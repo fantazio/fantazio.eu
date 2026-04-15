@@ -35,5 +35,8 @@ setup.log
 # Local OPAM switch
 _opam/
 
+# YOCaml generated output
+_www/
+
 # vim
 [._]*.sw[a-p]
