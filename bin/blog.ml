@@ -67,4 +67,7 @@ let program () =
   >>= create_pages
   >>= Action.store_cache cache
 
-let () = Yocaml_unix.run ~level:`Debug program
+let () =
+  match Sys.argv.(1) with
+  | "server" -> Yocaml_unix.serve ~level:`Info ~target:www ~port:8000 program
+  | _ | (exception _) -> Yocaml_unix.run ~level:`Debug program
