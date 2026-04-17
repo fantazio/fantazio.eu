@@ -7,6 +7,9 @@ let css = Path.(assets / "css")
 let templates = Path.(assets / "templates")
 let content = Path.rel [ "content" ]
 let pages = Path.(content / "pages")
+let articles = Path.(content / "articles")
+
+type document_kind = Page | Article
 
 let track_binary =
   Sys.executable_name |> Yocaml.Path.from_string |> Pipeline.track_file
@@ -17,29 +20,54 @@ let with_ext exts file =
 let build_paths dir filenames =
   List.map (fun filename -> Path.(dir / filename)) filenames
 
-let create_page source =
-  let www_page =
-    source |> Path.move ~into:www |> Path.change_extension "html"
+let www_target document_kind source =
+  let into =
+    match document_kind with Page -> www | Article -> Path.(www / "articles")
   in
+  source |> Path.move ~into |> Path.change_extension "html"
+
+let get_templates document_kind =
+  let specific_template =
+    match document_kind with Page -> "page.html" | Article -> "article.html"
+  in
+  build_paths templates [ specific_template; "layout.html" ]
+
+module type ARCHETYPE = sig
+  include Yocaml.Required.DATA_INJECTABLE
+  include Yocaml.Required.DATA_READABLE with type t := t
+end
+
+let document_archetype : document_kind -> (module ARCHETYPE) = function
+  | Page -> (module Archetype.Page)
+  | Article -> (module Archetype.Article)
+
+let create_document document_kind source =
+  let www_target = www_target document_kind source in
+  let module Archetype = (val document_archetype document_kind) in
   let pipeline =
     let open Task in
-    let templates = build_paths templates [ "page.html"; "layout.html" ] in
     let+ () = track_binary
-    and+ apply_templates = Yocaml_jingoo.read_templates templates
+    and+ apply_templates =
+      get_templates document_kind |> Yocaml_jingoo.read_templates
     and+ metadata, content =
-      Yocaml_yaml.Pipeline.read_file_with_metadata
-        (module Archetype.Page)
-        source
+      Yocaml_yaml.Pipeline.read_file_with_metadata (module Archetype) source
     in
     content
     |> Yocaml_markdown.from_string_to_html
-    |> apply_templates (module Archetype.Page) ~metadata
+    |> apply_templates (module Archetype) ~metadata
   in
-  Action.Static.write_file www_page pipeline
+  Action.Static.write_file www_target pipeline
 
-let create_pages =
+let create_page source = create_document Page source
+let create_article source = create_document Article source
+
+let create_documents document_kind =
   let is_markdown file = with_ext [ "md"; "markdown"; "mdown" ] file in
-  Batch.iter_files ~where:is_markdown pages create_page
+  let paths = match document_kind with Page -> pages | Article -> articles in
+  Batch.iter_files ~where:is_markdown paths (create_document document_kind)
+
+let create_pages = create_documents Page
+let create_articles = create_documents Article
 
 let create_css =
   let www_style = Path.(www / "style.css") in
@@ -65,6 +93,7 @@ let program () =
   >>= copy_images
   >>= create_css
   >>= create_pages
+  >>= create_articles
   >>= Action.store_cache cache
 
 let () =
