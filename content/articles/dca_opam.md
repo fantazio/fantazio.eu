@@ -1,11 +1,12 @@
 ---
 title: Dead code analyzing Opam
-description: Running the [dead_code_analyzer](https://github.com/LexiFi/dead_code_analyzer) on [Opam 2.5.1](https://github.com/ocaml/opam/tree/2.5.1)
+description: Running the dead_code_analyzer on opam
 date: 2026-05-05
-tags: [dead_code_analyzer, opam, ocaml, static analysis]
+tags: [dead_code_analyzer, opam, ocaml, static analysis, ocaml software foundation]
 ---
 
-This experiment uses the `dead_code_analyzer 1.2.0` on `opam 2.5.1`
+This experiment uses the `dead_code_analyzer 1.2.0` on `opam 2.5.1`.
+It is funded by the [OCaml Software Fundation](https://ocaml-sf.org/).
 
 ## Installing opam from source
 
@@ -18,16 +19,15 @@ However, it needed a few adjustment:
    The output of `make` is:
    ```
    $ make
-     dune build --profile=release --root .  --promote-install-files -- opam-installer.install opam.install
-     sed -f process.sed opam.install > processed-opam.install
-     dune build --profile=release --root .  --promote-install-files -- opam-installer.install
-     sed -f process.sed opam-installer.install > processed-opam-installer.install
+   dune build --profile=release --root .  --promote-install-files -- opam-installer.install opam.install
+   sed -f process.sed opam.install > processed-opam.install
+   dune build --profile=release --root .  --promote-install-files -- opam-installer.install
+   sed -f process.sed opam-installer.install > processed-opam-installer.install
    ```
-   We can see 2 `dune build` commands with the first one seemingly including the second one.
-   `Dune` has a nice alias [`@check`](https://dune.readthedocs.io/en/stable/reference/aliases/check.html) to build the `.cmi`, `cmt`, and `.cmti` files.
-   We can run the first `dune` command (which seems to include the second) with the alias :
+   We can see tha building opam relies on `dune`. `Dune` has a nice alias [`@check`](https://dune.readthedocs.io/en/stable/reference/aliases/check.html) to build the `.cmi`, `cmt`, and `.cmti` files.
+   We can run a single `dune` command with the alias :
    ```
-   $ dune build --profile=release --root .  --promote-install-files -- opam-installer.install opam.install @check
+   $ dune build @check
    File "src/tools/opam_admin_topstart.ml", line 1:
 Warning 70 [missing-mli]: Cannot find interface file.
    ```
@@ -532,3 +532,274 @@ Nothing else to report in this section
 > All the reports use the absolute paths of the files. In my case, the opam
 > project is located at `/tmp/proj/opam`. This prefix may vary depending on the
 > location of the clone on your machine.
+
+The reports are ordered in lexicographical order and a blank line is inserted in between changes of directory. This allows for an easier focus on each "component" of the codebase.
+
+Cleaning up unused exported values is pretty straightforward: go to the reported location and remove that value (along with its associated attributes and comments).
+This could theorically be automatised easily but has not been done for the `dead_code_analyzer` yet.
+
+#### Client
+
+This section focuses on reports in `/tmp/proj/opam/src/client`.
+
+Removing the reported values went smoothly. The code does not hit the dead_code_analyzer's  [limitations](https://github.com/LexiFi/dead_code_analyzer/blob/master/docs/exported_values/EXPORTED_VALUES.md#limitations).
+
+After the removal, running our initial `dune build @check` command ensures that everything still compiles as expected:
+```
+$ dune build @check
+File "src/client/opamClientConfig.ml", line 207, characters 4-16:
+207 | let search_files = ["findlib"]
+          ^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value search_files.
+File "src/tools/opam_admin_topstart.ml", line 1:
+Warning 70 [missing-mli]: Cannot find interface file.
+File "src/client/opamListCommand.ml", line 32, characters 4-30:
+32 | let default_dependency_toggles = {
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value default_dependency_toggles.
+File "src/client/opamConfigCommand.ml", line 526, characters 4-15:
+526 | let parse_whole fv =
+          ^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value parse_whole.
+File "src/client/opamArg.ml", line 1208, characters 4-13:
+1208 | let name_list =
+           ^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value name_list.
+
+File "src/client/opamArg.ml", line 1211, characters 4-13:
+1211 | let atom_list =
+           ^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value atom_list.
+
+File "src/client/opamArg.ml", line 1233, characters 4-22:
+1233 | let nonempty_atom_list =
+           ^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value nonempty_atom_list.
+
+File "src/client/opamArg.ml", line 1239, characters 4-14:
+1239 | let param_list =
+           ^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value param_list.
+File "src/client/opamSolution.ml", line 117, characters 4-7:
+117 | let sum stats =
+
+          ^^^
+Error (warning 32 [unused-value-declaration]): unused value sum.
+```
+
+As we can see un-exporting some values triggered compiler warnings (as errors), indicating that those values are not used internally either.
+They can be removed, just like the reports from the analyzer.
+
+> [!TIP]
+> The warnings appear as errors because of dune's default configuration.
+> They can be kept as warnings by using the `--profile=release` flag.
+
+#### Core
+
+This section focuses on reports in `/tmp/proj/opam/src/core`.
+
+The vast majority of the reports in `cmdliner/` are in the `cmdliner/opamCmdliner.mli`.
+A naive cleanup can be applied very smoothly and running our `dune` command will work fine :
+```
+$ dune build @check
+File "src/tools/opam_admin_topstart.ml", line 1:
+Warning 70 [missing-mli]: Cannot find interface file.
+```
+
+Among the 75 reported values in this subdirectory, 18 (i.e. 24%) were marked as deprecated.
+The analyzer does not report unused types and modules yet. However, a more thorough cleanup
+can be applied as some types (e.g. `Manpage.t`) are only used by unused values
+and a module (`Term.Syntax`) is only composed of unused values.
+
+
+Among the rest of the unused exported values in `core/`, only 1 out of 68 is marked as deprecated.
+A module (`OpamStd.Win32.RegistryHive`) only contains unused values and a module (`OpamStd.Compare`) almost only contains unused values except for one (`equal`).
+
+After cleanup, running our `dune` command triggers compilation warnings (most as errors) :
+```
+$ dune build @check
+File "src/core/opamVersionCompare.ml", line 142, characters 4-9:
+142 | let equal (x : string) (y : string) =
+          ^^^^^
+Error (warning 32 [unused-value-declaration]): unused value equal.
+File "src/core/opamStubs.unix.ml", line 15, characters 4-23:
+Error (warning 32 [unused-value-declaration]): unused value getCurrentProcessID.
+
+File "src/core/opamStubs.unix.ml", line 41, characters 4-19:
+Error (warning 32 [unused-value-declaration]): unused value getConsoleAlias.
+File "src/core/opamCoreConfig.ml", line 166, characters 4-7:
+166 | let set t = setk (fun x () -> x) t
+          ^^^
+Error (warning 32 [unused-value-declaration]): unused value set.
+File "src/core/opamHash.ml", line 72, characters 4-10:
+72 | let sha256 = make `SHA256
+         ^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value sha256.
+File "src/core/opamVersion.ml", line 43, characters 4-9:
+43 | let major v =
+         ^^^^^
+Error (warning 32 [unused-value-declaration]): unused value major.
+
+File "src/core/opamVersion.ml", line 65, characters 4-11:
+65 | let message () =
+         ^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value message.
+File "src/core/opamConsole.ml", line 100, characters 6-40:
+100 |   let latin_capital_letter_o_with_stroke = Uchar.of_int 0x00d8
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value latin_capital_letter_o_with_stroke.
+File "src/core/opamProcess.ml", line 972, characters 6-13:
+972 |   let seq_map f l =
+            ^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value seq_map.
+File "src/core/opamSystem.ml", line 633, characters 4-29:
+633 | let verbose_for_base_commands () =
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value verbose_for_base_commands.
+File "src/core/opamDirTrack.ml", line 45, characters 4-13:
+45 | let to_string t =
+         ^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value to_string.
+File "src/core/opamFilename.ml", line 138, characters 4-15:
+138 | let to_list_dir dir =
+          ^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value to_list_dir.
+
+File "src/core/opamFilename.ml", line 249, characters 4-21:
+249 | let with_open_out_bin [@deprecated] =
+          ^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value with_open_out_bin.
+
+File "src/core/opamFilename.ml", line 273, characters 4-17:
+273 | let with_tmp_file fn =
+          ^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value with_tmp_file.
+
+File "src/core/opamFilename.ml", line 276, characters 4-21:
+276 | let with_tmp_file_job fjob =
+          ^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value with_tmp_file_job.
+                                                                                                                                  18:26:56 [75/1891]
+File "src/core/opamFilename.ml", line 279, characters 4-17:
+279 | let with_contents fn filename =
+          ^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value with_contents.
+
+File "src/core/opamFilename.ml", line 378, characters 4-11:
+378 | let copy_in ?root = process_in ?root copy
+          ^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value copy_in.
+
+File "src/core/opamFilename.ml", line 402, characters 4-24:
+402 | let extract_generic_file filename dirname =
+          ^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value extract_generic_file.
+
+File "src/core/opamFilename.ml", line 423, characters 4-17:
+423 | let remove_suffix suffix filename =
+          ^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value remove_suffix.
+
+File "src/core/opamFilename.ml", line 517, characters 4-30:
+517 | let with_flock_write_then_read ?dontblock file write read =
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value with_flock_write_then_read.
+File "src/core/opamParallel.ml", line 488, characters 4-8:
+488 | let iter ~jobs ~command ?dry_run l =
+          ^^^^
+Error (warning 32 [unused-value-declaration]): unused value iter.
+File "src/core/opamStd.ml", line 68, characters 2-49:
+68 |   external compare : 't -> 't -> int = "%compare"
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value compare.
+
+File "src/core/opamStd.ml", line 70, characters 2-44:
+70 |   external (=) : 't -> 't -> bool = "%equal"
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value =.
+
+File "src/core/opamStd.ml", line 71, characters 2-48:
+71 |   external (<>) : 't -> 't -> bool = "%notequal"
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value <>.
+
+File "src/core/opamStd.ml", line 72, characters 2-47:                                                                             18:26:56 [31/1891]
+72 |   external (<) : 't -> 't -> bool = "%lessthan"
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value <.
+
+File "src/core/opamStd.ml", line 73, characters 2-50:
+73 |   external (>) : 't -> 't -> bool = "%greaterthan"
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value >.
+
+File "src/core/opamStd.ml", line 74, characters 2-49:
+74 |   external (<=) : 't -> 't -> bool = "%lessequal"
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value <=.
+
+File "src/core/opamStd.ml", line 75, characters 2-52:
+75 |   external (>=) : 't -> 't -> bool = "%greaterequal"
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value >=.
+
+File "src/core/opamStd.ml", line 139, characters 6-12:
+139 |   let insert comp x l =
+            ^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value insert.
+
+File "src/core/opamStd.ml", line 185, characters 6-18:
+185 |   let update_assoc eq k v l =
+            ^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value update_assoc.
+
+File "src/core/opamStd.ml", line 424, characters 6-17:
+424 |   let default_map dft = function
+            ^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value default_map.
+
+File "src/core/opamStd.ml", line 1337, characters 8-17:
+1337 |     let to_string = function
+               ^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value to_string.
+
+File "src/core/opamStd.ml", line 1344, characters 8-17:
+1344 |     let of_string = function
+               ^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value of_string.
+
+File "src/core/opamStd.ml", lines 1336-1356, characters 2-5:
+1336 | ..module RegistryHive = struct
+1337 |     let to_string = function
+1338 |     | OpamStubs.HKEY_CLASSES_ROOT   -> "HKEY_CLASSES_ROOT"
+1339 |     | OpamStubs.HKEY_CURRENT_CONFIG -> "HKEY_CURRENT_CONFIG"
+1340 |     | OpamStubs.HKEY_CURRENT_USER   -> "HKEY_CURRENT_USER"
+...
+1353 |     | "HKU"
+1354 |     | "HKEY_USERS"          -> OpamStubs.HKEY_USERS
+1355 |     | _                     -> failwith "RegistryHive.of_string"
+1356 |   end
+Warning 60 [unused-module]: unused module RegistryHive.
+
+File "src/core/opamStd.ml", line 1358, characters 7-21:
+1358 |   let (set_parent_pid, parent_putenv) =
+              ^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value set_parent_pid.
+
+File "src/core/opamStd.ml", line 1745, characters 6-18:
+1745 |   let resolve_when ~auto = function
+             ^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value resolve_when.
+
+File "src/core/opamStd.ml", line 1780, characters 8-14:
+1780 |     let update v = r := v :: !r
+               ^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value update.
+File "src/tools/opam_admin_topstart.ml", line 1:
+Warning 70 [missing-mli]: Cannot find interface file.
+```
+
+The warnings 32 are triggered because the values are not exported and not used inside their compilation unit.
+The warning 60 on module RegistryHive appears because I removed it from `src/core/opamStd.mli` since it was only exporting unused values.
+
+All the reported unused values and modules can be removed, just like the reports from the analyzer.
