@@ -1,8 +1,16 @@
 /* Style.css */
 :root {
     --width-screen: min(100rem, 100%);
-    --main-background-color: #eae2b7;
-    --main-foreground-color: #111111;
+    --main-foreground-color: #fef9ef;
+    --main-background-color: #1b1b3a;
+    --code-background-color: #0d0d1b;
+    --quote-background-color: var(--main-background-color);
+    --ocaml-color: #f08106;
+    --link-color: #f0c505;
+    --visited-link-color: var(--ocaml-color);
+    --note-color: #43aa8b;
+    --tip-color: var(--link-color);
+    --warning-color: #8b2635;
 }
 
 .icon {
@@ -14,11 +22,25 @@
     display: inline-block;
 }
 
+.alert-note {
+  border-color: var(--note-color);
+}
+
+.alert-tip {
+  border-color: var(--tip-color);
+}
+
+.alert-warning {
+  --quote-background-color: var(--warning-color);
+  --code-background-color: #401219;
+}
+
 
 body {
     display: flex;
     flex-direction: column;
     font-family: sans-serif;
+    line-height: normal;
     color: var(--main-foreground-color);
     background-color: var(--main-background-color);
 }
@@ -36,11 +58,8 @@ header,main, footer {
 }
 
 footer {
-    --icon-color: var(--main-background-color);
+    --icon-color: var(--ocaml-color);
     --icon-size: 2rem;
-    
-    background-color: var(--main-foreground-color);
-    color: var(--main-background-color);
 
     & > div {
         display: flex;
@@ -49,7 +68,6 @@ footer {
         gap: 1rem;
 
         & a {
-            color: var(--main-background-color);
             font-weight: 700;
             text-decoration: none;
         }
@@ -60,4 +78,37 @@ article,
 section,
 p {
     margin: 1rem 0;
+}
+
+code {
+  background-color: var(--code-background-color);
+  border-radius: .25em;
+  padding: 0rem .25rem;
+  font-family: monospace;
+  word-wrap: break-word;
+}
+
+pre code {
+  border-radius: .25em;
+  display: block;
+  overflow: auto;
+  padding: .5rem 1rem;
+}
+
+blockquote {
+  background-color: var(--quote-background-color);
+  border-radius: 0 .25em .25em 0;
+  border-left: .25rem solid;
+  border-color: inherit;
+  display: block;
+  padding: 0rem .75rem;
+  word-wrap: break-word;
+}
+
+a {
+  color: var(--link-color);
+}
+
+a:visited {
+  color: var(--visited-link-color);
 }
