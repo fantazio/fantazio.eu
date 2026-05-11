@@ -29,13 +29,16 @@ However, it needed a few adjustment:
    ```
    $ dune build @check
    File "src/tools/opam_admin_topstart.ml", line 1:
-Warning 70 [missing-mli]: Cannot find interface file.
+   Warning 70 [missing-mli]: Cannot find interface file.
    ```
    As a result, there are `.cmt` files generated aloongside the `.cmi` and `.cmti` in `_build`.
 3. We do not run `make install`
 
-> [!NOTE]
+<div class="alert-note">
+
+> **NOTE**:\
 > Using `./configure --enable-developer-mode` does not enable `-bin-annot`, so the manual call to `dune build @check` command is still necessary.
+</div>
 
 Now that we have generated the necessary files, let's move on to running the `dead_code_analyzer`.
 
@@ -75,8 +78,8 @@ Let's explore the reports by section.
 
 ### Unused exported values
 
-<details>
-  <summary>The [report](../assets/reports/dca/opam/dca.out)'s unused exported values section initial content is 433 lines long (_click to expand_)</summary>
+The [report](../assets/reports/dca/opam/dca.out)'s unused exported values section initial content is 433 lines long after discarding the header, footer, and blank lines.
+<details><summary>446 lines report output (<i>click to expand/hide</i>)</summary>
 
 ```
 .> UNUSED EXPORTED VALUES:
@@ -528,10 +531,13 @@ Nothing else to report in this section
 ```
 </details>
 
-> [!NOTE]
+<div class="alert-note">
+
+> **NOTE**:\
 > All the reports use the absolute paths of the files. In my case, the opam
 > project is located at `/tmp/proj/opam`. This prefix may vary depending on the
 > location of the clone on your machine.
+</div>
 
 The reports are ordered in lexicographical order and a blank line is inserted in between changes of directory. This allows for an easier focus on each "component" of the codebase.
 
@@ -590,7 +596,9 @@ Error (warning 32 [unused-value-declaration]): unused value sum.
 As we can see un-exporting some values triggered compiler warnings (as errors), indicating that those values are not used internally either.
 They can be removed, just like the reports from the analyzer.
 
-> [!TIP]
+<div class="alert-tip">
+
+> **TIP**:\
 > The warnings appear as errors because of dune's default configuration.
 > They can be kept as warnings by using the `--profile=release` flag.
 
@@ -598,7 +606,7 @@ They can be removed, just like the reports from the analyzer.
 
 This section focuses on reports in `/tmp/proj/opam/src/core`.
 
-The vast majority of the reports in `cmdliner/` are in the `cmdliner/opamCmdliner.mli`.
+The vast majority of the reports in `core/cmdliner` are in the `core/cmdliner/opamCmdliner.mli`.
 A naive cleanup can be applied very smoothly and running our `dune` command will work fine :
 ```
 $ dune build @check
@@ -616,6 +624,8 @@ Among the rest of the unused exported values in `core/`, only 1 out of 68 is mar
 A module (`OpamStd.Win32.RegistryHive`) only contains unused values and a module (`OpamStd.Compare`) almost only contains unused values except for one (`equal`).
 
 After cleanup, running our `dune` command triggers compilation warnings (most as errors) :
+<details><summary>180 lines compilation output (<i>click to expand/hide</i>)</summary>
+
 ```
 $ dune build @check
 File "src/core/opamVersionCompare.ml", line 142, characters 4-9:
@@ -679,7 +689,7 @@ File "src/core/opamFilename.ml", line 276, characters 4-21:
 276 | let with_tmp_file_job fjob =
           ^^^^^^^^^^^^^^^^^
 Error (warning 32 [unused-value-declaration]): unused value with_tmp_file_job.
-                                                                                                                                  18:26:56 [75/1891]
+
 File "src/core/opamFilename.ml", line 279, characters 4-17:
 279 | let with_contents fn filename =
           ^^^^^^^^^^^^^
@@ -723,7 +733,7 @@ File "src/core/opamStd.ml", line 71, characters 2-48:
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error (warning 32 [unused-value-declaration]): unused value <>.
 
-File "src/core/opamStd.ml", line 72, characters 2-47:                                                                             18:26:56 [31/1891]
+File "src/core/opamStd.ml", line 72, characters 2-47:
 72 |   external (<) : 't -> 't -> bool = "%lessthan"
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error (warning 32 [unused-value-declaration]): unused value <.
@@ -798,6 +808,7 @@ Error (warning 32 [unused-value-declaration]): unused value update.
 File "src/tools/opam_admin_topstart.ml", line 1:
 Warning 70 [missing-mli]: Cannot find interface file.
 ```
+</details>
 
 The warnings 32 are triggered because the values are not exported and not used inside their compilation unit.
 The warning 60 on module RegistryHive appears because I removed it from `src/core/opamStd.mli` since it was only exporting unused values.
