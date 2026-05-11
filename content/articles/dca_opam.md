@@ -539,10 +539,24 @@ Nothing else to report in this section
 > location of the clone on your machine.
 </div>
 
+<div class="alert-warning">
+
+> **WARNING**:\
+> The locations point to files if the `_build/default` directory. This is because `dune` copies and
+> builds the file in that directory. The actual source files are located outside of it.
+</div>
+
 The reports are ordered in lexicographical order and a blank line is inserted in between changes of directory. This allows for an easier focus on each "component" of the codebase.
 
-Cleaning up unused exported values is pretty straightforward: go to the reported location and remove that value (along with its associated attributes and comments).
-This could theorically be automatised easily but has not been done for the `dead_code_analyzer` yet.
+The analyzer does not track "transitively" dead elements of code (i.e. code only used by dead code).
+Thus all thre reports can be examined independently from each other.
+Cleaning up unused exported values is pretty straightforward: go to the reported location and remove
+that value (along with its associated attributes and comments). Because removing content from a file
+will change the location of subsequent content, I would recommend to start at the bottom of a file
+and go up.
+
+This naive cleaning process could theorically be automatised easily but has not been done for the
+`dead_code_analyzer` yet.
 
 #### Client
 
@@ -810,7 +824,235 @@ Warning 70 [missing-mli]: Cannot find interface file.
 ```
 </details>
 
-The warnings 32 are triggered because the values are not exported and not used inside their compilation unit.
-The warning 60 on module RegistryHive appears because I removed it from `src/core/opamStd.mli` since it was only exporting unused values.
+The warnings 32 are triggered because the values are not exported (anymore) and not used inside their compilation unit.
+The warning 60 on module `RegistryHive` appears because I removed it from `src/core/opamStd.mli` since it was only exporting unused values.
 
 All the reported unused values and modules can be removed, just like the reports from the analyzer.
+
+#### Format
+
+This section focuses on reports in `/tmp/proj/opam/src/format`.
+
+More than half of the reports (82 out of 147) are located in the file `format/opamFile.ml`.
+A naive cleanup can be applied very smoothly and running our `dune` command will trigger warnings as errors:
+```
+$ dune build @check
+File "src/format/opamFile.ml", line 1741, characters 6-26:
+1741 |   let with_solver_criteria solver_criteria t = {t with solver_criteria}
+             ^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value with_solver_criteria.
+
+File "src/format/opamFile.ml", line 2299, characters 6-15:
+2299 |   let variables t = List.rev_map fst t.vars
+             ^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value variables.
+
+File "src/format/opamFile.ml", line 2368, characters 6-20:
+2368 |   let with_stamp_opt stamp t = { t with stamp }
+             ^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value with_stamp_opt.
+
+File "src/format/opamFile.ml", line 2452, characters 6-16:
+2452 |   let with_swhid swhid t = { t with swhid = Some swhid }
+             ^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value with_swhid.
+
+File "src/format/opamFile.ml", line 2746, characters 6-14:
+2746 |   let extended t fld parse =
+             ^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value extended.
+
+File "src/format/opamFile.ml", line 2776, characters 6-22:
+2776 |   let with_version_opt version (t:t) = { t with version }
+             ^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value with_version_opt.
+
+File "src/format/opamFile.ml", line 2851, characters 6-20:
+2851 |   let with_descr_opt descr t = { t with descr }
+             ^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value with_descr_opt.
+
+File "src/format/opamFile.ml", line 3431, characters 6-14:
+3431 |   let contents = Syntax.contents pp
+             ^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value contents.
+
+File "src/format/opamFile.ml", line 3968, characters 6-25:
+3968 |   let create_preinstalled name version packages env =
+             ^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value create_preinstalled.
+File "src/tools/opam_admin_topstart.ml", line 1:
+Warning 70 [missing-mli]: Cannot find interface file.
+```
+
+The warnings 32 are triggered because the values are not exported (anymore) and not used inside their compilation unit.
+All the reported unused values can be removed, just like reports from the analyzer.
+
+The rest of the reports in `format` can be naively cleaned up.
+Running our `dune` command will trigger warnings as errors:
+<details><summary>116 lines compilation output (<i>click to expand/hide</i>)</summary>
+
+```
+$ dune build @check
+File "src/format/opamSysPkg.ml", line 65, characters 4-20:
+65 | let string_of_status sp =
+         ^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value string_of_status.
+
+File "src/format/opamSysPkg.ml", line 85, characters 4-24:
+85 | let string_of_to_install ti =
+         ^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value string_of_to_install.
+File "src/format/opamFormula.ml", line 100, characters 4-25:
+100 | let string_of_disjunction string_of_atom c =
+          ^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value string_of_disjunction.
+
+File "src/format/opamFormula.ml", line 105, characters 4-17:
+105 | let string_of_cnf string_of_atom cnf =
+          ^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value string_of_cnf.
+
+File "src/format/opamFormula.ml", line 114, characters 4-17:
+114 | let string_of_dnf string_of_atom cnf =
+          ^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value string_of_dnf.
+
+File "src/format/opamFormula.ml", line 194, characters 8-12:
+194 | let rec iter f = function
+              ^^^^
+Error (warning 32 [unused-value-declaration]): unused value iter.
+
+File "src/format/opamFormula.ml", line 462, characters 4-18:
+462 | let of_conjunction c =
+          ^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value of_conjunction.
+
+File "src/format/opamFormula.ml", line 536, characters 4-18:
+536 | let to_conjunction t =
+          ^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value to_conjunction.
+
+File "src/format/opamFormula.ml", line 540, characters 4-18:
+540 | let to_disjunction t =
+          ^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value to_disjunction.
+
+File "src/format/opamFormula.ml", line 544, characters 4-18:
+544 | let of_disjunction d =
+          ^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value of_disjunction.
+File "src/format/opamPp.ml", line 133, characters 4-10:
+133 | let ignore = {
+          ^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value ignore.
+File "src/format/opamTypesBase.ml", line 117, characters 4-12:
+117 | let pos_best pos1 pos2 =
+          ^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value pos_best.
+
+File "src/format/opamTypesBase.ml", line 329, characters 4-16:
+329 | let iter_success f = function
+          ^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value iter_success.
+
+File "src/format/opamTypesBase.ml", line 334, characters 4-14:
+334 | let env_update ?comment:envu_comment ~rewrite:envu_rewrite
+          ^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value env_update.
+File "src/format/opamFilter.ml", line 395, characters 4-8:
+395 | let eval ?default env e = value ?default (reduce env e)
+          ^^^^
+Error (warning 32 [unused-value-declaration]): unused value eval.
+
+File "src/format/opamFilter.ml", line 421, characters 4-15:
+421 | let ident_value ?default env id = value ?default (resolve_ident env id)
+          ^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value ident_value.
+
+File "src/format/opamFilter.ml", line 425, characters 4-14:
+425 | let ident_bool ?default env id = value_bool ?default (resolve_ident env id)
+          ^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value ident_bool.
+File "src/format/opamFormat.ml", line 165, characters 6-15:
+165 |   let map_group pp1 = group -| map_list ~posf:value_pos pp1
+            ^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value map_group.
+
+File "src/format/opamFormat.ml", line 480, characters 6-18:
+480 |   let package_atom constraints =
+            ^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value package_atom.
+
+File "src/format/opamFormat.ml", line 959, characters 6-12:
+959 |   let signed ~check =
+            ^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value signed.
+File "src/format/opamPath.ml", line 63, characters 4-10:
+63 | let backup t = backup_dir t /- backup_file ()
+         ^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value backup.
+
+File "src/format/opamPath.ml", line 79, characters 4-10:
+79 | let plugin t name =
+         ^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value plugin.
+
+File "src/format/opamPath.ml", line 137, characters 6-16:
+137 |   let extra_file t a h = extra_files_dir t a // OpamHash.contents h
+            ^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value extra_file.
+
+File "src/format/opamPath.ml", line 182, characters 8-16:
+182 |     let man_dirs t a = List.map (fun num -> man_dir ~num t a) mans
+              ^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value man_dirs.
+File "src/tools/opam_admin_topstart.ml", line 1:
+Warning 70 [missing-mli]: Cannot find interface file.
+```
+</details>
+
+The warnings 32 are triggered because the values are not exported (anymore) and not used inside their compilation unit.
+All the reported unused values can be removed, just like reports from the analyzer.
+
+After removing them, re-running our `dune` command will show that we are not done with the cleanup.
+Indeed some values were only used internally by unused values that appear in the above compilation
+output. Now that we removed these unused values, new unused values are uncovered:
+```
+$ dune build @check
+File "src/format/opamFilter.ml", line 155, characters 4-9:
+155 | let value ?default = function
+          ^^^^^
+Error (warning 32 [unused-value-declaration]): unused value value.
+File "src/format/opamFormat.ml", line 139, characters 6-11:
+139 |   let group =
+            ^^^^^
+Error (warning 32 [unused-value-declaration]): unused value group.
+
+File "src/format/opamFormat.ml", line 883, characters 6-19:
+883 |   let extract_field name =
+            ^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value extract_field.
+
+File "src/format/opamFormat.ml", line 948, characters 6-15:
+948 |   let signature =
+            ^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value signature.
+```
+
+We can once again remove the reported unused values, and the compilation will succeed.
+
+<div class="alert-warning">
+
+> **IMPORTANT**:\
+> Removing unused values reported by the compiler can lead to the discovery of new unused values for
+> both the compiler and the analyzer.
+> Similarly, removing unused values reported by analyzer can lead to the discovery of new unused
+> values for both the compiler and the analyzer.
+> Because neither the compiler nor the analyzer reports "transitively" unused values, multiple runs
+> may be necessary to uncover them all.
+>
+> The current report is focused on a single iteration of the analyzer, followed by
+> as-many-as-necessary iterations of the compiler. This whole process could be repeated multiple
+> times until neither the analyzer nor the compiler reports anything.
+</div>
