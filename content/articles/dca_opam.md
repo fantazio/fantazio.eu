@@ -1056,3 +1056,44 @@ We can once again remove the reported unused values, and the compilation will su
 > as-many-as-necessary iterations of the compiler. This whole process could be repeated multiple
 > times until neither the analyzer nor the compiler reports anything.
 </div>
+
+Going ever further, there is a type and an exception that are unused in `OpamFormat`: `signature` and `Invalid_signature`.
+They can be removed both from the `.mli` and the `.ml` without breaking the compilation.
+
+#### Repository
+
+This section focuses on reports in `/tmp/proj/opam/src/repository`.
+
+There are not a lot of reports (8) in that direcotry. Applying a naive cleanup is straightforward.
+Our `dune` command provides the following output:
+```
+$ dune build @check
+File "src/repository/opamRepositoryPath.ml", line 60, characters 6-10:
+60 |   let repo root_url =
+           ^^^^
+Error (warning 32 [unused-value-declaration]): unused value repo.
+
+File "src/repository/opamRepositoryPath.ml", line 66, characters 6-13:
+66 |   let archive root_url nv =
+           ^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value archive.
+File "src/repository/opamRepositoryBackend.ml", line 40, characters 4-11:
+40 | let compare r1 r2 = compare r1.repo_name r2.repo_name
+         ^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value compare.
+
+File "src/repository/opamRepositoryBackend.ml", line 47, characters 4-11:
+47 | let to_json r =
+         ^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value to_json.
+
+File "src/repository/opamRepositoryBackend.ml", line 52, characters 4-16:
+52 | let check_digest filename = function
+         ^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value check_digest.
+File "src/tools/opam_admin_topstart.ml", line 1:
+Warning 70 [missing-mli]: Cannot find interface file.
+```
+
+The warnings 32 are triggered because the values are not exported (anymore) and not used inside their compilation unit.
+All the reported unused values can be removed, just like reports from the analyzer.
