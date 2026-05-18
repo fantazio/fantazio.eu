@@ -1470,3 +1470,112 @@ src/client/opamListCommand.ml:821:    Field "conflict-class";
 src/client/opamArg.ml:1615:       list, from the other package, or by a common $(b,conflict-class:) \
 src/format/opamFile.ml:2994:      "conflict-class", no_cleanup Pp.ppacc with_conflict_class conflict_class
 ```
+
+### Unused constructors/record fields
+
+The [report](../assets/reports/dca/opam/dca.out)'s unused constructors/record fields section initial content is 75 lines long after discarding the header, footer, and blank lines.
+<details><summary>88 lines report output (<i>click to expand/hide</i>)</summary>
+
+```
+.> UNUSED CONSTRUCTORS/RECORD FIELDS:
+====================================
+/tmp/proj/opam/src/client/opamListCommand.mli:38: pattern_selector.ext_fields
+/tmp/proj/opam/src/client/opamListCommand.mli:59: selector.Atoms
+
+/tmp/proj/opam/src/core/opamCompat.mli:36: Either.t.Left
+/tmp/proj/opam/src/core/opamCompat.mli:37: Either.t.Right
+/tmp/proj/opam/src/core/opamProcess.mli:73: t.p_info
+/tmp/proj/opam/src/core/opamStd.mli:474: Sys.os.Darwin
+/tmp/proj/opam/src/core/opamStd.mli:475: Sys.os.Linux
+/tmp/proj/opam/src/core/opamStd.mli:476: Sys.os.FreeBSD
+/tmp/proj/opam/src/core/opamStd.mli:477: Sys.os.OpenBSD
+/tmp/proj/opam/src/core/opamStd.mli:478: Sys.os.NetBSD
+/tmp/proj/opam/src/core/opamStd.mli:479: Sys.os.DragonFly
+/tmp/proj/opam/src/core/opamStd.mli:482: Sys.os.Unix
+/tmp/proj/opam/src/core/opamStd.mli:483: Sys.os.Other
+/tmp/proj/opam/src/core/opamStd.mli:505: Sys.powershell_host.Powershell_pwsh
+/tmp/proj/opam/src/core/opamStd.mli:505: Sys.powershell_host.Powershell
+/tmp/proj/opam/src/core/opamStd.mli:506: Sys.shell.SH_sh
+/tmp/proj/opam/src/core/opamStd.mli:506: Sys.shell.SH_bash
+/tmp/proj/opam/src/core/opamStd.mli:506: Sys.shell.SH_zsh
+/tmp/proj/opam/src/core/opamStd.mli:506: Sys.shell.SH_csh
+/tmp/proj/opam/src/core/opamStd.mli:506: Sys.shell.SH_fish
+/tmp/proj/opam/src/core/opamStd.mli:507: Sys.shell.SH_pwsh
+/tmp/proj/opam/src/core/opamStd.mli:507: Sys.shell.SH_cmd
+/tmp/proj/opam/src/core/opamStd.mli:613: Sys.warning_printer.warning
+/tmp/proj/opam/src/core/opamStubsTypes.ml:23: console_screen_buffer_info.window
+/tmp/proj/opam/src/core/opamStubsTypes.ml:26: console_screen_buffer_info.maximumWindowSize
+/tmp/proj/opam/src/core/opamStubsTypes.ml:34: console_font_infoex.font
+/tmp/proj/opam/src/core/opamStubsTypes.ml:36: console_font_infoex.fontSize
+/tmp/proj/opam/src/core/opamStubsTypes.ml:42: console_font_infoex.fontWeight
+/tmp/proj/opam/src/core/opamStubsTypes.ml:77: windows_cpu_architecture.AMD64
+/tmp/proj/opam/src/core/opamStubsTypes.ml:78: windows_cpu_architecture.ARM
+/tmp/proj/opam/src/core/opamStubsTypes.ml:79: windows_cpu_architecture.ARM64
+/tmp/proj/opam/src/core/opamStubsTypes.ml:80: windows_cpu_architecture.IA64
+/tmp/proj/opam/src/core/opamStubsTypes.ml:81: windows_cpu_architecture.Intel
+/tmp/proj/opam/src/core/opamStubsTypes.ml:82: windows_cpu_architecture.Unknown
+/tmp/proj/opam/src/core/opamStubsTypes.ml:87: win32_non_fixed_version_info.comments
+/tmp/proj/opam/src/core/opamStubsTypes.ml:88: win32_non_fixed_version_info.companyName
+/tmp/proj/opam/src/core/opamStubsTypes.ml:89: win32_non_fixed_version_info.fileDescription
+/tmp/proj/opam/src/core/opamStubsTypes.ml:90: win32_non_fixed_version_info.fileVersionString
+/tmp/proj/opam/src/core/opamStubsTypes.ml:91: win32_non_fixed_version_info.internalName
+/tmp/proj/opam/src/core/opamStubsTypes.ml:92: win32_non_fixed_version_info.legalCopyright
+/tmp/proj/opam/src/core/opamStubsTypes.ml:93: win32_non_fixed_version_info.legalTrademarks
+/tmp/proj/opam/src/core/opamStubsTypes.ml:94: win32_non_fixed_version_info.originalFilename
+/tmp/proj/opam/src/core/opamStubsTypes.ml:95: win32_non_fixed_version_info.productName
+/tmp/proj/opam/src/core/opamStubsTypes.ml:97: win32_non_fixed_version_info.privateBuild
+/tmp/proj/opam/src/core/opamStubsTypes.ml:98: win32_non_fixed_version_info.specialBuild
+/tmp/proj/opam/src/core/opamStubsTypes.ml:103: win32_version_info.signature
+/tmp/proj/opam/src/core/opamStubsTypes.ml:104: win32_version_info.version
+/tmp/proj/opam/src/core/opamStubsTypes.ml:105: win32_version_info.fileVersion
+/tmp/proj/opam/src/core/opamStubsTypes.ml:106: win32_version_info.productVersion
+/tmp/proj/opam/src/core/opamStubsTypes.ml:107: win32_version_info.fileFlagsMask
+/tmp/proj/opam/src/core/opamStubsTypes.ml:108: win32_version_info.fileFlags
+/tmp/proj/opam/src/core/opamStubsTypes.ml:109: win32_version_info.fileOS
+/tmp/proj/opam/src/core/opamStubsTypes.ml:110: win32_version_info.fileType
+/tmp/proj/opam/src/core/opamStubsTypes.ml:111: win32_version_info.fileSubtype
+/tmp/proj/opam/src/core/opamStubsTypes.ml:112: win32_version_info.fileDate
+/tmp/proj/opam/src/core/opamStubsTypes.ml:118: uname.sysname
+/tmp/proj/opam/src/core/opamStubsTypes.ml:119: uname.release
+/tmp/proj/opam/src/core/opamStubsTypes.ml:120: uname.machine
+
+/tmp/proj/opam/src/format/opamFile.mli:366: OPAM.t.conflict_class
+/tmp/proj/opam/src/format/opamFile.mli:369: OPAM.t.env
+/tmp/proj/opam/src/format/opamFile.mli:378: OPAM.t.substs
+/tmp/proj/opam/src/format/opamFile.mli:380: OPAM.t.build_env
+/tmp/proj/opam/src/format/opamFile.mli:403: OPAM.t.extensions
+/tmp/proj/opam/src/format/opamFile.mli:413: OPAM.t.metadata_dir
+/tmp/proj/opam/src/format/opamFile.mli:419: OPAM.t.locked
+/tmp/proj/opam/src/format/opamFile.mli:1019: Repo_config_legacy.t.repo_name
+/tmp/proj/opam/src/format/opamFile.mli:1020: Repo_config_legacy.t.repo_root
+/tmp/proj/opam/src/format/opamFile.mli:1038: Switch_config.t.paths
+/tmp/proj/opam/src/format/opamTypes.mli:308: universe.u_action
+/tmp/proj/opam/src/format/opamTypes.mli:364: lock.Read_lock
+/tmp/proj/opam/src/format/opamTypes.mli:368: lock.Global_lock
+/tmp/proj/opam/src/format/opamTypes.mli:372: lock.Switch_lock
+/tmp/proj/opam/src/format/opamTypes.mli:377: lock.Global_with_switch_cont_lock
+/tmp/proj/opam/src/format/opamVariable.mli:26: variable_contents.L
+
+/tmp/proj/opam/src/solver/opamCudfSolverSig.ml:12: criteria_def.crit_default
+/tmp/proj/opam/src/solver/opamCudfSolverSig.ml:13: criteria_def.crit_upgrade
+/tmp/proj/opam/src/solver/opamCudfSolverSig.ml:14: criteria_def.crit_fixup
+/tmp/proj/opam/src/solver/opamCudfSolverSig.ml:15: criteria_def.crit_best_effort_prefix
+
+/tmp/proj/opam/src/state/opamStateTypes.mli:164: switch_state.invalidated
+
+Nothing else to report in this section
+--------------------------------------------------------------------------------
+```
+</details>
+
+The observation made for the unused values remain valid here.
+A small difference exists in the naive cleanup technique: removing a field or a constructor will most likely trigger compilation errors.
+This is for 2 reasons:
+1. the types described in the signature and the structure must be equal;
+2. a field is considered unused if it is never read (but it must be written when creating a value),
+and a constructor is considered unused if it is never constructed (but it may be destructed e.g. in pattern matching).
+
+Therefore, cleaning up an unused field or constructor requires compiling the code to fix all the places impacted by the removal of the unused element.
+
+Because we already removed some code during the cleanup of unused exported values, the lines of the reports are not exact anymore.
+For the sake of this example, we will pretend that they are. One can run the analyzer on unused fields and constructors specifically by running the `dead_code_analyzer` command with the `--nothing -T all` arguments.
