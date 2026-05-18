@@ -1097,3 +1097,349 @@ Warning 70 [missing-mli]: Cannot find interface file.
 
 The warnings 32 are triggered because the values are not exported (anymore) and not used inside their compilation unit.
 All the reported unused values can be removed, just like reports from the analyzer.
+
+#### Solver
+
+This section focuses on reports in `/tmp/proj/opam/src/solver`.
+
+The vast majority of reports (51 out of 58, i.e. ~88%) are within `src/solver/opamCudf.mli`.
+They can all be cleaned very smoothly. However, all the values exported by `OpamCudf.Json` are unused. This leaves the module's signature defined as:
+```OCaml
+module Json: sig
+  open Cudf_types
+end
+```
+The unused `open` will  trigger a compiler warning 33 (reported as an error using our `dune` command).
+The module `Json` does not export anything anymore, so it can be removed as a whole.
+
+Let's run our `dune` command to discover all the unveiled unused values:
+```
+$ dune build @check
+File "src/solver/opamCudf.ml", line 51, characters 4-23:
+51 | let unavailable_package = unavailable_package_name, unavailable_package_version
+         ^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value unavailable_package.
+
+File "src/solver/opamCudf.ml", line 52, characters 4-26:
+52 | let is_unavailable_package p = p.Cudf.package = unavailable_package_name
+         ^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value is_unavailable_package.
+
+File "src/solver/opamCudf.ml", line 624, characters 4-22:
+624 | let string_of_universe u =
+          ^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value string_of_universe.
+
+File "src/solver/opamCudf.ml", line 1226, characters 4-19:
+1226 | let conflict_cycles = function
+           ^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value conflict_cycles.
+
+File "src/solver/opamCudf.ml", line 1288, characters 4-17:
+1288 | let uninstall_all universe =
+           ^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value uninstall_all.
+
+File "src/solver/opamCudf.ml", line 1293, characters 4-11:
+1293 | let install universe package =
+           ^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value install.
+
+File "src/solver/opamCudf.ml", line 1303, characters 4-39:
+1303 | let remove_all_uninstalled_versions_but universe name constr =
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value remove_all_uninstalled_versions_but.
+
+File "src/solver/opamCudf.ml", line 2057, characters 4-12:
+2057 | let packages u = Cudf.get_packages u
+           ^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value packages.
+File "src/tools/opam_admin_topstart.ml", line 1:
+Warning 70 [missing-mli]: Cannot find interface file.
+```
+The warnings 32 are triggered because the values are not exported (anymore) and not used inside their compilation unit. All the reported unused values can be removed, just like reports from the analyzer.
+
+Once these are taken care of, re-running our command triggers new compiler reports:
+```
+$ dune build @check
+File "src/solver/opamCudf.ml", line 50, characters 4-31:
+50 | let unavailable_package_version = 1
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value unavailable_package_version.
+
+File "src/solver/opamCudf.ml", line 94, characters 4-22:
+94 | let string_of_packages l =
+         ^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value string_of_packages.
+```
+
+Once again, we can cleanup the dead code and rerun our command:
+```
+$ dune build @check
+File "src/solver/opamCudf.ml", line 87, characters 4-21:
+87 | let string_of_package p =
+         ^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value string_of_package.
+```
+
+After removing this last unused value, the compiler will not report any more of them.
+
+The same overall process can be applied to the remaining `dead_code_analyzer` reports in `src/solver`.
+
+#### State
+
+This section focuses on reports in `/tmp/proj/opam/src/state`.
+
+Applying a naive cleanup is straightforward. Our dune command provides the following output:
+```
+$ dune build @check
+File "src/state/opamScript.ml", line 23, characters 4-10:
+23 | let prompt =
+         ^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value prompt.
+File "src/state/opamGlobalState.ml", line 165, characters 4-17:
+165 | let all_installed gt =
+          ^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value all_installed.
+File "src/state/opamFileTools.ml", line 1236, characters 4-15:
+1236 | let lint_string ?check_extra_files ?check_upstream ?handle_dirname
+           ^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value lint_string.
+File "src/state/opamUpdate.ml", line 475, characters 4-19:
+475 | let pinned_packages st ?autolock ?(working_dir=OpamPackage.Name.Set.empty) names =
+          ^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value pinned_packages.
+File "src/state/opamSwitchState.ml", line 705, characters 4-9:
+705 | let descr st nv =
+          ^^^^^
+Error (warning 32 [unused-value-declaration]): unused value descr.
+
+File "src/state/opamSwitchState.ml", line 793, characters 4-16:
+793 | let dev_packages st =
+          ^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value dev_packages.
+File "src/state/opamEnv.ml", line 701, characters 4-12:
+701 | let get_opam ~set_opamroot ~set_opamswitch ~force_path st =
+          ^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value get_opam.
+
+File "src/state/opamEnv.ml", line 722, characters 4-16:
+722 | let get_opam_raw ~set_opamroot ~set_opamswitch ?(base=[]) ~force_path
+          ^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value get_opam_raw.
+
+File "src/state/opamEnv.ml", line 811, characters 4-8:
+811 | let path ~force_path root switch =
+          ^^^^
+Error (warning 32 [unused-value-declaration]): unused value path.
+
+File "src/state/opamEnv.ml", line 1251, characters 4-30:
+1251 | let clear_dynamic_init_scripts gt =
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value clear_dynamic_init_scripts.
+File "src/tools/opam_admin_topstart.ml", line 1:
+Warning 70 [missing-mli]: Cannot find interface file.
+```
+The warnings 32 are triggered because the values are not exported (anymore) and not used inside their compilation unit. All the reported unused values can be removed, just like reports from the analyzer.
+
+I was able to trivially fix all the reports except for this one:
+```
+File "src/state/opamScript.ml", line 23, characters 4-10:
+23 | let prompt =
+         ^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value prompt.
+```
+This is because the file `src/state/opamScript.ml` does not exist. I will come back to this later.
+
+After this first cleanup, running our `dune` command a second time outputs:
+```
+$ dune build @check
+File "src/state/opamScript.ml", line 23, characters 4-10:
+23 | let prompt =
+         ^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value prompt.
+File "src/state/opamSwitchState.ml", line 702, characters 4-13:
+702 | let descr_opt st nv =
+          ^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value descr_opt.
+```
+`descr_opt` can be removed an we are done with the naive cleanup.
+
+Let's come back to our unused `prompt` value in `src/state/opamScript.ml`.
+The file is actually generated by a rule in `src/state/dune`:
+```dune
+(rule
+  (targets opamScript.ml)
+  (deps    ../../shell/crunch.ml (glob_files shellscripts/*.*sh))
+  (action  (with-stdout-to %{targets} (run ocaml %{deps}))))
+```
+The `crunch.ml` script simply prints out the name of the script and its content in following format for each script provided as argument:
+```OCaml
+let <name> =
+"<content>"
+
+```
+As a result, this rule creates the `src/state/opamScript.ml` file and fills it
+with variables named after the shell scripts found in `src/state/shellscripts`.
+
+If we continue applying a naive cleanup, we hit a wall here. 2 choices can be made:
+- go as far as possible in the cleanup and remove the unused script (`src/state/shellscripts/prompt.sh`);
+- or tolerate to leave the unused `prompt` variable in `src/state/opamScript.mli` because it is linked with generated code.
+
+I chose to go the agressive route and remove the script. After this, the compiler does not report any unused value.
+
+#### Tools
+
+This section focuses on reports in `/tmp/proj/opam/src/tools`.
+
+The `dead_code_analyzer` only reports values in `src/tools/opam_admin_top.mli` and reports all the values in that file.
+There is a type that is exported that only seems to be used by the exported values, and an open that becomes unused without the values.
+Consequently, we can go even further than a naive cleanup and remove all the content of the file (except for the copyright and module description).
+
+Running our `dune` command gives a few compiler reports:
+```
+$ dune build @check
+File "src/tools/opam_admin_topstart.ml", line 1:
+Warning 70 [missing-mli]: Cannot find interface file.
+File "src/tools/opam_admin_top.ml", line 18, characters 4-12:
+18 | let packages = OpamRepository.packages repo
+         ^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value packages.
+
+File "src/tools/opam_admin_top.ml", line 29, characters 0-51:
+29 | type 'a action = [`Update of 'a | `Remove  | `Keep]
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 34 [unused-type-declaration]): unused type action.
+
+File "src/tools/opam_admin_top.ml", line 93, characters 4-17:
+93 | let iter_packages ?quiet
+         ^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value iter_packages.
+
+File "src/tools/opam_admin_top.ml", line 129, characters 4-19:
+129 | let filter_packages = filter OpamPackage.to_string
+          ^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value filter_packages.
+```
+The warnings 32 are triggered because the values are not exported (anymore) and not used inside their compilation unit. All the reported unused values can be removed, just like reports from the analyzer.
+
+After this first cleanup, running our `dune` command a second time outputs even more reports:
+```
+$ dune build @check
+File "src/tools/opam_admin_top.ml", line 14, characters 4-12:
+14 | let identity _ x = x
+         ^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value identity.
+
+File "src/tools/opam_admin_top.ml", line 15, characters 4-9:
+15 | let true_ _ = true
+         ^^^^^
+Error (warning 32 [unused-value-declaration]): unused value true_.
+
+File "src/tools/opam_admin_top.ml", line 23, characters 4-9:
+23 | let apply f x prefix y =
+         ^^^^^
+Error (warning 32 [unused-value-declaration]): unused value apply.
+
+File "src/tools/opam_admin_top.ml", line 28, characters 4-13:
+28 | let to_action f x y =
+         ^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value to_action.
+
+File "src/tools/opam_admin_top.ml", line 40, characters 4-21:
+40 | let iter_packages_gen ?(quiet=false) f =
+         ^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value iter_packages_gen.
+
+File "src/tools/opam_admin_top.ml", line 105, characters 4-10:
+105 | let filter fn patterns =
+          ^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value filter.
+```
+
+Once again, we can cleanup the compiler reports and run our command:
+```
+$ dune build @check
+File "src/tools/opam_admin_top.ml", line 12, characters 0-20:
+12 | open OpamFilename.Op
+     ^^^^^^^^^^^^^^^^^^^^
+Error (warning 33 [unused-open]): unused open OpamFilename.Op.
+
+File "src/tools/opam_admin_top.ml", line 14, characters 4-8:
+14 | let repo = OpamFilename.cwd ()
+         ^^^^
+Error (warning 32 [unused-value-declaration]): unused value repo.
+
+File "src/tools/opam_admin_top.ml", line 16, characters 4-8:
+16 | let wopt w f = function
+         ^^^^
+Error (warning 32 [unused-value-declaration]): unused value wopt.
+
+File "src/tools/opam_admin_top.ml", line 20, characters 4-13:
+20 | let of_action o = function
+         ^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value of_action.
+
+File "src/tools/opam_admin_top.ml", line 25, characters 4-23:
+25 | let regexps_of_patterns patterns =
+         ^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value regexps_of_patterns.
+```
+
+Third time's the charm. After cleaning up these reports, the file does not contain anything but comments.
+Therefore, we can go further in the cleanup and remove this module entirely.
+Doing so requires a few extra steps.
+
+First we need to remove the whole `library` stanza from `src/tools/dune`:
+```dune
+(library
+  (name         opam_admin_top)
+  (public_name  opam-admin.top)
+  (synopsis     "OCaml Package Manager admin toplevel")
+  (modules      opam_admin_top)
+  ; TODO: Remove (re_export ...) when CI uses the OCaml version that includes https://github.com/ocaml/ocaml/pull/11989
+  (libraries    opam-client opam-file-format (re_export compiler-libs.toplevel) re)
+  (wrapped      false))
+```
+
+Then we also need to edit the `executable` stanza in the same file, to replace the dependecy on the removed lib to a dependency on the ocaml toplevel:
+```diff
+(executable
+  (name         opam_admin_topstart)
+  (public_name  opam-admin.top)
+  (package      opam-admin)
+  (modes        byte)
+  (modules      opam_admin_topstart)
+-  (libraries    opam-admin.top)
++  (libraries    compiler-libs.toplevel)
+  (ocamlc_flags (:standard
+                (:include ../ocaml-flags-standard.sexp)
+                (:include ../ocaml-flags-configure.sexp)
+                (:include ../ocaml-context-flags.sexp)
+                -linkall)))
+```
+
+Finally, we must update the rule to generate `src/tools/opam_admin_topstart.ml` in the same `dune` file:
+```diff
+-(rule (with-stdout-to opam_admin_topstart.ml (echo "include Opam_admin_top\n\nlet _ = Topmain.main ()")))
++(rule (with-stdout-to opam_admin_topstart.ml (echo "let _ = Topmain.main ()")))
+```
+
+#### Tests
+
+This section focuses on reports in `/tmp/proj/opam/tests`.
+
+We don't want to remove them for now but actaully to ignore them in the analyzer's report.
+To do this, we can update our `dead_code_analyzer` command to:
+```
+$ dead_code_analyzer --exclude _build/default/tests --references _build/default/tests --verbose _build 2> dca.err > dca.out
+```
+2 new options are used:
+- `--exclude <path>` skips the `.cmt` and `.cmti` files found in `<path>`
+- `--references <path>` adds the `.cmt` and `.cmti` files found in `<path>` to account uses found in them.
+
+Alternatively, because we want to focus on values exported in `src` while accounting for uses in the whole codebase, we can use the following simpler command:
+```
+$ dead_code_analyzer --references _build --verbose _build/default/src 2> dca.err > dca.out
+```
+This command gather uses from the whole codebase (`_build`) but only tracks elements of code declared in `_build/default/src`.
