@@ -1443,3 +1443,30 @@ Alternatively, because we want to focus on values exported in `src` while accoun
 $ dead_code_analyzer --references _build --verbose _build/default/src 2> dca.err > dca.out
 ```
 This command gather uses from the whole codebase (`_build`) but only tracks elements of code declared in `_build/default/src`.
+
+### Unused methods
+
+The [report](../assets/reports/dca/opam/dca.out)'s unused methods section is empty.
+```
+.> UNUSED METHODS:
+=================
+
+Nothing else to report in this section
+--------------------------------------------------------------------------------
+```
+
+By grepping the codebase, we can quickly verify that there is no use of objects or classes, confirming that there cannot be any unused method:
+```
+$ pwd
+/tmp/proj/opam
+
+$ grep -rnw -e object -e class src
+src/state/opamSwitchState.mli:179:    backward conflict definition or common conflict-class. Packages in [subset]
+src/core/opamStubs.mli:92:    and a font object, which will have been selected into the DC.
+src/core/opamStubs.mli:97:(** Windows only. Given [(dc, font)], deletes the font object and releases the
+src/core/opamStubs.mli:141:(** Windows only. Returns the name of the class for the Console window or [None]
+src/core/cmdliner/cmdliner_base.ml:11:  (* Thread-safe UIDs, Oo.id (object end) was used before.
+src/client/opamListCommand.ml:821:    Field "conflict-class";
+src/client/opamArg.ml:1615:       list, from the other package, or by a common $(b,conflict-class:) \
+src/format/opamFile.ml:2994:      "conflict-class", no_cleanup Pp.ppacc with_conflict_class conflict_class
+```
