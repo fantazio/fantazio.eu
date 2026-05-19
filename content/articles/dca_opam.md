@@ -1579,3 +1579,125 @@ Therefore, cleaning up an unused field or constructor requires compiling the cod
 
 Because we already removed some code during the cleanup of unused exported values, the lines of the reports are not exact anymore.
 For the sake of this example, we will pretend that they are. One can run the analyzer on unused fields and constructors specifically by running the `dead_code_analyzer` command with the `--nothing -T all` arguments.
+
+#### Client
+
+This section focuses on reports in `/tmp/proj/opam/src/client`.
+
+There are only 2 reports in this directory, both in the file `opamListCommand.mli`: a field (`pattern_selector.ext_fields`) and a constructor (`selector.Atoms`).
+After removing them from the `.mli` we will also need to remove them from the `.ml`. The compiler will tell us where the type mismatches happen, and which parts of the code ar impacted by the removal:
+```
+$ dune build @check
+File "src/client/opamListCommand.ml", line 1:
+Error: The implementation src/client/opamListCommand.ml
+       does not match the interface src/client/opamListCommand.mli:
+       Type declarations do not match:
+         type pattern_selector = {
+           case_sensitive : bool;
+           exact : bool;
+           glob : bool;
+           fields : string list;
+           ext_fields : bool;
+         }
+       is not included in
+         type pattern_selector = {
+           case_sensitive : bool;
+           exact : bool;
+           glob : bool;
+           fields : string list;
+         }
+       An extra field, ext_fields, is provided in the first declaration.
+       File "src/client/opamListCommand.mli", lines 31-36, characters 0-1:
+         Expected declaration
+       File "src/client/opamListCommand.ml", lines 32-38, characters 0-1:
+         Actual declaration
+
+$ dune build @check
+File "src/client/opamListCommand.ml", line 44, characters 2-12:
+44 |   ext_fields = false;
+       ^^^^^^^^^^
+Error: Unbound record field ext_fields
+```
+```
+dune build @check
+File "src/client/opamListCommand.ml", line 1:
+Error: The implementation src/client/opamListCommand.ml
+       does not match the interface src/client/opamListCommand.mli:
+       Type declarations do not match:
+         type selector =
+             Any
+           | Installed
+           | Root
+           | Compiler
+           | Available
+           | Installable
+           | Pinned
+           | Latests_only
+           | Depends_on of dependency_toggles * OpamFormula.atom list
+           | Required_by of dependency_toggles * OpamFormula.atom list
+           | Conflicts_with of OpamPackage.t list
+           | Coinstallable_with of dependency_toggles * OpamPackage.t list
+           | Solution of dependency_toggles * OpamFormula.atom list
+           | Pattern of pattern_selector * string
+           | Atoms of OpamFormula.atom list
+           | Flag of OpamTypes.package_flag
+           | NotFlag of OpamTypes.package_flag
+           | Tag of string
+           | From_repository of OpamRepositoryName.t list
+           | Owns_file of OpamFilename.t
+       is not included in
+         type selector =
+             Any
+           | Installed
+           | Root
+           | Compiler
+           | Available
+           | Installable
+           | Pinned
+           | Latests_only
+           | Depends_on of dependency_toggles * OpamFormula.atom list
+           | Required_by of dependency_toggles * OpamFormula.atom list
+           | Conflicts_with of OpamPackage.t list
+           | Coinstallable_with of dependency_toggles * OpamPackage.t list
+           | Solution of dependency_toggles * OpamFormula.atom list
+           | Pattern of pattern_selector * string
+           | Flag of OpamTypes.package_flag
+           | NotFlag of OpamTypes.package_flag
+           | Tag of string
+           | From_repository of OpamRepositoryName.t list
+           | Owns_file of OpamFilename.t
+       An extra constructor, Atoms, is provided in the first declaration.
+       File "src/client/opamListCommand.mli", lines 41-60, characters 0-25:
+         Expected declaration
+       File "src/client/opamListCommand.ml", lines 46-66, characters 0-25:
+         Actual declaration
+
+dune build @check
+File "src/client/opamListCommand.ml", line 111, characters 4-9:
+111 |   | Atoms atoms ->
+          ^^^^^
+Error: This variant pattern is expected to have type selector
+       There is no constructor Atoms within type selector
+
+$ dune build @check
+File "src/client/opamListCommand.ml", line 211, characters 4-9:
+211 |   | Atoms _
+          ^^^^^
+Error: This variant pattern is expected to have type selector
+       There is no constructor Atoms within type selector
+
+$ dune build @check
+File "src/client/opamListCommand.ml", line 321, characters 4-9:
+321 |   | Atoms atoms ->
+          ^^^^^
+Error: This variant pattern is expected to have type selector
+       There is no constructor Atoms within type selector
+
+```
+The errors can be fixed quite easily:
+- for a type mismatch, remove the extra field/constructor;
+- for an unbound record field, remove it from the the structure;
+- for an invalid constructor, remove its branch from the pattern matching.
+
+As we can see, removing the unused field took 2 builds, and removing the unused constructor took 4.
+This simple clean up took 6 builds in total. This is not ideal but easy to follow and the builds are fast so it does not incurr a big overhead. Nonetheless, it would be nice to try and automatise this process as much as possible.
