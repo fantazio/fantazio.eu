@@ -1701,3 +1701,436 @@ The errors can be fixed quite easily:
 
 As we can see, removing the unused field took 2 builds, and removing the unused constructor took 4.
 This simple clean up took 6 builds in total. This is not ideal but easy to follow and the builds are fast so it does not incurr a big overhead. Nonetheless, it would be nice to try and automatise this process as much as possible.
+
+#### Core
+
+This section focuses on reports in `/tmp/proj/opam/src/core`.
+
+More than half of the reports are located in `src/core/opamStubsTypes.ml` (35 out of 56 i.e. ~62.5%).
+However, unlike with unused exported values, we will try to minimize the amount of re-builds necessary to clean all the reports.
+Thus, we will not focus on this file specifically but clean up all the reports in the directory at once, hoping to get multiple compiler errors reported at once.
+
+Some of the reports accumulate to a whole type definition (e.g. `Either.t.Left` and `Either.t.Right` in `src/core/opamCompat.mli`), so we will mark the type as `private` in this case.
+
+<div class="alert-tip">
+
+> **TIP**:\
+> Instead of make the types private, we can try and make them abstract or go even further and remove them from the signature.
+> I would recommend doing these more aggressive changes in further steps after doing an initial cleanup using private types.
+> - Making types abstract means that you completely lose the ability to match on the constructors.
+>   This should not be an issue with records because reading a field is considered as a use, if no field is read then they do not need to be exposed at all.
+> - Removing a type from the signature too early may lead to having to un-remove them in case they are actually used (e.g. in a value's signature), and a more cumbersome clean up experience.
+>
+> Iteratively making types private, then abstract, then removing them from the signature is the smoothest path for an efficient cleanup in my experience.
+</div>
+
+Let's see what our `dune` command says after removing the reported fields and constructors:
+```
+$ dune build @check
+File "src/core/opamCompat.ml", line 75, characters 4-16:
+75 |     | Left of 'a
+         ^^^^^^^^^^^^
+Error (warning 37 [unused-constructor]): constructor Left is never used to build values.
+Its type is exported as a private type.
+
+File "src/core/opamCompat.ml", line 76, characters 4-17:
+76 |     | Right of 'b
+         ^^^^^^^^^^^^^
+Error (warning 37 [unused-constructor]): constructor Right is never used to build values.
+Its type is exported as a private type.
+File "src/core/opamStubs.ml", line 1:
+Error: The implementation src/core/opamStubs.ml
+       does not match the interface src/core/opamStubs.mli:
+       Type declarations do not match:
+         type uname =
+           OpamStubsTypes.uname = private {
+           sysname : string;
+           release : string;
+           machine : string;
+         }
+       is not included in
+         type uname = {
+           sysname : string;
+           release : string;
+           machine : string;
+         }
+       A private record constructor would be revealed.
+       File "src/core/opamStubs.mli", lines 166-170, characters 0-1:
+         Expected declaration
+       File "src/core/opamStubsTypes.ml", lines 85-89, characters 0-1:
+         Actual declaration
+File "src/core/opamConsole.ml", line 43, characters 6-12:
+43 |     | Darwin -> true
+           ^^^^^^
+Error: This variant pattern is expected to have type OpamStd.Sys.os
+       There is no constructor Darwin within type OpamStd.Sys.os
+File "src/core/opamProcess.ml", line 470, characters 4-10:
+470 |     p_info   = info_file;
+          ^^^^^^
+Error: Unbound record field p_info
+File "src/core/opamStd.ml", line 1:
+Error: The implementation src/core/opamStd.ml
+       does not match the interface src/core/opamStd.mli:  ... In module Sys:
+       Type declarations do not match:
+         type os =
+           Sys.os =
+             Darwin
+           | Linux
+           | FreeBSD
+           | OpenBSD
+           | NetBSD
+           | DragonFly
+           | Cygwin
+           | Win32
+           | Unix
+           | Other of string
+       is not included in
+         type os = Cygwin | Win32
+       1. An extra constructor, Darwin, is provided in the first declaration.
+       2. An extra constructor, Linux, is provided in the first declaration.
+       3. An extra constructor, FreeBSD, is provided in the first declaration.
+       4. An extra constructor, OpenBSD, is provided in the first declaration.
+       5. An extra constructor, NetBSD, is provided in the first declaration.
+       6. An extra constructor, DragonFly, is provided in the first declaration.
+       9. An extra constructor, Unix, is provided in the first declaration.
+       10. An extra constructor, Other, is provided in the first declaration.
+       File "src/core/opamStd.mli", lines 454-455, characters 2-17:
+         Expected declaration
+       File "src/core/opamStd.ml", lines 880-890, characters 2-21:
+         Actual declaration
+File "src/core/opamSystem.ml", line 934, characters 6-25:
+934 |     | OpamStd.Sys.OpenBSD -> "gtar"
+            ^^^^^^^^^^^^^^^^^^^
+Error: Unbound constructor OpamStd.Sys.OpenBSD
+File "src/format/opamTypes.mli", lines 22-24, characters 0-15:
+22 | type ('a, 'b) either = ('a, 'b) OpamCompat.Either.t =
+23 |   | Left of 'a
+24 |   | Right of 'b
+Error: This variant or record definition does not match that of type
+         ('a, 'b) OpamCompat.Either.t
+       Private variant constructor(s) would be revealed.
+```
+There are different kinds of errors reported.
+1. The first one is trivial, it is a warning 37 (reported as an error) that indicates the constructor is never constructed. This is expected to happen because we exported the type as private, meaning the constructor can only be used to build values inside its compilation unit. Thus, the compiler is able to check if it is actually used and report if not. This is solved by removing the unused constructor.
+2. The second kind is a type mismatch between the signature and the implementation of a type. This is also expected to happen. This can be solved by updating the `.ml` to match the `.mli`.
+3. The third kind is an invalid constructor or record field. Again, this is expected to happen and can be solved by removing the corresponding code.
+4. The fourth and last kind of error we can observe is a type mismatch, like the second kind. However, this one is due to broken type equations.
+
+After only a couple iterations we get stuck on the complicated cases:
+```
+$ dune build @check
+File "src/format/opamTypes.mli", lines 22-24, characters 0-15:
+22 | type ('a, 'b) either = ('a, 'b) OpamCompat.Either.t =
+23 |   | Left of 'a
+24 |   | Right of 'b
+Error: This variant or record definition does not match that of type
+         ('a, 'b) OpamCompat.Either.t
+       Private variant constructor(s) would be revealed.
+File "src/core/opamCompat.ml", line 75, characters 4-16:
+75 |     | Left of 'a
+         ^^^^^^^^^^^^
+Error (warning 37 [unused-constructor]): constructor Left is never used to build values.
+Its type is exported as a private type.
+
+File "src/core/opamCompat.ml", line 76, characters 4-17:
+76 |     | Right of 'b
+         ^^^^^^^^^^^^^
+Error (warning 37 [unused-constructor]): constructor Right is never used to build values.
+Its type is exported as a private type.
+File "src/core/opamConsole.ml", line 1106, characters 35-44:
+1106 |   OpamStd.Sys.(set_warning_printer {warning})
+                                          ^^^^^^^^^
+Error: Cannot create values of the private type warning_printer
+File "src/core/opamStd.ml", line 1:
+Error: The implementation src/core/opamStd.ml
+       does not match the interface src/core/opamStd.mli:  ... In module Sys:
+       Type declarations do not match:
+         type os =
+           Sys.os =
+             Darwin
+           | Linux
+           | FreeBSD
+           | OpenBSD
+           | NetBSD
+           | DragonFly
+           | Cygwin
+           | Win32
+           | Unix
+           | Other of string
+       is not included in
+         type os = Cygwin | Win32
+       1. An extra constructor, Darwin, is provided in the first declaration.
+       2. An extra constructor, Linux, is provided in the first declaration.
+       3. An extra constructor, FreeBSD, is provided in the first declaration.
+       4. An extra constructor, OpenBSD, is provided in the first declaration.
+       5. An extra constructor, NetBSD, is provided in the first declaration.
+       6. An extra constructor, DragonFly, is provided in the first declaration.
+       9. An extra constructor, Unix, is provided in the first declaration.
+       10. An extra constructor, Other, is provided in the first declaration.
+       File "src/core/opamStd.mli", lines 454-455, characters 2-17:
+         Expected declaration
+       File "src/core/opamStd.ml", lines 880-890, characters 2-21:
+         Actual declaration
+```
+
+Let's look at the invalid type equation at the top first:
+```
+File "src/format/opamTypes.mli", lines 22-24, characters 0-15:
+22 | type ('a, 'b) either = ('a, 'b) OpamCompat.Either.t =
+23 |   | Left of 'a
+24 |   | Right of 'b
+Error: This variant or record definition does not match that of type
+         ('a, 'b) OpamCompat.Either.t
+       Private variant constructor(s) would be revealed.
+File "src/core/opamCompat.ml", line 75, characters 4-16:
+75 |     | Left of 'a
+         ^^^^^^^^^^^^
+Error (warning 37 [unused-constructor]): constructor Left is never used to build values.
+Its type is exported as a private type.
+
+File "src/core/opamCompat.ml", line 76, characters 4-17:
+76 |     | Right of 'b
+         ^^^^^^^^^^^^^
+Error (warning 37 [unused-constructor]): constructor Right is never used to build values.
+Its type is exported as a private type.
+```
+Here we have 2 kinds of reports: an invalid type equation and warnings 37.
+I did not clean the warnings because they are directly connected to the other error.
+
+To fix the invalid type equation we could mark the constructors of `either` as private, just as they are now for `OpamCompat.Either.t`.
+This would leave us with unfixable warnings. This dead-end might be a sign that we hit a limitation of the analyzer.
+<div class="alert-note">
+
+> The warnings could actually be fixed by marking the type as private within `src/core/opamCompat.ml`,
+> which would make it impossible to build any value of this type. There may be situations were this
+> makes sense but the current one is not.
+</div>
+
+Alternatively, we could choose to fix the warnings first by making the type abstract.
+Because we updated the type in the `.ml`, the compiler will complain about a type mismatch, and we need to update the `.mli` to reflect the change:
+```
+File "src/core/opamCompat.ml", line 1:
+Error: The implementation src/core/opamCompat.ml
+       does not match the interface src/core/opamCompat.mli:
+       In module Either:                                                                                                                                   Modules do not match:
+         sig type ('a, 'b) t = ('a, 'b) Either.t end
+       is not included in
+         sig type ('a, 'b) t = private Left of 'a | Right of 'b end
+       In module Either:
+       Type declarations do not match:
+         type ('a, 'b) t = ('a, 'b) Either.t
+       is not included in
+         type ('a, 'b) t = private Left of 'a | Right of 'b
+       The first is abstract, but the second is a variant.
+       File "src/core/opamCompat.mli", lines 35-37, characters 2-17:
+         Expected declaration
+       File "src/core/opamCompat.ml", line 74, characters 2-17:
+         Actual declaration
+```
+Now that the type is abstract in both the signature and the implementation, the warnings are gone.
+The invalid type equation changed to:
+```
+File "src/format/opamTypes.mli", lines 22-24, characters 0-15:
+22 | type ('a, 'b) either = ('a, 'b) OpamCompat.Either.t =
+23 |   | Left of 'a
+24 |   | Right of 'b
+Error: This variant or record definition does not match that of type
+         ('a, 'b) OpamCompat.Either.t
+       The original is abstract, but this is a variant.
+```
+We can fix it by making `either` abstract as well.
+This unveils a new invalid type equation:
+```
+File "src/format/opamTypes.mli", line 320, characters 0-81:
+320 | type powershell_host = OpamStd.Sys.powershell_host = Powershell_pwsh | Powershell
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error: This variant or record definition does not match that of type
+         OpamStd.Sys.powershell_host
+       Private variant constructor(s) would be revealed.
+```
+The situation is similar to our original case but there is no warning 37 to indicate that the constructors are not used within their compialtion units.
+This time, we can simply make `powershell_host` private to satisfy the equation.
+This unveils yet another invalid equation which can be solved by making the new type private as well:
+```
+File "src/format/opamTypes.mli", lines 321-323, characters 0-10:
+321 | type shell = OpamStd.Sys.shell =
+322 |   | SH_sh | SH_bash | SH_zsh | SH_csh | SH_fish | SH_pwsh of powershell_host
+323 |   | SH_cmd
+Error: This variant or record definition does not match that of type
+         OpamStd.Sys.shell
+       Private variant constructor(s) would be revealed.
+```
+
+With all the invalid type equations resolved, the compiler is now able to report more errors.
+In particular, the 2 following errors tell use that constructors `Left` and `Right` are actually used to build values:
+```
+File "src/client/opamAction.ml", line 1062, characters 32-37:
+1062 |     | Some (_, result) -> Done (Right (OpamSystem.Process_error result))
+                                       ^^^^^
+Error: Unbound constructor Right
+File "src/client/opamCommands.ml", line 439, characters 31-35:
+439 |       | Some d, false -> Some (Left d)
+                                     ^^^^
+Error: Unbound constructor Left
+```
+As we suspected in our initial attempt to fix the invalid type equation on `either`, we hit a limitation of the analyzer.
+Even better, we hit an [undocumented limitation](https://github.com/fantazio/dead_code_analyzer/blob/master/docs/fields_and_constructors/FIELDS_AND_CONSTRUCTORS.md#limitations)
+so we can open an [issue](https://github.com/LexiFi/dead_code_analyzer/issues/79) to report it.
+We can conclude that the following reports are false positives and undo their cleaning:
+```
+/tmp/proj/opam/src/core/opamCompat.mli:36: Either.t.Left
+/tmp/proj/opam/src/core/opamCompat.mli:37: Either.t.Right
+```
+
+Among the new compilation errors there is also an error telling us that the constructor `SH_bash` is used:
+```
+File "src/client/opamArg.ml", line 1149, characters 16-23:
+1149 |     None,"bash",SH_bash;
+                       ^^^^^^^
+Error: Cannot create values of the private type shell
+```
+We are hitting the same limitation as with `either`, can conclude that the following reports are false positives and undo their cleaning:
+```
+/tmp/proj/opam/src/core/opamStd.mli:506: Sys.shell.SH_sh
+/tmp/proj/opam/src/core/opamStd.mli:506: Sys.shell.SH_bash
+/tmp/proj/opam/src/core/opamStd.mli:506: Sys.shell.SH_zsh
+/tmp/proj/opam/src/core/opamStd.mli:506: Sys.shell.SH_csh
+/tmp/proj/opam/src/core/opamStd.mli:506: Sys.shell.SH_fish
+/tmp/proj/opam/src/core/opamStd.mli:507: Sys.shell.SH_pwsh
+/tmp/proj/opam/src/core/opamStd.mli:507: Sys.shell.SH_cmd
+```
+
+Finally, after re-building the project, an new error tells us that the constructor `Powershell_pwsh` is used:
+```
+File "src/client/opamArg.ml", line 1154, characters 31-46:
+1154 |     Some cli2_2,"pwsh",SH_pwsh Powershell_pwsh;
+                                      ^^^^^^^^^^^^^^^
+Error: Cannot create values of the private type powershell_host
+```
+Once again, we are hitting the same limitation, can conclude the following reports are false positives and undo their cleaning:
+```
+/tmp/proj/opam/src/core/opamStd.mli:505: Sys.powershell_host.Powershell_pwsh
+/tmp/proj/opam/src/core/opamStd.mli:505: Sys.powershell_host.Powershell
+```
+
+Now that we resolved our the situation by not cleaning up the false positives, we can come back to our original errors and move on to the next one:
+```
+File "src/core/opamConsole.ml", line 1106, characters 35-44:
+1106 |   OpamStd.Sys.(set_warning_printer {warning})
+                                          ^^^^^^^^^
+Error: Cannot create values of the private type warning_printer
+```
+The analyzer reported `Sys.warning_printer.warning` as unused. This means that it is never read.
+Because this is the only field in its type, we marked the type as `private`, hence the error when
+creating a value of that type from outside its compilation unit.
+
+Although the error is not surprising, the associated function is telling us something.
+`Opam.Std.Sys.set_warning_printer` has type `warning_printer -> unit`. This indicates us that it must be storing the argument somewhere.
+By looking at its definition, it does store it in a variable named `console`:
+```OCaml
+  let set_warning_printer =
+    let called = ref false in
+    fun printer ->
+      if !called then invalid_arg "Just what do you think you're doing, Dave?";
+      called := true;
+      console := printer
+```
+`console` is an unexported value of type `warning_printer` and if we look at its uses, its `warning` field is actually read a couple times.
+
+The issue here is that the type `warning_printer` is defined twice in `src/core/opamStd.ml`:
+once before the definition of `console` and another before the definition of `set_warning_printer`
+with a type equation indicating that the 2 are equal.
+Thus, we are facing a similar situation as with the previous type equation where the analyzer does not associated uses to its type.
+We can open another [issue](https://github.com/LexiFi/dead_code_analyzer/issues/80)
+to report this limitation, conclude that the following report is a false positive and undo its cleaning:
+```
+/tmp/proj/opam/src/core/opamStd.mli:613: Sys.warning_printer.warning
+```
+
+Finally, the last of our original errors is:
+```
+File "src/core/opamStd.ml", line 1:
+Error: The implementation src/core/opamStd.ml
+       does not match the interface src/core/opamStd.mli:  ... In module Sys:
+       Type declarations do not match:
+         type os =
+           Sys.os =
+             Darwin
+           | Linux
+           | FreeBSD
+           | OpenBSD
+           | NetBSD
+           | DragonFly
+           | Cygwin
+           | Win32
+           | Unix
+           | Other of string
+       is not included in
+         type os = Cygwin | Win32
+       1. An extra constructor, Darwin, is provided in the first declaration.
+       2. An extra constructor, Linux, is provided in the first declaration.
+       3. An extra constructor, FreeBSD, is provided in the first declaration.
+       4. An extra constructor, OpenBSD, is provided in the first declaration.
+       5. An extra constructor, NetBSD, is provided in the first declaration.
+       6. An extra constructor, DragonFly, is provided in the first declaration.
+       9. An extra constructor, Unix, is provided in the first declaration.
+       10. An extra constructor, Other, is provided in the first declaration.
+       File "src/core/opamStd.mli", lines 454-455, characters 2-17:
+         Expected declaration
+       File "src/core/opamStd.ml", lines 880-890, characters 2-21:
+         Actual declaration
+```
+This type mismatch could fit our 2nd kind of errors: the expected type mismatch between the interface and the implementation.
+However, the reported code contains a type equation `os = Sys.os`, so it will fit our 4th kind.
+This is why we did not fix it earlier.
+If we try to fix it like a regular type mismatch by updating the type in the `.ml` to match the `.mli`, we get this new compilation error:
+```
+File "src/core/opamStd.ml", line 889, characters 27-33:
+889 |           | "Darwin"    -> Darwin
+                                 ^^^^^^
+Error: Unbound constructor Darwin
+```
+This indicates that the constructor is used to build a value. Thus, it should not be reported as unused.
+We hit a new undocumented limitation of the analyzer so we can open an [issue](https://github.com/LexiFi/dead_code_analyzer/issues/81)
+to report it.
+We can conclude that the following false positives and undo their cleaning:
+```
+/tmp/proj/opam/src/core/opamStd.mli:474: Sys.os.Darwin
+/tmp/proj/opam/src/core/opamStd.mli:475: Sys.os.Linux
+/tmp/proj/opam/src/core/opamStd.mli:476: Sys.os.FreeBSD
+/tmp/proj/opam/src/core/opamStd.mli:477: Sys.os.OpenBSD
+/tmp/proj/opam/src/core/opamStd.mli:478: Sys.os.NetBSD
+/tmp/proj/opam/src/core/opamStd.mli:479: Sys.os.DragonFly
+/tmp/proj/opam/src/core/opamStd.mli:482: Sys.os.Unix
+/tmp/proj/opam/src/core/opamStd.mli:483: Sys.os.Other
+```
+
+With all those errors fixed, we are now done with the naive cleaning, using private type when their content is entirely unused.
+
+The only remaining private type is `uname` in `src/core/opamStubsTypes.ml` and `src/core/opamStubs.mli`.
+We can try to clean it further by making it abstract. Our `dune` command will provide the following output:
+```
+$ dune build @check
+File "src/core/opamStd.ml", line 896, characters 27-34:
+896 |           match (uname ()).sysname with
+                                 ^^^^^^^
+Error: Unbound record field sysname
+File "src/state/opamSysPoll.ml", line 40, characters 55-62:
+40 |     | "Unix" | "Cygwin" -> Some (OpamStd.Sys.uname ()).machine
+                                                            ^^^^^^^
+Error: Unbound record field machine
+```
+This indicates that the fields `sysname` and `machine` are read. If we search a bit further, the field `release` is also read.
+Thus, they should not be reported as unused.
+Actually, I made a mistake earlier: I assumed that the following error was a 2nd kind error (mismatch between interface and implementation) when it is more subtle than that. The type `uname` is defined in 2 separate compilation units (`OpamStbsTypes` and `OpamStubs`),
+and one is included in the other (the former into the latter).
+We hit a new undocumented limitation of the analyzer so we can open an [issue](https://github.com/LexiFi/dead_code_analyzer/issues/82)
+to report it.
+We can conclude that the following false positives and undo their cleaning:
+```
+/tmp/proj/opam/src/core/opamStubsTypes.ml:118: uname.sysname
+/tmp/proj/opam/src/core/opamStubsTypes.ml:119: uname.release
+/tmp/proj/opam/src/core/opamStubsTypes.ml:120: uname.machine
+```
+
+In the end, only 33 out of 56 (i.e. ~9%) reports were true positives in the `src/core` directory.
