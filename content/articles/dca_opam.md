@@ -2134,3 +2134,344 @@ We can conclude that the following false positives and undo their cleaning:
 ```
 
 In the end, only 33 out of 56 (i.e. ~9%) reports were true positives in the `src/core` directory.
+
+#### Format
+
+This section focuses on reports in `/tmp/proj/opam/src/format`.
+
+There are only 16 reports in this directory, mostly concentrated in 2 files:
+- 10 of them (62.5%) are in `src/format/opamFile.mli`,
+- 5 of them (31.25%) are in `src/format/opamTypes.mli`.
+
+`OpamTypes.lock`'s constructors are all reported unused so we make the type private, by applying the same reasoning as in core above.
+
+Building reports the following errors:
+```
+$ dune build @check
+File "src/format/opamTypes.mli", lines 102-105, characters 0-20:
+102 | type variable_contents = OpamVariable.variable_contents =
+103 |   | B of bool
+104 |   | S of string
+105 |   | L of string list
+Error: This variant or record definition does not match that of type
+         OpamVariable.variable_contents
+       A constructor, L, is missing in the original definition.
+File "src/format/opamVariable.ml", line 1:
+Error: The implementation src/format/opamVariable.ml
+       does not match the interface src/format/opamVariable.mli:
+       Type declarations do not match:
+         type variable_contents =
+             B of bool
+           | S of variable
+           | L of variable list
+       is not included in
+         type variable_contents = B of bool | S of variable
+       An extra constructor, L, is provided in the first declaration.
+       File "src/format/opamVariable.mli", lines 23-25, characters 0-15:
+         Expected declaration
+       File "src/format/opamVariable.ml", lines 16-19, characters 0-20:
+         Actual declaration
+```
+The first error is related to a type equation `variable_contents = OpamVariable.variable_contents`,
+and we already hit a limitation on this when exploring core ([issue #79](https://github.com/LexiFi/dead_code_analyzer/issues/79)).
+We will still explore it because on of the goals of this analysis is also to properly qualify the results of the `dead_code_analyzer`,
+but I would not recommend systematically doing so to a regular user.
+
+
+<div class="alert-tip">
+
+> **TIP**:\
+> In a given codebase, the same patterns will probably repeat, so the same limitations will probably be encountered.
+> For a more efficient cleanup, it is recommended to skip reports on patterns already associated with false positives.
+</div>
+
+We can quickly verify if we hit the type-equation-limitation by removing the constructor `L` in the alias `variable_contents`.
+Re-building reports more errors among which a couple indicate that `L` is actually used to build values:
+```
+File "src/client/opamAction.ml", line 1101, characters 15-16:
+1101 |         (Some (L added))
+                      ^
+Error: Unbound constructor L
+File "src/client/opamSolution.ml", line 1478, characters 42-43:
+1478 |         OpamVariable.Full.of_string name, L l
+                                                 ^
+Error: Unbound constructor L
+```
+Thus, we can consider the following report as false positive and undo its cleaning:
+```
+/tmp/proj/opam/src/format/opamVariable.mli:26: variable_contents.L
+```
+
+Let's re-build:
+```
+$ dune build @check
+File "src/state/opamSwitchAction.ml", line 35, characters 4-9:
+35 |     paths = [];
+         ^^^^^
+Error: Unbound record field OpamFile.Switch_config.paths
+File "src/state/opamFormatUpgrade.ml", line 946, characters 23-28:
+946 |             opam_root; paths; variables; wrappers = OpamFile.Wrappers.empty;
+                             ^^^^^
+Error: Unbound record field OpamFile.Switch_config.paths
+File "src/client/opamAdminCheck.ml", line 38, characters 4-12:
+38 |     u_action = Query;
+         ^^^^^^^^
+Error: Unbound record field u_action
+File "src/state/opamSwitchState.ml", line 1042, characters 2-10:
+1042 |   u_action = user_action;
+         ^^^^^^^^
+Error: Unbound record field u_action
+File "src/format/opamFile.ml", line 1:
+Error: The implementation src/format/opamFile.ml
+       does not match the interface src/format/opamFile.mli:  ...
+       In module OPAM:
+       Type declarations do not match:
+         type t =
+           OPAM.t = {
+           opam_version : OpamVersion.t;
+           name : StateTable.M.key option;
+           version : OpamPackage.Version.t option;
+           depends : OpamTypes.filtered_formula;
+           depopts : OpamTypes.filtered_formula;
+           conflicts : OpamTypes.filtered_formula;
+           conflict_class : StateTable.M.key list;
+           available : OpamTypes.filter;
+           flags : OpamTypes.package_flag list;
+           env :
+             (OpamTypes.spf_unresolved, OpamTypes.euok_writeable)
+             OpamTypes.env_update list;
+           build : OpamTypes.command list;
+           run_test : OpamTypes.command list;
+           install : OpamTypes.command list;
+           remove : OpamTypes.command list;
+           substs : OpamFilename.Base.t list;
+           patches : (OpamFilename.Base.t * OpamTypes.filter option) list;
+           build_env :
+             (OpamTypes.spf_unresolved, OpamTypes.euok_writeable)
+             OpamTypes.env_update list;
+           features :
+             (OpamVariable.t * OpamTypes.filtered_formula * string) list;
+           extra_sources : (OpamFilename.Base.t * URL.t) list;
+           messages : (string * OpamTypes.filter option) list;
+           post_messages : (string * OpamTypes.filter option) list;
+           depexts : (OpamSysPkg.Set.t * OpamTypes.filter) list;
+           libraries : (string * OpamTypes.filter option) list;
+           syntax : (string * OpamTypes.filter option) list;
+           dev_repo : OpamUrl.t option;
+           pin_depends : (OpamPackage.t * OpamUrl.t) list;
+           maintainer : string list;
+           author : string list;
+           license : string list;
+           tags : string list;
+           homepage : string list;
+           doc : string list;
+           bug_reports : string list;
+           extensions : OpamParserTypes.FullPos.value ChangesSyntax.SM.t;
+           url : URL.t option;
+           descr : Descr.t option;
+           metadata_dir : (OpamRepositoryName.t option * string) option;
+           extra_files : (OpamFilename.Base.t * OpamHash.t) list option;
+           locked : string option;
+           format_errors : (string * Pp.bad_format) list;
+           ocaml_version :
+             (OpamParserTypes.relop * string) OpamFormula.formula option;
+           os : (bool * string) OpamFormula.formula;
+           deprecated_build_test : OpamTypes.command list;
+           deprecated_build_doc : OpamTypes.command list;
+         }
+       is not included in
+         type t = private {
+           opam_version : OpamVersion.t;
+           name : StateTable.M.key option;
+           version : OpamPackage.Version.t option;
+           depends : OpamTypes.filtered_formula;
+           depopts : OpamTypes.filtered_formula;
+           conflicts : OpamTypes.filtered_formula;
+           available : OpamTypes.filter;
+           flags : OpamTypes.package_flag list;
+           build : OpamTypes.command list;
+           run_test : OpamTypes.command list;
+           install : OpamTypes.command list;
+           remove : OpamTypes.command list;
+           patches : (OpamFilename.Base.t * OpamTypes.filter option) list;
+           features :
+             (OpamVariable.t * OpamTypes.filtered_formula * string) list;
+           extra_sources : (OpamFilename.Base.t * URL.t) list;
+           messages : (string * OpamTypes.filter option) list;
+           post_messages : (string * OpamTypes.filter option) list;
+           depexts : (OpamSysPkg.Set.t * OpamTypes.filter) list;
+           libraries : (string * OpamTypes.filter option) list;
+           syntax : (string * OpamTypes.filter option) list;
+           dev_repo : OpamUrl.t option;
+           pin_depends : (OpamPackage.t * OpamUrl.t) list;
+           maintainer : string list;
+           author : string list;
+           license : string list;
+           tags : string list;
+           homepage : string list;
+           doc : string list;
+           bug_reports : string list;
+           url : URL.t option;
+           descr : Descr.t option;
+           extra_files : (OpamFilename.Base.t * OpamHash.t) list option;
+           format_errors : (string * OpamPp.bad_format) list;
+           ocaml_version :
+             (OpamParserTypes.relop * string) OpamFormula.formula option;
+           os : (bool * string) OpamFormula.formula;
+           deprecated_build_test : OpamTypes.command list;
+           deprecated_build_doc : OpamTypes.command list;
+         }
+       7. An extra field, conflict_class, is provided in the first declaration.
+       10. An extra field, env, is provided in the first declaration.
+       15. An extra field, substs, is provided in the first declaration.
+       17. An extra field, build_env, is provided in the first declaration.
+       34. An extra field, extensions, is provided in the first declaration.
+       37. An extra field, metadata_dir, is provided in the first declaration.
+       39. An extra field, locked, is provided in the first declaration.
+       File "src/format/opamFile.mli", lines 333-390, characters 2-3:
+         Expected declaration
+       File "src/format/opamFile.ml", lines 2528-2603, characters 2-3:
+         Actual declaration
+```
+The last error looks a lot like the one that lead to opening [issue #81](https://github.com/LexiFi/dead_code_analyzer/issues/81)
+when exploring the reports in `src/core` above.
+We can verify if we hit the same limitation by looking for the actual definition of `t` and the definition of `OPAM` in the `.ml`.
+It turns out that `t` is defined in `OPAMSyntax` which is included in `OPAM`. Thus, the situation is closer to [issue #82](https://github.com/LexiFi/dead_code_analyzer/issues/82).
+Now to see if we actually hit the limitation, we can update the type in `OPAMSyntax` to match the definition in `OPAM`.
+Quickly we can reach a compilation error synonym of a false positive:
+```
+File "src/format/opamFile.ml", line 2649, characters 34-46:
+2649 |         OpamStd.Option.Op.(>>|) t.metadata_dir @@ function
+                                         ^^^^^^^^^^^^
+Error: Unbound record field metadata_dir
+```
+We can conclude that the following reports are false positives and undo their cleaning:
+```
+/tmp/proj/opam/src/format/opamFile.mli:366: OPAM.t.conflict_class
+/tmp/proj/opam/src/format/opamFile.mli:369: OPAM.t.env
+/tmp/proj/opam/src/format/opamFile.mli:378: OPAM.t.substs
+/tmp/proj/opam/src/format/opamFile.mli:380: OPAM.t.build_env
+/tmp/proj/opam/src/format/opamFile.mli:403: OPAM.t.extensions
+/tmp/proj/opam/src/format/opamFile.mli:413: OPAM.t.metadata_dir
+/tmp/proj/opam/src/format/opamFile.mli:419: OPAM.t.locked
+```
+
+Now if we re-build the compilation error will appear:
+```
+File "src/format/opamFile.ml", line 1:
+Error: The implementation src/format/opamFile.ml
+       does not match the interface src/format/opamFile.mli:  ...
+       In module Repo_config_legacy:
+       Type declarations do not match:
+         type t =
+           Repo_config_legacy.t = {
+           repo_name : OpamRepositoryName.t;
+           repo_root : OpamFilename.Dir.t;
+           repo_url : OpamUrl.t;
+           repo_priority : int;
+         }
+       is not included in
+         type t = { repo_url : OpamUrl.t; repo_priority : int; }
+       1. An extra field, repo_name, is provided in the first declaration.
+       2. An extra field, repo_root, is provided in the first declaration.
+       File "src/format/opamFile.mli", lines 854-857, characters 2-3:
+         Expected declaration
+       File "src/format/opamFile.ml", lines 2174-2179, characters 2-3:
+         Actual declaration
+```
+This is similar to the previous problematic one.
+It turns out that the same pattern as with the type `t` in modules `OPAM` and `OPAMSyntax` is used.
+This time it is the module `Repo_config_legacySyntax` that is included in `Repo_config_legacy`.
+Both fields `repo_name` and `repo_root` are used in `src/format/opamFile.ml` in the definition of the value `Repo_config_legacySyntax.fields`.
+We can move on with the same conclusion that the following reports are false positives and undo their cleaning:
+```
+/tmp/proj/opam/src/format/opamFile.mli:1019: Repo_config_legacy.t.repo_name
+/tmp/proj/opam/src/format/opamFile.mli:1020: Repo_config_legacy.t.repo_root
+```
+
+Once again, if we re-build we see a similar error appear:
+```
+File "src/format/opamFile.ml", line 1:
+Error: The implementation src/format/opamFile.ml
+       does not match the interface src/format/opamFile.mli:  ...
+       In module Switch_config:
+       Type declarations do not match:
+         type t =
+           Switch_config.t = {
+           opam_version : OpamVersion.t;
+           synopsis : string;
+           repos : OpamRepositoryName.t list option;
+           paths : (OpamTypes.std_path * string) list;
+           variables : (OpamVariable.t * OpamVariable.variable_contents) list;
+           opam_root : OpamFilename.Dir.t option;
+           wrappers : Wrappers.t;
+           env :
+             (OpamTypes.spf_resolved, OpamTypes.euok_writeable)
+             OpamTypes.env_update list;
+           invariant : OpamFormula.t option;
+           depext_bypass : OpamSysPkg.Set.t;
+         }
+       is not included in
+         type t = {
+           opam_version : OpamVersion.t;
+           synopsis : string;
+           repos : OpamRepositoryName.t list option;
+           variables : (OpamVariable.t * OpamVariable.variable_contents) list;
+           opam_root : OpamFilename.Dir.t option;
+           wrappers : Wrappers.t;
+           env :
+             (OpamTypes.spf_resolved, OpamTypes.euok_writeable)
+             OpamTypes.env_update list;
+           invariant : OpamFormula.t option;
+           depext_bypass : OpamSysPkg.Set.t;
+         }
+       An extra field, paths, is provided in the first declaration.
+       File "src/format/opamFile.mli", lines 870-880, characters 2-3:
+         Expected declaration
+       File "src/format/opamFile.ml", lines 1990-2001, characters 2-3:
+         Actual declaration
+```
+And, once again, we are facing the same pattern. This time with module `Switch_configSyntax` included in `Switch_config`.
+The field `paths` is actually used in `src/format/opamFile.ml` in the definition of the value `Switch_configSyntax.sections`.
+Once again, we can conclude that the following report is a false positive and undo its cleaning:
+```
+/tmp/proj/opam/src/format/opamFile.mli:1038: Switch_config.t.paths
+```
+
+Now that we are done with the false positives in `src/format/opamFile.ml`, all the remaining errors seem safe:
+```
+$ dune build @check
+File "src/state/opamSwitchState.ml", line 1042, characters 2-10:
+1042 |   u_action = user_action;
+         ^^^^^^^^
+Error: Unbound record field u_action
+File "src/client/opamAdminCheck.ml", line 38, characters 4-12:
+38 |     u_action = Query;
+         ^^^^^^^^
+Error: Unbound record field u_action
+```
+We can proceed and follow the compiler's guidance to continue our cleanup.
+```
+$ dune build @check
+File "src/state/opamSwitchState.ml", line 959, characters 4-15:
+959 |     user_action =
+          ^^^^^^^^^^^
+Error (warning 27 [unused-var-strict]): unused variable user_action.
+```
+This error points to an unused parameter. Removing it would trigger a warning (as error) that is more problematic :
+```
+File "src/state/opamSwitchState.ml", line 957, characters 5-14:
+957 |     ?reinstall
+           ^^^^^^^^^
+Error (warning 16 [unerasable-optional-argument]): this optional argument cannot be erased.
+```
+In order to keep this exploration simple enough, I will silence it by prefixing the parameter's name with an underscore: `_user_action`.
+<div class="alert-note">
+
+> **NOTE**:\
+> In practice, fixing such situation can lead to a replacement of the parameter with unit and updating all the callers accordingly,
+> or more heavy-handed refactors.
+</div>
+
+All the errors can be fixed without hitting limitations of the analyzer anymore.
+In the end, only the reports in `src/format/opamTypes` (31.25%) were true positives in the `src/format` directory.
