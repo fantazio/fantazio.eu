@@ -8,8 +8,9 @@ let templates = Path.(assets / "templates")
 let content = Path.rel [ "content" ]
 let pages = Path.(content / "pages")
 let articles = Path.(content / "articles")
+let reports = Path.(content / "reports")
 
-type document_kind = Page | Article
+type document_kind = Page | Article | Report
 
 let track_binary =
   Sys.executable_name |> Yocaml.Path.from_string |> Pipeline.track_file
@@ -19,18 +20,35 @@ let with_ext exts file =
 
 let is_markdown file = with_ext [ "md"; "markdown"; "mdown" ] file
 
+let is_index file =
+  match Path.remove_extension file |> Path.basename with
+  | Some "index" -> true
+  | _ -> false
+
 let build_paths dir filenames =
   List.map (fun filename -> Path.(dir / filename)) filenames
 
+let relocate document_kind ~into source =
+  match document_kind with
+  | Page -> Path.move ~into source
+  | Article -> Path.trim ~prefix:articles source |> Path.relocate ~into
+  | Report -> Path.trim ~prefix:reports source |> Path.relocate ~into
+
 let www_target document_kind source =
   let into =
-    match document_kind with Page -> www | Article -> Path.(www / "articles")
+    match document_kind with
+    | Page -> www
+    | Article -> Path.(www / "articles")
+    | Report -> Path.(www / "reports")
   in
-  source |> Path.move ~into |> Path.change_extension "html"
+  source |> relocate document_kind ~into |> Path.change_extension "html"
 
 let get_templates document_kind =
   let specific_template =
-    match document_kind with Page -> "page.html" | Article -> "article.html"
+    match document_kind with
+    | Page -> "page.html"
+    | Article -> "article.html"
+    | Report -> "article.html"
   in
   build_paths templates [ specific_template; "layout.html" ]
 
@@ -42,10 +60,7 @@ end
 let document_archetype : document_kind -> (module ARCHETYPE) = function
   | Page -> (module Archetype.Page)
   | Article -> (module Archetype.Article)
-
-let compute_link source =
-  let into = Path.abs [ "articles" ] in
-  source |> Path.move ~into |> Path.change_extension "html"
+  | Report -> (module Archetype.Article)
 
 let create_document document_kind source =
   let www_target = www_target document_kind source in
@@ -66,15 +81,38 @@ let create_document document_kind source =
 
 let create_page source = create_document Page source
 let create_article source = create_document Article source
+let create_report source = create_document Report source
 
 let create_documents document_kind =
-  let paths = match document_kind with Page -> pages | Article -> articles in
-  Batch.iter_files ~where:is_markdown paths (create_document document_kind)
+  let paths =
+    match document_kind with
+    | Page -> pages
+    | Article -> articles
+    | Report -> reports
+  in
+  let is_file = ref false in
+  let where = function
+    | `Directory ->
+        is_file := false;
+        fun _ -> true
+    | `File ->
+        is_file := true;
+        is_markdown
+  in
+  let action path =
+    if !is_file then create_document document_kind path else Eff.return
+  in
+  Batch.iter_tree ~where paths action
 
 let create_pages = create_documents Page
 let create_articles = create_documents Article
+let create_reports = create_documents Report
 
 let fetch_articles =
+  let compute_link source =
+    let into = Path.abs [ "articles" ] in
+    source |> relocate Article ~into |> Path.change_extension "html"
+  in
   Archetype.Articles.fetch ~where:is_markdown ~compute_link
     (module Yocaml_yaml)
     articles
@@ -125,6 +163,7 @@ let program () =
   >>= create_css
   >>= create_pages
   >>= create_articles
+  >>= create_reports
   >>= create_index
   >>= Action.store_cache cache
 
