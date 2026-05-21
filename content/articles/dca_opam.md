@@ -2475,3 +2475,82 @@ In order to keep this exploration simple enough, I will silence it by prefixing 
 
 All the errors can be fixed without hitting limitations of the analyzer anymore.
 In the end, only the reports in `src/format/opamTypes` (31.25%) were true positives in the `src/format` directory.
+
+#### Solver
+
+This section focuses on reports in `/tmp/proj/opam/src/solver`.
+
+All the reports are (14) located in the same file `src/solver/opamCudfSolverSig.ml` and the same type `criteria_def`.
+The reports amount to all the fields of the type, thus, by the same reasoning as before, we will start by making it private.
+
+```
+$ dune build @check
+File "src/solver/opamBuiltinZ3.dummy.ml", lines 23-28, characters 23-1:
+Error: Cannot create values of the private type criteria_def
+File "src/solver/opamBuiltinMccs.real.ml", lines 15-32, characters 23-1:
+Error: Cannot create values of the private type criteria_def
+File "src/solver/opamBuiltin0install.ml", lines 25-31, characters 23-1:
+25 | .......................{
+26 |   crit_default = "-changed,\
+27 |                   -count[avoid-version,solution]";
+28 |   crit_upgrade = "-count[avoid-version,solution]";
+29 |   crit_fixup = "-count[avoid-version,solution]";
+30 |   crit_best_effort_prefix = None;
+31 | }
+Error: Cannot create values of the private type criteria_def
+File "src/solver/opamCudfSolver.ml", lines 15-20, characters 30-1:
+15 | ..............................{
+16 |   crit_default = "-removed,-notuptodate,-changed";
+17 |   crit_upgrade = "-removed,-notuptodate,-changed";
+18 |   crit_fixup = "-changed,-notuptodate";
+19 |   crit_best_effort_prefix = None;
+20 | }
+Error: Cannot create values of the private type criteria_def
+```
+As expected we have errors about the impossibility to write into the fields. Remember, a field is considered used if it is read.
+If none of its fields is ever used, then the values created of type `criteria_def` become useless. We can fix our errors by removing them and their use, guided by the compilation errors.
+
+We can do a couple of cleanup + re-build iterations until we get the following error:
+```
+File "src/solver/opamSolverConfig.ml", line 161, characters 4-22:
+161 |     S.default_criteria
+          ^^^^^^^^^^^^^^^^^^
+Error: Unbound value S.default_criteria
+```
+The referenced code is part of this larger piece of code:
+```
+  let criteria = lazy (
+    let module S = (val Lazy.force config.solver) in
+    S.default_criteria
+  ) in
+  set config
+    ~solver_preferences_default:
+      (lazy (match config.solver_preferences_default with
+           | lazy None -> Some (Lazy.force criteria).OpamCudfSolver.crit_default
+           | lazy some -> some))
+    ~solver_preferences_upgrade:
+      (lazy (match config.solver_preferences_upgrade with
+           | lazy None -> Some (Lazy.force criteria).OpamCudfSolver.crit_upgrade
+           | lazy some -> some))
+    ~solver_preferences_fixup:
+      (lazy (match config.solver_preferences_fixup with
+           | lazy None -> Some (Lazy.force criteria).OpamCudfSolver.crit_fixup
+           | lazy some -> some))
+    ~solver_preferences_best_effort_prefix:
+      (lazy (match config.solver_preferences_best_effort_prefix with
+           | lazy None ->
+             (Lazy.force criteria).OpamCudfSolver.crit_best_effort_prefix
+           | lazy some -> some))
+    ()
+```
+The removed value `S.default_criteria` is stored in `criteria`, and its the fields (`crit_default`, `crit_upgrade`, `crit_fixup`, and `crit_best_effort_prefix`) are visibly read.
+We hit a new limitation of the analyzer and can open an issue.
+We can conclude that the following reports are false positives and undo their cleaning:
+```
+/tmp/proj/opam/src/solver/opamCudfSolverSig.ml:12: criteria_def.crit_default
+/tmp/proj/opam/src/solver/opamCudfSolverSig.ml:13: criteria_def.crit_upgrade
+/tmp/proj/opam/src/solver/opamCudfSolverSig.ml:14: criteria_def.crit_fixup
+/tmp/proj/opam/src/solver/opamCudfSolverSig.ml:15: criteria_def.crit_best_effort_prefix
+```
+
+As a result, all the reports in `src/solver` are false positives.
