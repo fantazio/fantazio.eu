@@ -11,6 +11,11 @@
     --note-color: #43aa8b;
     --tip-color: var(--link-color);
     --warning-color: #8b2635;
+
+    --keyword-color: #5fbfa2;
+    --constant-color: #549bf2;
+    --type-color: var(--tip-color);
+    --comment-color: #656056;
 }
 
 .icon {

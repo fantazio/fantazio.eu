@@ -1,0 +1,24 @@
+[class*="OCaml-keyword"] {
+  color: var(--keyword-color);
+  font-style: italic;
+}
+
+.OCaml-keyword-other {
+  font-style: normal;
+}
+
+.OCaml-support-type {
+  color: var(--type-color);
+  font-style: italic;
+}
+
+[class*="OCaml-constant"],
+.OCaml-string-quoted-double,
+.OCaml-string-quoted-single {
+  color: var(--constant-color);
+}
+
+.OCaml-comment-block {
+  color: var(--comment-color);
+  font-style: italic;
+}
