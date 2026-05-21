@@ -2554,3 +2554,12 @@ We can conclude that the following reports are false positives and undo their cl
 ```
 
 As a result, all the reports in `src/solver` are false positives.
+
+#### State
+
+This section focuses on reports in `/tmp/proj/opam/src/state`.
+
+
+There is only one report in this section for field `switch_state.invalidated` in `src/state/opamStateTypes.mli`.
+As usual, the field can be removed and we will follow the compiler reports to complete the cleanup.
+This time, everything goes smoothly.
