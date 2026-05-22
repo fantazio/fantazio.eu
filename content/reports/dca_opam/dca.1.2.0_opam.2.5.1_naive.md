@@ -2518,7 +2518,7 @@ File "src/solver/opamSolverConfig.ml", line 161, characters 4-22:
 Error: Unbound value S.default_criteria
 ```
 The referenced code is part of this larger piece of code:
-```
+```OCaml
   let criteria = lazy (
     let module S = (val Lazy.force config.solver) in
     S.default_criteria
