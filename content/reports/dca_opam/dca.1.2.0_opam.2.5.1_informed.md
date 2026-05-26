@@ -139,3 +139,71 @@ Regarding the 4 values reported above that comment, a quick history check show t
 The reported values in `src/core/opamVersion` are indeed not used anymore and can be removed.
 
 `OpamVersionCompare.equal` does not seem to have ever been used. Thus, I'll consider it as indeed unused and keep it removed.
+
+#### Format
+
+This section focuses on reports in `/tmp/proj/opam/src/format`.
+
+Investigating the unused `OpamFile.*.with_*` functions, I found a mistake in opam :
+`OpamFile.Wrappers.with_pre_remove` is used in [`src/client/opamConfigCommand.ml`](https://github.com/ocaml/opam/blob/2.5.1/src/client/opamConfigCommand.ml#L665),
+where `OpamFile.Wrappers.with_wrap_remove` is expected. Thus, it should not be removed but used.
+
+The `OpamFile.Config.with_*` and `Opam.InitConfig.with_*` exist to update valeus of the abstract `t`. Keeping them, even if unused, would make sense.
+However, because the 2 APIs already show some inconsistencies, I think it would make sense to reduce them to what is actually used for easier maintenance. Thus, I'll consider them actually unused and they can be kept remoived.
+
+Although I found a use of `OpamFile.Descr.full` in [an external package](with_jobs), its last update was 8 years ago. Thus, I'll consider the reported values in `OpamFile.Descr` as unused and keep them removed.
+
+By the same reasoning as with `OpamFile.Config.with_*`, I'll consider the reported `OpamFile.URL.with_*` values as unused and keep them removed.
+
+Some of the reported values in `OpamFile.OPAM` are simple accessors, that existed for a long time and were sensical when `OpamFile.OPAM.t` was abstract.
+Now that the type is private, the fields can be accessed directly and the getters do not provide any additional value.
+The same argument as before can be applied to the setters (`with_*` values).
+However, multiple reported values are used by external packages:
+- `extended` in [`opam-monorepo`](https://github.com/tarides/opam-monorepo/blob/main/lib/opam.ml#L313)
+- `homepage`, `author`, `license`, and more in [dune-release](https://github.com/tarides/dune-release/blob/main/lib/opam.ml#L181)
+
+Thus, it will be safer to consider the values in `OpamFile.OPAM` as used and not remove them.
+
+`OpamFile.Environment` does not seem to be used outside of opam and its reported values' history show that they are indeed unused. I'll keep them removed.
+
+`src/format/opamFile.mli` contains the following comment on its `Comp` module:
+```
+(** Compiler version [$opam/compilers/]. Deprecated, only used to upgrade old
+```
+Thus, I'll consider its values are indeed unused and can be kept removed.
+
+By the same reasoning as with `OpamFile.Config.with_*`, I'll consider the reported `OpamFile.Dot_install.with_*` values as unused and keep them removed.
+This corresponds to all the `with_*` setters. Because `OpamFile.Dot_install.t` is abstract, this means that those fields are never updated externally.
+Additionally, the module is never used outside of opam, so I'll also consider that the reported `Dot_install.variablesè can be kept removed.
+
+I have not found any use of `OpamFile.Repo.browse` outside of opam but found one of `OpamFile.Repo.upstream` in [Opam2Web](https://github.com/ocaml-opam/opam2web/blob/master/src/o2wPackage.ml#L472).
+Thus, I'll consider the first one is indeed unused and can be kept removed, but the second one should ne be removed.
+Regarding the reported `OpamFile.Repo.with_*` values, by the same reasoning as with `OpamFile.Config.with_*`, I'll consider them as unused and keep them removed.
+
+I did not find any external use of the values reported in `OpamFile.Syntax`. I have not found any historical use outside their compilation units as well.
+Thus, I'll consider they are indeed unused and can be kept removed.
+
+Among all the values reported in `src/format/opamFilter.mli`, I could only find the use of one: `OpamFilter.eval` in [opam-0install](https://github.com/ocaml-opam/opam-0install-solver/blob/master/lib/dir_context.ml#L104).
+Thus, I'll consider this values should not be removed while all the other are indeed unused and can be kept removed.
+
+There is a comment in [`src/format/opamFormat.mli` at line 287](https://github.com/ocaml/opam/blob/2.5.1/src/format/opamFormat.mli#L287)
+indicating a wor in progress:
+```OCaml
+  (** Signature handling (wip) *)
+```
+Thus, I'll consider everything related to this comment should not be removed.
+
+I did not find any use outside of opam of the other values reported in `src/format/opamFormat.mli`.
+Thus, I'll consider they are indeed unused and keep them removed.
+
+Among the values reported in `src/format/opamFormula.mli`, `iter` is actually used by `admin-scripts/depopts_to_conflicts.ml`.
+This was missed by the analyzer because the files in `admin-scripts` are not part of the build.
+The other values do not appear used outside of opam. Thus, I'll consider the first one as actually being used and the other as indeed unused.
+
+I have not found any external use of the values reported in `src/format/opamPath.mli`. Thus, I'll consider they are indeed unused and can be kept removed.
+
+I have not found any external use of the value reported in `src/format/opamPp.mli`. Thus, I'll consider it is indeed unused and can be kept removed.
+
+I have not found any external use of the values reported in `src/format/opamSysPkg.mli`. Thus, I'll consider they are indeed unused and can be kept removed.
+
+I have not found any external use of the values reported in `src/format/opamTypesBase.mli`. Thus, I'll consider they are indeed unused and can be kept removed.
