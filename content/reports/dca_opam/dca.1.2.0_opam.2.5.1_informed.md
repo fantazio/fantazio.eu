@@ -222,3 +222,13 @@ I did not find any use outside of opam. Thus, I'll consider they are indeed unus
 
 The values reported in `src/repository/opamRepositoryPath.mli` were historically used but not anymore.
 I did not find any use outside of opam. Thus, I'll consider they are indeed unused and can be kept removed.
+
+#### Solver
+
+This section focuses on reports in `/tmp/proj/opam/src/solver`.
+
+I have found only one use of `OpamCudf` outside of opam and it does not concern any of its reported values.
+Thus, I'll consider they are indeed unused and can be kept removed.
+
+I have not found any external use of the values reported in `src/solver/opamSolver.mli`.
+Thus, I'll consider they are indeed unused and can be kept removed.
