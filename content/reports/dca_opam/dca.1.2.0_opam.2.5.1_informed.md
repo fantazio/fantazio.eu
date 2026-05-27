@@ -266,3 +266,11 @@ Thus, I'll consider it is indeed unused and can be kept removed.
 
 I have not found any use of `OpamUpdate` outside of opam.
 Thus, I'll consider its reported value is indeed unused and can be kept removed.
+
+#### Tools
+
+This section focuses on reports in `/tmp/proj/opam/src/tools`.
+
+`Opam_admin_top` is actaully used in `admin-scripts`.
+This was missed by the analyzer because the files in `admin-scripts` are not part of the build.
+Thus, I'll consider its values are used and should not be removed
