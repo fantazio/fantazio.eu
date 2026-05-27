@@ -207,3 +207,18 @@ I have not found any external use of the value reported in `src/format/opamPp.ml
 I have not found any external use of the values reported in `src/format/opamSysPkg.mli`. Thus, I'll consider they are indeed unused and can be kept removed.
 
 I have not found any external use of the values reported in `src/format/opamTypesBase.mli`. Thus, I'll consider they are indeed unused and can be kept removed.
+
+#### Repository
+
+This section focuses on reports in `/tmp/proj/opam/src/repository`.
+
+The value `find_backend` reported in `src/repository/opamRepository.mli` seems to be replaced by `find_backend_by_kind`.
+I cannot find any external use of it and all its historical uses have been removed. Thus, I'll consider it is indeed unused and can be kept removed.
+
+I have not found any external use of the values reported in `src/repository/opamRepositoryBackend.mli`. Thus, I'll consider they are indeed unused and can be kept removed.
+
+The values `E.fetch` and `E.curl` reported in `src/repository/opamRepositoryConfig.mli` are replaced by their eager equivalent `E.fetch_t` and `E.curl_t`.
+I did not find any use outside of opam. Thus, I'll consider they are indeed unused and can be kept removed.
+
+The values reported in `src/repository/opamRepositoryPath.mli` were historically used but not anymore.
+I did not find any use outside of opam. Thus, I'll consider they are indeed unused and can be kept removed.
