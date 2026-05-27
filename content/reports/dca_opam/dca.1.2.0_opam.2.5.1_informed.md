@@ -232,3 +232,37 @@ Thus, I'll consider they are indeed unused and can be kept removed.
 
 I have not found any external use of the values reported in `src/solver/opamSolver.mli`.
 Thus, I'll consider they are indeed unused and can be kept removed.
+
+#### State
+
+This section focuses on reports in `/tmp/proj/opam/src/state`.
+
+I have not found any external use of the values reported in `src/state/opamEnv.mli`.
+Thus, I'll consider they are indeed unused and can be kept removed.
+
+I have not found any external use of `OpamFileTools.lint_string`.
+Thus, I'll consider it is indeed unused and can be kept removed.
+
+I have not found any external use of `OpamFormatUpgrade.latest_version`.
+Thus, I'll consider it is indeed unused and can be kept removed.
+
+I have not found any external use of the values reported in `src/state/opamGlobalState.mli`.
+Thus, I'll consider they are indeed unused and can be kept removed.
+
+I have not found any external use of the values reported in `src/state/opamRepositoryState.mli`.
+Thus, I'll consider they are indeed unused and can be kept removed.
+
+I have not found any use of `OpamScript` outside of opam.
+Thus, I'll consider its reported value is indeed unused and can be kept removed, along with all the code generation cleanup.
+
+I have not found any external use of the values reported in `src/state/opamStateConfig.mli`.
+Thus, I'll consider they are indeed unused and can be kept removed.
+
+I have not found any external use of the values reported in `src/state/opamSwitchState.mli`.
+Thus, I'll consider they are indeed unused and can be kept removed.
+
+I have not found any external use of `OpamSysPoll.os_version`.
+Thus, I'll consider it is indeed unused and can be kept removed.
+
+I have not found any use of `OpamUpdate` outside of opam.
+Thus, I'll consider its reported value is indeed unused and can be kept removed.
