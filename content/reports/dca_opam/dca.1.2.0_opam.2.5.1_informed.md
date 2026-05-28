@@ -274,3 +274,16 @@ This section focuses on reports in `/tmp/proj/opam/src/tools`.
 `Opam_admin_top` is actaully used in `admin-scripts`.
 This was missed by the analyzer because the files in `admin-scripts` are not part of the build.
 Thus, I'll consider its values are used and should not be removed
+
+### Unused constructors/record fields
+
+The [report](../assets/reports/dca/opam/dca.out)'s unused constructors/record fields section initial content is 75 lines long after discarding the header, footer, and blank lines.
+
+#### Client
+
+This section focuses on reports in `/tmp/proj/opam/src/client`.
+
+The documentation of `src/client/opamListCommand.mli` indicates that it is intended for the `opam list` subcommand.
+Additionally, there is no use of this module outside opam.
+Thus, I'll consider its reported constructors and fields are indeed unused and can be kept removed
+
