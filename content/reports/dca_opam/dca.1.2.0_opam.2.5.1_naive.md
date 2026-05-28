@@ -472,21 +472,7 @@ Nothing else to report in this section
 > location of the clone on your machine.
 </div>
 
-<div class="alert-warning">
 
-> **WARNING**:\
-> The locations point to files if the `_build/default` directory. This is because `dune` copies and
-> builds the file in that directory. The actual source files are located outside of it.
-</div>
-
-The reports are ordered in lexicographical order and a blank line is inserted in between changes of directory. This allows for an easier focus on each "component" of the codebase.
-
-The analyzer does not track "transitively" dead elements of code (i.e. code only used by dead code).
-Thus all thre reports can be examined independently from each other.
-Cleaning up unused exported values is pretty straightforward: go to the reported location and remove
-that value (along with its associated attributes and comments). Because removing content from a file
-will change the location of subsequent content, I would recommend to start at the bottom of a file
-and go up.
 
 This naive cleaning process could theorically be automatised easily but has not been done for the
 `dead_code_analyzer` yet.
@@ -975,20 +961,6 @@ Error (warning 32 [unused-value-declaration]): unused value signature.
 
 We can once again remove the reported unused values, and the compilation will succeed.
 
-<div class="alert-warning">
-
-> **IMPORTANT**:\
-> Removing unused values reported by the compiler can lead to the discovery of new unused values for
-> both the compiler and the analyzer.
-> Similarly, removing unused values reported by analyzer can lead to the discovery of new unused
-> values for both the compiler and the analyzer.
-> Because neither the compiler nor the analyzer reports "transitively" unused values, multiple runs
-> may be necessary to uncover them all.
->
-> The current report is focused on a single iteration of the analyzer, followed by
-> as-many-as-necessary iterations of the compiler. This whole process could be repeated multiple
-> times until neither the analyzer nor the compiler reports anything.
-</div>
 
 Going ever further, there is a type and an exception that are unused in `OpamFormat`: `signature` and `Invalid_signature`.
 They can be removed both from the `.mli` and the `.ml` without breaking the compilation.
@@ -1358,52 +1330,6 @@ Finally, we must update the rule to generate `src/tools/opam_admin_topstart.ml` 
 +(rule (with-stdout-to opam_admin_topstart.ml (echo "let _ = Topmain.main ()")))
 ```
 
-#### Tests
-
-This section focuses on reports in `/tmp/proj/opam/tests`.
-
-We don't want to remove them for now but actaully to ignore them in the analyzer's report.
-To do this, we can update our `dead_code_analyzer` command to:
-```
-$ dead_code_analyzer --exclude _build/default/tests --references _build/default/tests --verbose _build 2> dca.err > dca.out
-```
-2 new options are used:
-- `--exclude <path>` skips the `.cmt` and `.cmti` files found in `<path>`
-- `--references <path>` adds the `.cmt` and `.cmti` files found in `<path>` to account uses found in them.
-
-Alternatively, because we want to focus on values exported in `src` while accounting for uses in the whole codebase, we can use the following simpler command:
-```
-$ dead_code_analyzer --references _build --verbose _build/default/src 2> dca.err > dca.out
-```
-This command gather uses from the whole codebase (`_build`) but only tracks elements of code declared in `_build/default/src`.
-
-### Unused methods
-
-The [report](../assets/reports/dca/opam/dca.out)'s unused methods section is empty.
-```
-.> UNUSED METHODS:
-=================
-
-Nothing else to report in this section
---------------------------------------------------------------------------------
-```
-
-By grepping the codebase, we can quickly verify that there is no use of objects or classes, confirming that there cannot be any unused method:
-```
-$ pwd
-/tmp/proj/opam
-
-$ grep -rnw -e object -e class src
-src/state/opamSwitchState.mli:179:    backward conflict definition or common conflict-class. Packages in [subset]
-src/core/opamStubs.mli:92:    and a font object, which will have been selected into the DC.
-src/core/opamStubs.mli:97:(** Windows only. Given [(dc, font)], deletes the font object and releases the
-src/core/opamStubs.mli:141:(** Windows only. Returns the name of the class for the Console window or [None]
-src/core/cmdliner/cmdliner_base.ml:11:  (* Thread-safe UIDs, Oo.id (object end) was used before.
-src/client/opamListCommand.ml:821:    Field "conflict-class";
-src/client/opamArg.ml:1615:       list, from the other package, or by a common $(b,conflict-class:) \
-src/format/opamFile.ml:2994:      "conflict-class", no_cleanup Pp.ppacc with_conflict_class conflict_class
-```
-
 ### Unused constructors/record fields
 
 The [report](../assets/reports/dca/opam/dca.out)'s unused constructors/record fields section initial content is 75 lines long after discarding the header, footer, and blank lines.
@@ -1500,15 +1426,6 @@ Nothing else to report in this section
 --------------------------------------------------------------------------------
 ```
 </details>
-
-The observation made for the unused values remain valid here.
-A small difference exists in the naive cleanup technique: removing a field or a constructor will most likely trigger compilation errors.
-This is for 2 reasons:
-1. the types described in the signature and the structure must be equal;
-2. a field is considered unused if it is never read (but it must be written when creating a value),
-and a constructor is considered unused if it is never constructed (but it may be destructed e.g. in pattern matching).
-
-Therefore, cleaning up an unused field or constructor requires compiling the code to fix all the places impacted by the removal of the unused element.
 
 Because we already removed some code during the cleanup of unused exported values, the lines of the reports are not exact anymore.
 For the sake of this example, we will pretend that they are. One can run the analyzer on unused fields and constructors specifically by running the `dead_code_analyzer` command with the `--nothing -T all` arguments.
@@ -1644,18 +1561,6 @@ However, unlike with unused exported values, we will try to minimize the amount 
 Thus, we will not focus on this file specifically but clean up all the reports in the directory at once, hoping to get multiple compiler errors reported at once.
 
 Some of the reports accumulate to a whole type definition (e.g. `Either.t.Left` and `Either.t.Right` in `src/core/opamCompat.mli`), so we will mark the type as `private` in this case.
-
-<div class="alert-tip">
-
-> **TIP**:\
-> Instead of make the types private, we can try and make them abstract or go even further and remove them from the signature.
-> I would recommend doing these more aggressive changes in further steps after doing an initial cleanup using private types.
-> - Making types abstract means that you completely lose the ability to match on the constructors.
->   This should not be an issue with records because reading a field is considered as a use, if no field is read then they do not need to be exposed at all.
-> - Removing a type from the signature too early may lead to having to un-remove them in case they are actually used (e.g. in a value's signature), and a more cumbersome clean up experience.
->
-> Iteratively making types private, then abstract, then removing them from the signature is the smoothest path for an efficient cleanup in my experience.
-</div>
 
 Let's see what our `dune` command says after removing the reported fields and constructors:
 ```

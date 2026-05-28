@@ -10,27 +10,6 @@ It is funded by the [OCaml Software Fundation](https://ocaml-sf.org/).
 
 This is a follow up on the naive cleanup. We will re-examine the results with a more context-aware eye.
 
-The naive cleanup removed all that it could among the reports. This time, we will try and evaluate which removals seem legitimate and which not.
-There can be multiple reasons for some code to be reported as unused by the `dead_code`analyzer` although it should not be blindly removed from the codebase:
-1.  The most obvious and common reason will be that the reported element is part of an exposed API.
-    The exported API is probably used outside the project so the element's uses cannot be detected.
-    <div class="alert-tip">
-
-    > **TIP**:\
-    > Using [sherlocode](https://sherlocode.com) may be helpful to verify if a reported API element is used somewhere.
-    > However, it may not be sufficient because it only scans project in `Opam` (I think ?), and unlisted projects may use the element.
-    </div>
-
-2.  The build configuration removed/replaced the uses of the reported element.
-    This may happen e.g. if there is some platform-dependent code selected at build time,
-    or if an environment variable is used to activate certain code paths (e.g. a debug profile).
-
-3. The reported element is part of a work in progress.
-
-The list above is not exhaustive but I believe it must cover most of the cases.
-
-The goal of the exercise presented in this report is to reduce the amount of work required for
-the maintainers to review (and approve) the cleanup done using the analyzer.
 In order to achive that goal, we will reuse the cleanup done with the naive approach, check if it makes sense and undo it when not.
 
 Let's re-explore the `dead_code_analyzer` results on `Opam` in the same order as for the naive cleanup.
