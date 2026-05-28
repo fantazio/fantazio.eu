@@ -300,3 +300,11 @@ If we look deeper, the mentioned stubs can be found in `src/core/opamWindows.c`,
 Although the reported OCaml fields seem to only be written to in those stubs, keeping both types structurally equivalent will be easier to maintain.
 Handling FFI is out of scope for the dead_code_analyzer, although undocumented.
 Thus, I'll consider the reported fields are used and should not be removed.
+
+#### Format
+
+This section focuses on reports in `/tmp/proj/opam/src/format`.
+
+I did not find any external use of `OpamTypes.universe.u_action`.
+I also did not find external use of any of the constructors of `OpamTypes.lock`.
+Thus, I'll consider the field and constructors reported in `src/format/opamTypes.mli` are indeed unused and keep their cleanup.
