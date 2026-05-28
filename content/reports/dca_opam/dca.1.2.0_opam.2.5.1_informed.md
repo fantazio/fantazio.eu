@@ -308,3 +308,11 @@ This section focuses on reports in `/tmp/proj/opam/src/format`.
 I did not find any external use of `OpamTypes.universe.u_action`.
 I also did not find external use of any of the constructors of `OpamTypes.lock`.
 Thus, I'll consider the field and constructors reported in `src/format/opamTypes.mli` are indeed unused and keep their cleanup.
+
+#### State
+
+This section focuses on reports in `/tmp/proj/opam/src/state`.
+
+I did not find any external use of `OpamStateTypes.switch_state.invalidated`.
+According to the project's history, this field existed for a single purpose and made obsolete during a refactor.
+Thus, I'll consider it is indeed unused and can be kept removed.
