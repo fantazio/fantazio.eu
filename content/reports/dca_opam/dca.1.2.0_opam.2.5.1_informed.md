@@ -287,3 +287,16 @@ The documentation of `src/client/opamListCommand.mli` indicates that it is inten
 Additionally, there is no use of this module outside opam.
 Thus, I'll consider its reported constructors and fields are indeed unused and can be kept removed
 
+#### Core
+
+This section focuses on reports in `/tmp/proj/opam/src/core`.
+
+I have not found any external use of `OpamProcess.t.p_info`. It is, however, more complicated to verify
+if a type component is used than a value component. The Serlocode search requires looking for places where the module is used, and then for the use of the component near those places.
+Thus, I'll consider the reported field is indeed unused and can be kept removed
+
+The documentation of `src/core/opamStubsTypes.ml` indicates that it exposes types for C stubs.
+If we look deeper, the mentioned stubs can be found in `src/core/opamWindows.c`, and the exported OCaml types are based on their C equivalents.
+Although the reported OCaml fields seem to only be written to in those stubs, keeping both types structurally equivalent will be easier to maintain.
+Handling FFI is out of scope for the dead_code_analyzer, although undocumented.
+Thus, I'll consider the reported fields are used and should not be removed.
