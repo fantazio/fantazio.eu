@@ -15,6 +15,13 @@ tags: [dead_code_analyzer, opam, ocaml, static analysis, dead code, ocaml softwa
     - [Cleaning up unused exported values](#cleaning-up-unused-exported-values)
     - [Cleaning up unused constructors and fields](#cleaning-up-unused-constructors-and-fields)
     - [Informed cleanup](#informed-cleanup)
+- [Cleanup](#cleanup)
+    - [src/client](#srcclient)
+    - [src/core](#srccore)
+    - [src/format](#srcformat)
+    - [src/solver](#srcsolver)
+    - [src/state](#srcstate)
+    - [src/tools](#srctools)
 
 ## Foreword
 
@@ -385,4 +392,34 @@ finding (in no particular order):
 > However, it may not be sufficient because it only scans opam packages (I think?),
 > and may be slightly outdated. Consequently, unlisted projects or newer
 > versions may use the finding.
+</div>
+
+## Cleanup
+
+For each component, we will first give a quick description of the findings,
+then we will describe the aggressive cleanup phase, followed by the informed
+cleanup. Finally, we will conclude on the results of the cleanups.
+
+To avoid redundancy, the first phase will be focused on the actual cleanup
+actions, while the second will discuss contextualization and indicate which
+findings are actually considered for cleanup and which are ignored.
+
+Here are the different components that we will explore:
+- [src/client](#srcclient)
+- [src/core](#srccore)
+- [src/format](#srcformat)
+- [src/solver](#srcsolver)
+- [src/state](#srcstate)
+- [src/tools](#srctools)
+
+<div class="alert-tip">
+
+> **Tip**:\
+> During the agressive cleanup, some compiler warnings will be reported as errors.
+> More sepecifically, we will encounter warnings 16, 27, 32, 33, 34, 37, and 60.\
+> The obtain a list and short description of available compiler warnings, use
+> `ocamlopt -warn-help`.
+>
+> The warnings appear as errors because of dune's default configuration.
+> They can be kept as warnings by using the `--profile=release` flag.
 </div>

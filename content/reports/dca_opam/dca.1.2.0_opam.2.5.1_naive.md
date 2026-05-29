@@ -526,14 +526,6 @@ File "src/client/opamSolution.ml", line 117, characters 4-7:
 Error (warning 32 [unused-value-declaration]): unused value sum.
 ```
 
-As we can see un-exporting some values triggered compiler warnings (as errors), indicating that those values are not used internally either.
-They can be removed, just like the reports from the analyzer.
-
-<div class="alert-tip">
-
-> **TIP**:\
-> The warnings appear as errors because of dune's default configuration.
-> They can be kept as warnings by using the `--profile=release` flag.
 
 #### Core
 
