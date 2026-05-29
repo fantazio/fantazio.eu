@@ -268,7 +268,7 @@ Thus, all the findings can be examined independently from each other.
 
 Because there are 2 goals to this audit, I processed the analyzer's reports in
 2 phases:
-1.  An agressive cleanup, which assumes all the findings can be removed from the
+1.  An aggressive cleanup, which assumes all the findings can be removed from the
     codebase. The goal is to verify that none of them is a false positive.
     Otherwise, identify the cause and document it if necessary.
 2.  An informed cleanup, which relies on contextual information to ensure that
@@ -415,7 +415,7 @@ Here are the different components that we will explore:
 <div class="alert-tip">
 
 > **Tip**:\
-> During the agressive cleanup, some compiler warnings will be reported as errors.
+> During the aggressive cleanup, some compiler warnings will be reported as errors.
 > More sepecifically, we will encounter warnings 16, 27, 32, 33, 34, 37, and 60.\
 > The obtain a list and short description of available compiler warnings, use
 > `ocamlopt -warn-help`.
@@ -423,3 +423,345 @@ Here are the different components that we will explore:
 > The warnings appear as errors because of dune's default configuration.
 > They can be kept as warnings by using the `--profile=release` flag.
 </div>
+
+<div class="alert-note">
+
+> **Note**:\
+> The warning 70 below, triggered when building, will be ignored for the
+> remaining of this report:
+>   ```bash
+>   $ dune build @check
+>   File "src/tools/opam_admin_topstart.ml", line 1:
+>   Warning 70 [missing-mli]: Cannot find interface file.
+>   ```
+</div>
+
+### src/client
+
+#### Description
+
+This component is distributed as the package
+[`opam-client`](https://ocaml.org/p/opam-client/2.5.1), and has
+[7 reverse package dependencies](https://ocaml.org/p/opam-client/2.5.1#used-by).\
+It is described in
+[opam/CONTRIBUTING.md#layout](https://github.com/ocaml/opam/blob/2.5.1/CONTRIBUTING.md#layout)
+as:
+<div class="alert-cite">
+
+> where the entry point for the opam binary and all the code handling all the opam subcommands is.
+</div>
+
+
+There are 34 unused reported values, 1 unused field and 1 unused constructor
+reported by the `dead_code_analyzer`for this component.
+
+#### Aggressive cleanup
+
+##### Unused exported values
+
+Applying steps 1 and 2 of the cleanup methodology for
+[unused exported values](#cleaning-up-unused-exported-values) is trivial.\
+Applying step 3 triggered 10 warnings 32 (reported as errors).
+<details><summary>build output</summary>
+
+```bash
+$ dune build @check
+File "src/client/opamClientConfig.ml", line 207, characters 4-16:
+207 | let search_files = ["findlib"]
+          ^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value search_files.
+File "src/client/opamListCommand.ml", line 32, characters 4-30:
+32 | let default_dependency_toggles = {
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value default_dependency_toggles.
+File "src/client/opamArg.ml", line 1208, characters 4-13:
+1208 | let name_list =
+           ^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value name_list.
+
+File "src/client/opamArg.ml", line 1211, characters 4-13:
+1211 | let atom_list =
+           ^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value atom_list.
+
+File "src/client/opamArg.ml", line 1233, characters 4-22:
+1233 | let nonempty_atom_list =
+           ^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value nonempty_atom_list.
+
+File "src/client/opamArg.ml", line 1239, characters 4-14:
+1239 | let param_list =
+           ^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value param_list.
+File "src/client/opamConfigCommand.ml", line 526, characters 4-15:
+526 | let parse_whole fv =
+          ^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value parse_whole.
+File "src/client/opamSolution.ml", line 117, characters 4-7:
+117 | let sum stats =
+          ^^^
+Error (warning 32 [unused-value-declaration]): unused value sum.
+```
+</details>
+
+Fixing a warning 32 is the same as cleaning up a an unused value:
+1. go to the reported location,
+2. remove the value (along with its associated attributes and comments)
+
+After cleaning up the warnings 32, the build works without error.
+We are done with the unused exported values.
+
+##### Unused constructors and fields
+
+Applying steps 1 and 2 of the general cleanup methodology for
+[unused constructors and fields](#cleaning-up-unused-constructors-and-fields)
+is trivial.\
+Applying the steps 3 and 4 leads to:
+-  2 build and fix iterations to finish the cleanup of the field `pattern_selector.ext_fields`.
+    <details><summary>build output</summary>
+
+    ```bash
+    $ dune build @check
+    File "src/client/opamListCommand.ml", line 1:
+    Error: The implementation src/client/opamListCommand.ml
+           does not match the interface src/client/opamListCommand.mli:
+           Type declarations do not match:
+             type pattern_selector = {
+               case_sensitive : bool;
+               exact : bool;
+               glob : bool;
+               fields : string list;
+               ext_fields : bool;
+             }
+           is not included in
+             type pattern_selector = {
+               case_sensitive : bool;
+               exact : bool;
+               glob : bool;
+               fields : string list;
+             }
+           An extra field, ext_fields, is provided in the first declaration.
+           File "src/client/opamListCommand.mli", lines 31-36, characters 0-1:
+             Expected declaration
+           File "src/client/opamListCommand.ml", lines 32-38, characters 0-1:
+             Actual declaration
+
+    $ dune build @check
+    File "src/client/opamListCommand.ml", line 44, characters 2-12:
+    44 |   ext_fields = false;
+           ^^^^^^^^^^
+    Error: Unbound record field ext_fields
+    ```
+    </details>
+
+- 4 build and fix iterations for the cleanup of the constructor `selector.Atoms`.
+    <details><summary>build output</summary>
+
+    ```bash
+    $ dune build @check
+    File "src/client/opamListCommand.ml", line 1:
+    Error: The implementation src/client/opamListCommand.ml
+           does not match the interface src/client/opamListCommand.mli:
+           Type declarations do not match:
+             type selector =
+                 Any
+               | Installed
+               | Root
+               | Compiler
+               | Available
+               | Installable
+               | Pinned
+               | Latests_only
+               | Depends_on of dependency_toggles * OpamFormula.atom list
+               | Required_by of dependency_toggles * OpamFormula.atom list
+               | Conflicts_with of OpamPackage.t list
+               | Coinstallable_with of dependency_toggles * OpamPackage.t list
+               | Solution of dependency_toggles * OpamFormula.atom list
+               | Pattern of pattern_selector * string
+               | Atoms of OpamFormula.atom list
+               | Flag of OpamTypes.package_flag
+               | NotFlag of OpamTypes.package_flag
+               | Tag of string
+               | From_repository of OpamRepositoryName.t list
+               | Owns_file of OpamFilename.t
+           is not included in
+             type selector =
+                 Any
+               | Installed
+               | Root
+               | Compiler
+               | Available
+               | Installable
+               | Pinned
+               | Latests_only
+               | Depends_on of dependency_toggles * OpamFormula.atom list
+               | Required_by of dependency_toggles * OpamFormula.atom list
+               | Conflicts_with of OpamPackage.t list
+               | Coinstallable_with of dependency_toggles * OpamPackage.t list
+               | Solution of dependency_toggles * OpamFormula.atom list
+               | Pattern of pattern_selector * string
+               | Flag of OpamTypes.package_flag
+               | NotFlag of OpamTypes.package_flag
+               | Tag of string
+               | From_repository of OpamRepositoryName.t list
+               | Owns_file of OpamFilename.t
+           An extra constructor, Atoms, is provided in the first declaration.
+           File "src/client/opamListCommand.mli", lines 41-60, characters 0-25:
+             Expected declaration
+           File "src/client/opamListCommand.ml", lines 46-66, characters 0-25:
+             Actual declaration
+
+    dune build @check
+    File "src/client/opamListCommand.ml", line 111, characters 4-9:
+    111 |   | Atoms atoms ->
+              ^^^^^
+    Error: This variant pattern is expected to have type selector
+           There is no constructor Atoms within type selector
+
+    $ dune build @check
+    File "src/client/opamListCommand.ml", line 211, characters 4-9:
+    211 |   | Atoms _
+              ^^^^^
+    Error: This variant pattern is expected to have type selector
+           There is no constructor Atoms within type selector
+
+    $ dune build @check
+    File "src/client/opamListCommand.ml", line 321, characters 4-9:
+    321 |   | Atoms atoms ->
+              ^^^^^
+    Error: This variant pattern is expected to have type selector
+           There is no constructor Atoms within type selector
+
+    ```
+
+The errors can be fixed quite easily:
+- for a type mismatch, remove the extra field/constructor;
+- for an unbound record field, remove it from the structure;
+- for an invalid constructor, remove its branch from the pattern matching.
+
+This simple cleanup took 6 builds in total. This is not ideal but easy to follow
+and the builds are fast so it does not incur a big overhead.
+
+We are done with the aggressive cleanup and can move on to the informed cleanup
+
+#### Informed cleanup
+
+This section takes the findings in-order (often at once in a single file) and indicates if their cleanup is
+reasonable or if it should be undone, along with a short explanation.
+
+- `src/client/opamAction.mli:42: prepare_package_build`: <span class="alert-warning">**undo**</span>\
+    I was able to find an external use in
+    [opam2nix](https://github.com/timbertson/opam2nix/blob/v1/src/invoke.ml#L258),
+    thanks to the file's history ([PR #4147](https://github.com/ocaml/opam/pull/4147)).
+
+- `src/client/opamAdminCheck.mli`: <span class="alert-positive">**clean**</span>\
+    The reported values were added in the same
+    [PR #3253](https://github.com/ocaml/opam/pull/3253) and never used outside
+    their compilation units.\
+    I did not find any use of `OpamAdminCheck`.
+
+- `src/client/opamArg.mli`: <span class="alert-positive">**clean**</span>\
+    The documentation of the module below leads me to believe the module is
+    intended for internal use.\
+    Additionally, I did not find any use of the findings outside of opam.\
+    Finally, I tried to follow the history of `OpamArg.name_list` and it appears
+    to have been made redundant by the unexported `OpamCommands.name_list`.
+    ```OCaml
+    (** Command-line argument parsers and helpers *)
+    ```
+
+- `src/client/opamAuxCommands.mli`: <span class="alert-positive">**clean**</span>\
+    Based on its documentation and its naming, I assume this module is not
+    intended for use outside of opam.\
+    Additionally, I did not find any external use of `OpamAuxCommands`.
+
+- `src/client/opamCliMain.mli`: <span class="alert-positive">**clean**</span>\
+    My understanding of the module `OpamCliMain` is that it is meant for use
+    by the binary entry point, not as a library.\
+    I did not find any use outside opam, and only 1 use inside opam in
+    [`src/client/opamMain.ml`](https://github.com/ocaml/opam/blob/2.5.1/src/client/opamMain.ml#L12).
+
+- `src/client/opamClient.mli`: <span class="alert-positive">**clean**</span>\
+    The only user of `OpamClient` outside of opam I found is
+    [opam-build-revdeps](https://github.com/gildor478/opam-build-revdeps),
+    which is archived.\
+    The reported findings' histories show that they have not been used outside
+    their compilation units for many years.
+
+- `src/client/opamClientConfig.mli:93: search_files`: <span class="alert-positive">**clean**</span>\
+    Although `OpamClientConfig` is used outside of opam, I could not find any
+    use of `search_files`.\
+    Additionally, it has not been used inside opam for a decade.
+
+- `src/client/opamConfigCommand.mli`: <span class="alert-positive">**clean**</span>\
+    The documentation of the module below leads me to believe the module is
+    intended for internal use.\
+    Additionally, I did not find any use of `OpamConfigCommand` outside of opam.
+    ```OCaml
+    (** Functions handling the `opam config` subcommand and configuration actions *)
+    ```
+
+- `src/client/opamInitDefaults.mli`: <span class="alert-positive">**clean**</span>\
+    The documentation of the module below leads me to believe the module is
+    intended for internal use.\
+    Additionally, I only found 1 use of `OpamInitDefaults` outside of opam, in
+    [opam-bundle](https://github.com/AltGr/opam-bundle/blob/master/src/opamBundleMain.ml#L875),
+    and it does not concern the findings.
+    ```OCaml
+    (** This module defines a few defaults, used at 'opam init', that bind opam to
+        its default OCaml repository at https://opam.ocaml.org. All can be overridden
+        through the init command flags or an init config file. *)
+    ```
+
+- `src/client/opamListCommand.mli:31: default_dependency_toggles`: <span class="alert-warning">**undo**</span>\
+    I found a use in [opam-bundle](https://github.com/AltGr/opam-bundle/blob/master/src/opamBundleMain.ml#L175).
+
+- `src/client/opamListCommand.mli:38: pattern_selector.ext_fields`:  <span class="alert-positive">**clean**</span>\
+  `src/client/opamListCommand.mli:59: selector.Atoms`:  <span class="alert-positive">**clean**</span>\
+    The documentation of the module below leads me to believe the module is
+    intended for internal use (although there is an external use documented above).\
+    Additionally, I did not find any external use of these findings.
+    ```OCaml
+    (** Functions handling the "opam list" subcommand *)
+    ```
+
+- `src/client/opamRepositoryCommand.mli`: <span class="alert-positive">**clean**</span>\
+    The documentation of the module below leads me to believe the module is
+    intended for internal use.\
+    Additionally, I only found 1 use of `OpamRepositoryCommand` outside of opam,
+    in [opam-bundle](https://github.com/AltGr/opam-bundle/blob/master/src/opamBundleMain.ml#L191),
+    and it does not concern the finding.
+    ```OCaml
+    (** Functions handling the "opam repository" subcommand *)
+    ```
+
+- `src/client/opamSolution.mli:102: eq_atom`: <span class="alert-positive">**clean**</span>\
+    When exploring the finding's history, I was under the impression that its
+    package specific version `OpamSolution.eq_atom_of_package` was meant to
+    replace it.\
+    Additionally, I did not find any use of this value outside of opam, but I
+    found a use of `eq_atom_of_package` in [opam-bundle](https://github.com/AltGr/opam-bundle/blob/master/src/opamBundleMain.ml#L34).
+
+- `src/client/opamSolution.mli:136: sum`: <span class="alert-positive">**clean**</span>\
+    I did not find any use outside of opam.\
+    According to its history, it exists almost since the origins of opam in
+    [2012](https://github.com/ocaml/opam/commit/dd0c0ca284aeb520394acb91d15e01f919ed8b7e).
+    I assume it was moved around and forgotten since then.
+
+#### Results
+
+The analyzer reported 36 findings in this component:
+34 unused reported values, 1 unused field and 1 unused constructor.\
+The aggressive cleanup was able did not reveal any false positive or limitation.\
+The informed cleanup indicates that only 2 findings shold not be removed.
+They are exported values used outside of opam.
+
+From these results, we can compute the precision of the analyzer shown in the
+table below. The estimated precision for the informed cleanup can be
+extrapolated as the potential fix rate.
+
+| section                 | aggressive | informed |
+|:-----------------------:|:----------:|:--------:|
+| exported values         | 100%       | 94.1%    |
+| constructors and fields | 100%       | 100%     |
+| total                   | 100%       | 94.4%    |
