@@ -64,6 +64,17 @@ header {
   font-weight: bold;
 }
 
+.article_title {
+  display: grid;
+  justify-content: center;
+  margin: 0;
+
+  &> time {
+    display: flex;
+    justify-content: end;
+  }
+}
+
 h1 {
   text-align: center;
   font-size: 2.5em;
