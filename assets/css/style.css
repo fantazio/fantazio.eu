@@ -1,16 +1,20 @@
 /* Style.css */
 :root {
     --width-screen: min(100rem, 100%);
+
     --main-foreground-color: #fef9ef;
     --main-background-color: #1b1b3a;
     --code-background-color: #0d0d1b;
     --quote-background-color: var(--main-background-color);
+
     --ocaml-color: #f08106;
     --link-color: #f0c505;
     --visited-link-color: var(--ocaml-color);
+
     --note-color: #43aa8b;
     --tip-color: var(--link-color);
-    --warning-color: #8b2635;
+    --danger-color: #dc1836;
+    --danger-background-color: #b8142d;
 
     --keyword-color: #5fbfa2;
     --constant-color: #549bf2;
@@ -105,18 +109,52 @@ details summary {
   border-color: var(--tip-color);
 }
 
-.alert-warning {
-  --quote-background-color: var(--warning-color);
-  --code-background-color: #401219;
+.alert-caution {
+  border-color: var(--danger-color);
 }
 
-.alert-positive {
+.alert-danger {
+  --quote-background-color: var(--danger-background-color);
+  --code-background-color: #931024;
+}
+
+.alert-safe {
   --quote-background-color: var(--note-color);
+  --code-background-color: #3a9278;
 }
 
-span.alert-warning,
-span.alert-positive {
+span.alert-danger,
+span.alert-safe {
   background-color: var(--quote-background-color);
+}
+
+@property --alert-title {
+  syntax: "*";
+  inherits: true;
+}
+
+div[class*="alert-"] > blockquote > p:first-child::before {
+    display: block;
+    font-weight: bold;
+}
+
+div.alert-note > blockquote > p:first-child::before {
+    color: var(--note-color);
+    content: var(--alert-title, "Note") ":";
+}
+
+div.alert-tip > blockquote > p:first-child::before {
+    color: var(--tip-color);
+    content: var(--alert-title, "Tip") ":";
+}
+
+div.alert-caution > blockquote > p:first-child::before {
+    color: var(--danger-color);
+    content: var(--alert-title, "Caution") ":";
+}
+
+div.alert-danger > blockquote > p:first-child::before {
+    content: var(--alert-title, "Warning") ":";
 }
 
 body {
