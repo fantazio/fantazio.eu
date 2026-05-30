@@ -24,64 +24,6 @@ This section focuses on reports in `/tmp/proj/opam/src/client`.
 
 This component builds into the library [`opam-client`](https://opam.ocaml.org/packages/opam-client/). Thus, we must be very careful when choosing to remove a value.
 
-#### Core
-
-This section focuses on reports in `/tmp/proj/opam/src/core`.
-
-I'll assume all the reports in `src/core/cmdliner` to be valid, because it seems that this component is meant for opam use.
-
-Based on the intent of `OpamCompat`, the value `Lazy.map_val` should not be be removed, although it has never been used according to the project's history.
-
-The reported values in `src/core/opamConsole.mli` were either never used or their uses have been internalized during refactors.
-I'll consider they are indeed unused and can be kept unexported.
-
-The reported values in `src/core/opamCoreConfig.mli` were used externally but their uses have been re-internalized during re-factors.
-I'll consider they are indeed unused and can be kept unexported.
-
-The reported values in `src/core/opamDirTrack.mli` were never used outside their compilation units.
-I'll consider they are indeed unused and can be kept unexported.
-
-The reported values in `src/core/opamFilename.mli` were used externally but their uses external uses have been removed or re-internalized during re-factors.
-I'll consider they are indeed unused and can be kept unexported.
-
-The reported values in `src/core/opamHash.mli` were never used externally.Additionally, computing hashes
-seems to be meant to do externally via `OpamHash.compute` (12 occurences) or `OpamHash.compute_from_string` (6 occurences)
-rather than by calling the direct hash function (`OpamHash.md5` and `OpamHash.sha256`: 0 occurence, `OpamHash.sha512`: 1 occurence).
-Thus I'll consider the reported values as unused, keep them updated, and go even further by unexporting `OpamHash.sha512` and replace its use by ``OpamHash.compute ~kind:`SHA512``.
-
-Although `OpamParallel.iter` is not used anymore, it can come in handy and left available for the API consistency.
-Also, I found a use [outside of opam](https://github.com/AltGr/opam-bundle/blob/1fcd2e67d91b9062ca79565d6e95dfd0294cebaf/src/opamBundleMain.ml#L732).
-Thus, I'll un-remove it.
-
-`OpamProcess` seems to be meant for internal use so I'll consider the reported values are indeed unused and can be kept unexported.
-
-The same observation as for `OpamHash` can be made for the reported values in `src/core/opamSHA.mli`. Once again, I'll consider the reported values as unused, keep them removed, and go even further by unexporting `OpamSHA.sha1_string` and replace its use by ``OpamSHA.hash_string `SHA1``.
-
-Based on the intent of `OpamStd`, none of its values should be removed.
-
-According to the comment in `src/core/opamStubs.mli`, most of its functions are windows-specific. I am using Linux, and the compilation of opam is dependent on os-type, as shown in `src/core/dune`:
-```dune
-(rule
-  (enabled_if (<> %{os_type} "Win32"))
-  (action (copy# opamStubs.unix.ml opamStubs.ml)))
-
-(rule
- (enabled_if (= %{os_type} "Win32"))
- (action (copy# opamWin32Stubs.win32.ml opamWin32Stubs.ml)))
-```
-Thus, I'll ignore the reports and its values should not be removed.
-
-In `src/core/opamSystem.mli` there is the following comment line 216:
-```OCaml
-(** OLD COMMAND API, DEPRECATED *)
-```
-Thus, I'll consider everything reported below that line as effectively unused.
-Regarding the 4 values reported above that comment, a quick history check show that they became unused externally through consecutive improvements of opam. I'll consider that these values are indeed unused and that all can be kept removed.
-
-The reported values in `src/core/opamVersion` are indeed not used anymore and can be removed.
-
-`OpamVersionCompare.equal` does not seem to have ever been used. Thus, I'll consider it as indeed unused and keep it removed.
-
 #### Format
 
 This section focuses on reports in `/tmp/proj/opam/src/format`.
@@ -225,15 +167,8 @@ The [report](../assets/reports/dca/opam/dca.out)'s unused constructors/record fi
 
 This section focuses on reports in `/tmp/proj/opam/src/core`.
 
-I have not found any external use of `OpamProcess.t.p_info`. It is, however, more complicated to verify
+It is, however, more complicated to verify
 if a type component is used than a value component. The Serlocode search requires looking for places where the module is used, and then for the use of the component near those places.
-Thus, I'll consider the reported field is indeed unused and can be kept removed
-
-The documentation of `src/core/opamStubsTypes.ml` indicates that it exposes types for C stubs.
-If we look deeper, the mentioned stubs can be found in `src/core/opamWindows.c`, and the exported OCaml types are based on their C equivalents.
-Although the reported OCaml fields seem to only be written to in those stubs, keeping both types structurally equivalent will be easier to maintain.
-Handling FFI is out of scope for the dead_code_analyzer, although undocumented.
-Thus, I'll consider the reported fields are used and should not be removed.
 
 #### Format
 

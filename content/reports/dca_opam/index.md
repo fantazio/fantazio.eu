@@ -406,7 +406,7 @@ Here are the different components that we will explore:
 <div class="alert-tip">
 
 > During the aggressive cleanup, some compiler warnings will be reported as errors.
-> More sepecifically, we will encounter warnings 16, 27, 32, 33, 34, 37, and 60.\
+> More specifically, we will encounter warnings 16, 27, 32, 33, 34, 37, and 60.\
 > The obtain a list and short description of available compiler warnings, use
 > `ocamlopt -warn-help`.
 >
@@ -493,6 +493,7 @@ Error (warning 32 [unused-value-declaration]): unused value sum.
 ```
 </details>
 
+<a id="anchor_warning_fix_methodology"></a>
 Fixing a warning 32 is the same as cleaning up a an unused value:
 1. go to the reported location,
 2. remove the value (along with its associated attributes and comments)
@@ -754,3 +755,909 @@ extrapolated as the potential fix rate.
 | exported values         | 100%       | 94.1%    |
 | constructors and fields | 100%       | 100%     |
 | total                   | 100%       | 94.4%    |
+
+### src/core
+
+#### Description
+
+This component is distributed as the package
+[`opam-core`](https://ocaml.org/p/opam-core/2.5.1), and has
+[7 reverse package dependencies](https://ocaml.org/p/opam-core/2.5.1#used-by).\
+It is described in
+[opam/CONTRIBUTING.md#layout](https://github.com/ocaml/opam/blob/2.5.1/CONTRIBUTING.md#layout)
+as:
+<div class="alert-cite">
+
+> where all the lowest level common code used everywhere else is (opam stdlib, IOs, retrocompatibility with older versions of OCaml, code for version handling, …)
+</div>
+
+It has 1 subcomponent : `src/core/cmdliner` which defines the sub-library
+`opam-core.cmdliner`. According to the [release notes of 2.5.0-beta1](https://github.com/ocaml/opam/releases/tag/2.5.0-beta1):
+<div class="alert-cite">
+
+> it is meant for internal use only.
+</div>
+
+In total, there are 153 unused reported values, and 56 unused fields and
+constructors reported by the `dead_code_analyzer`for this component.\
+Among the findings, 75 values are reported for the subcomponent.\
+This is the component with the most fields and constructors reported.
+
+#### Aggressive cleanup
+
+##### Unused exported values
+
+Because almost half (75 out of 153, i.e. 49.0%) of the reported values are within the
+`src/core/cmdliner` subcomponent, we will clean it first. The intent is to
+reduce the workload during step 3 of the cleanup, although it may lead to more
+iterations.
+
+Applying steps 1 and 2 of the cleanup methodology for
+[unused exported values](#cleaning-up-unused-exported-values) on the fidings in
+`src/core/cmdliner` is trivial.\
+Applying step 3 did not trigger any new warning or error.
+<details><summary>build output</summary>
+
+```bash
+$ dune build @check
+File "src/tools/opam_admin_topstart.ml", line 1:
+Warning 70 [missing-mli]: Cannot find interface file.
+```
+</details>
+
+The analyzer does not report unused types and modules yet. However, a more thorough cleanup
+can be applied as some types (e.g. `Manpage.t`) are only used by unused values
+and a module (`Term.Syntax`) is only composed of unused values.
+
+Moving on to the rest of the `src/core` component,  applying steps 1 and 2 is
+trivial again.\
+However, applying step 3 triggers 1 warning 60 and 36 warnings 32 (reported as
+errors) and 1 actual error.
+<details><summary>build output</summary>
+
+```bash
+$ dune build @check
+File "src/core/opamVersionCompare.ml", line 142, characters 4-9:
+142 | let equal (x : string) (y : string) =
+          ^^^^^
+Error (warning 32 [unused-value-declaration]): unused value equal.
+
+File "src/core/opamStubs.unix.ml", line 15, characters 4-23:
+Error (warning 32 [unused-value-declaration]): unused value getCurrentProcessID.
+
+File "src/core/opamStubs.unix.ml", line 41, characters 4-19:
+Error (warning 32 [unused-value-declaration]): unused value getConsoleAlias.
+
+File "src/core/opamCoreConfig.ml", line 166, characters 4-7:
+166 | let set t = setk (fun x () -> x) t
+          ^^^
+Error (warning 32 [unused-value-declaration]): unused value set.
+
+File "src/core/opamVersion.ml", line 43, characters 4-9:
+43 | let major v =
+         ^^^^^
+Error (warning 32 [unused-value-declaration]): unused value major.
+
+File "src/core/opamVersion.ml", line 65, characters 4-11:
+65 | let message () =
+         ^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value message.
+
+File "src/core/opamHash.ml", line 72, characters 4-10:
+72 | let sha256 = make `SHA256
+         ^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value sha256.
+
+File "src/core/opamDirTrack.ml", line 45, characters 4-13:
+45 | let to_string t =
+         ^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value to_string.
+
+File "src/core/opamProcess.ml", line 972, characters 6-13:
+972 |   let seq_map f l =
+            ^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value seq_map.
+
+File "src/core/opamSystem.ml", line 633, characters 4-29:
+633 | let verbose_for_base_commands () =
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value verbose_for_base_commands.
+
+File "src/core/opamFilename.ml", line 138, characters 4-15:
+138 | let to_list_dir dir =
+          ^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value to_list_dir.
+
+File "src/core/opamFilename.ml", line 249, characters 4-21:
+249 | let with_open_out_bin [@deprecated] =
+          ^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value with_open_out_bin.
+
+File "src/core/opamFilename.ml", line 273, characters 4-17:
+273 | let with_tmp_file fn =
+          ^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value with_tmp_file.
+
+File "src/core/opamFilename.ml", line 276, characters 4-21:
+276 | let with_tmp_file_job fjob =
+          ^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value with_tmp_file_job.
+
+File "src/core/opamFilename.ml", line 279, characters 4-17:
+279 | let with_contents fn filename =
+          ^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value with_contents.
+
+File "src/core/opamFilename.ml", line 378, characters 4-11:
+378 | let copy_in ?root = process_in ?root copy
+          ^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value copy_in.
+
+File "src/core/opamFilename.ml", line 402, characters 4-24:
+402 | let extract_generic_file filename dirname =
+          ^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value extract_generic_file.
+
+File "src/core/opamFilename.ml", line 423, characters 4-17:
+423 | let remove_suffix suffix filename =
+          ^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value remove_suffix.
+
+File "src/core/opamFilename.ml", line 517, characters 4-30:
+517 | let with_flock_write_then_read ?dontblock file write read =
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value with_flock_write_then_read.
+
+File "src/core/opamSystem.ml", line 858, characters 32-47:
+858 |   let nproc = Nativeint.to_int (OpamStubs.nproc ()) in
+                                      ^^^^^^^^^^^^^^^
+Error: Unbound value OpamStubs.nproc
+
+File "src/core/opamParallel.ml", line 488, characters 4-8:
+488 | let iter ~jobs ~command ?dry_run l =
+          ^^^^
+Error (warning 32 [unused-value-declaration]): unused value iter.
+
+File "src/core/opamConsole.ml", line 100, characters 6-40:
+100 |   let latin_capital_letter_o_with_stroke = Uchar.of_int 0x00d8
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value latin_capital_letter_o_with_stroke.
+
+File "src/core/opamStd.ml", line 68, characters 2-49:
+68 |   external compare : 't -> 't -> int = "%compare"
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value compare.
+
+File "src/core/opamStd.ml", line 70, characters 2-44:
+70 |   external (=) : 't -> 't -> bool = "%equal"
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value =.
+
+File "src/core/opamStd.ml", line 71, characters 2-48:
+71 |   external (<>) : 't -> 't -> bool = "%notequal"
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value <>.
+
+File "src/core/opamStd.ml", line 72, characters 2-47:
+72 |   external (<) : 't -> 't -> bool = "%lessthan"
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value <.
+
+File "src/core/opamStd.ml", line 73, characters 2-50:
+73 |   external (>) : 't -> 't -> bool = "%greaterthan"
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value >.
+
+File "src/core/opamStd.ml", line 74, characters 2-49:
+74 |   external (<=) : 't -> 't -> bool = "%lessequal"
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value <=.
+
+File "src/core/opamStd.ml", line 75, characters 2-52:
+75 |   external (>=) : 't -> 't -> bool = "%greaterequal"
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value >=.
+
+File "src/core/opamStd.ml", line 139, characters 6-12:
+139 |   let insert comp x l =
+            ^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value insert.
+
+File "src/core/opamStd.ml", line 185, characters 6-18:
+185 |   let update_assoc eq k v l =
+            ^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value update_assoc.
+
+File "src/core/opamStd.ml", line 424, characters 6-17:
+424 |   let default_map dft = function
+            ^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value default_map.
+
+File "src/core/opamStd.ml", line 1337, characters 8-17:
+1337 |     let to_string = function
+               ^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value to_string.
+
+File "src/core/opamStd.ml", line 1344, characters 8-17:
+1344 |     let of_string = function
+               ^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value of_string.
+
+File "src/core/opamStd.ml", lines 1336-1356, characters 2-5:
+1336 | ..module RegistryHive = struct
+1337 |     let to_string = function
+1338 |     | OpamStubs.HKEY_CLASSES_ROOT   -> "HKEY_CLASSES_ROOT"
+1339 |     | OpamStubs.HKEY_CURRENT_CONFIG -> "HKEY_CURRENT_CONFIG"
+1340 |     | OpamStubs.HKEY_CURRENT_USER   -> "HKEY_CURRENT_USER"
+...
+1353 |     | "HKU"
+1354 |     | "HKEY_USERS"          -> OpamStubs.HKEY_USERS
+1355 |     | _                     -> failwith "RegistryHive.of_string"
+1356 |   end
+Warning 60 [unused-module]: unused module RegistryHive.
+
+File "src/core/opamStd.ml", line 1358, characters 7-21:
+1358 |   let (set_parent_pid, parent_putenv) =
+              ^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value set_parent_pid.
+
+File "src/core/opamStd.ml", line 1745, characters 6-18:
+1745 |   let resolve_when ~auto = function
+             ^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value resolve_when.
+
+File "src/core/opamStd.ml", line 1780, characters 8-14:
+1780 |     let update v = r := v :: !r
+               ^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value update.
+```
+</details>
+
+The error is:
+```
+File "src/core/opamSystem.ml", line 858, characters 32-47:
+858 |   let nproc = Nativeint.to_int (OpamStubs.nproc ()) in
+                                      ^^^^^^^^^^^^^^^
+Error: Unbound value OpamStubs.nproc
+```
+The value is actually exported by `OpamStubsType` and included `OpamSubs`.
+The latter re-exports the interface of the former, as itself via the following construct:
+```OCaml
+include module type of struct include OpamStubsTypes end
+```
+This is close enough to a
+[known limitation](https://github.com/LexiFi/dead_code_analyzer/blob/master/docs/exported_values/EXPORTED_VALUES.md#include-module-type-with-substitution)
+so we do not need to document it further.
+The following finding is <span class="alert-danger">false positive</span>:
+```
+/tmp/proj/opam/_build/default/src/core/opamStubsTypes.ml:128: nproc
+```
+
+The warning 60 on module `RegistryHive` below appears because I removed it from
+`src/core/opamStd.mli`. It was only exporting unused values.
+```
+File "src/core/opamStd.ml", lines 1336-1356, characters 2-5:
+1336 | ..module RegistryHive = struct
+1337 |     let to_string = function
+1338 |     | OpamStubs.HKEY_CLASSES_ROOT   -> "HKEY_CLASSES_ROOT"
+1339 |     | OpamStubs.HKEY_CURRENT_CONFIG -> "HKEY_CURRENT_CONFIG"
+1340 |     | OpamStubs.HKEY_CURRENT_USER   -> "HKEY_CURRENT_USER"
+...
+1353 |     | "HKU"
+1354 |     | "HKEY_USERS"          -> OpamStubs.HKEY_USERS
+1355 |     | _                     -> failwith "RegistryHive.of_string"
+1356 |   end
+Warning 60 [unused-module]: unused module RegistryHive.
+```
+
+The warnings 60 and 32 can be fixed following the technique described in [src/client](#anchor_warning_fix_methodology)
+
+##### Unused constructors and fields
+
+More than half of the findings are located in `src/core/opamStubsTypes.ml`
+(35 out of 56, i.e. 62.5%). However, unlike with unused exported values, we will
+try to minimize the amount of re-builds necessary to clean them. Thus, we will
+not focus on this file specifically but clean up all the findings in the
+directory at once, hoping to get multiple compiler errors reported at once.
+
+Some of the findings accumulate to whole type definitions (e.g. `Either.t.Left`
+and `Either.t.Right` in `src/core/opamCompat.mli`), so we will follow the more
+specific cleanup methodology of
+[unused constructors and fields](#cleaning-up-unused-constructors-and-fields)
+for those cases.
+
+Applying steps 1 and 2 is trivial.\
+Applying step 3 a first time triggers 2 warnings 37 (reported as errors) and
+2 errors.
+<details><summary>build output</summary>
+
+```bash
+$ dune build @check
+File "src/core/opamCompat.ml", line 75, characters 4-16:
+75 |     | Left of 'a
+         ^^^^^^^^^^^^
+Error (warning 37 [unused-constructor]): constructor Left is never used to build values.
+Its type is exported as a private type.
+
+File "src/core/opamCompat.ml", line 76, characters 4-17:
+76 |     | Right of 'b
+         ^^^^^^^^^^^^^
+Error (warning 37 [unused-constructor]): constructor Right is never used to build values.
+Its type is exported as a private type.
+File "src/core/opamStubs.ml", line 1:
+Error: The implementation src/core/opamStubs.ml
+       does not match the interface src/core/opamStubs.mli:
+       Type declarations do not match:
+         type uname =
+           OpamStubsTypes.uname = private {
+           sysname : string;
+           release : string;
+           machine : string;
+         }
+       is not included in
+         type uname = {
+           sysname : string;
+           release : string;
+           machine : string;
+         }
+       A private record constructor would be revealed.
+       File "src/core/opamStubs.mli", lines 166-170, characters 0-1:
+         Expected declaration
+       File "src/core/opamStubsTypes.ml", lines 85-89, characters 0-1:
+         Actual declaration
+File "src/core/opamConsole.ml", line 43, characters 6-12:
+43 |     | Darwin -> true
+           ^^^^^^
+Error: This variant pattern is expected to have type OpamStd.Sys.os
+       There is no constructor Darwin within type OpamStd.Sys.os
+File "src/core/opamProcess.ml", line 470, characters 4-10:
+470 |     p_info   = info_file;
+          ^^^^^^
+Error: Unbound record field p_info
+File "src/core/opamStd.ml", line 1:
+Error: The implementation src/core/opamStd.ml
+       does not match the interface src/core/opamStd.mli:  ... In module Sys:
+       Type declarations do not match:
+         type os =
+           Sys.os =
+             Darwin
+           | Linux
+           | FreeBSD
+           | OpenBSD
+           | NetBSD
+           | DragonFly
+           | Cygwin
+           | Win32
+           | Unix
+           | Other of string
+       is not included in
+         type os = Cygwin | Win32
+       1. An extra constructor, Darwin, is provided in the first declaration.
+       2. An extra constructor, Linux, is provided in the first declaration.
+       3. An extra constructor, FreeBSD, is provided in the first declaration.
+       4. An extra constructor, OpenBSD, is provided in the first declaration.
+       5. An extra constructor, NetBSD, is provided in the first declaration.
+       6. An extra constructor, DragonFly, is provided in the first declaration.
+       9. An extra constructor, Unix, is provided in the first declaration.
+       10. An extra constructor, Other, is provided in the first declaration.
+       File "src/core/opamStd.mli", lines 454-455, characters 2-17:
+         Expected declaration
+       File "src/core/opamStd.ml", lines 880-890, characters 2-21:
+         Actual declaration
+File "src/core/opamSystem.ml", line 934, characters 6-25:
+934 |     | OpamStd.Sys.OpenBSD -> "gtar"
+            ^^^^^^^^^^^^^^^^^^^
+Error: Unbound constructor OpamStd.Sys.OpenBSD
+File "src/format/opamTypes.mli", lines 22-24, characters 0-15:
+22 | type ('a, 'b) either = ('a, 'b) OpamCompat.Either.t =
+23 |   | Left of 'a
+24 |   | Right of 'b
+Error: This variant or record definition does not match that of type
+         ('a, 'b) OpamCompat.Either.t
+       Private variant constructor(s) would be revealed.
+```
+</details>
+
+There are different kinds of errors reported.
+1.  The first one is the warning 37.\
+    It indicates the constructor is never constructed. This is expected to happen.
+    Because we exported the type as `private`, its constructors can only be
+    used to build values inside its compilation unit. Thus, the compiler is able
+    to check if they are actually used and report them if not.\
+    This is solved by removing the unused constructor.
+
+2.  The second kind is a type mismatch between the definition  in the interface
+    and the implementation of a type.\
+    This is also expected to happen and is solved by updating the `.ml` to match
+    the `.mli`.
+
+3.  The third kind is an invalid constructor or record field.\
+    Again, this is expected to happen and is solved by removing the
+    corresponding code.
+
+4.  The fourth and last kind of error we can observe is a type mismatch, like the second kind.\
+    However, this one is due to broken type equations. We will explore them in
+    more details.
+
+After only a couple iterations of step 3 we get stuck on the complicated cases.
+<details><summary>build output</summary>
+
+```bash
+$ dune build @check
+File "src/format/opamTypes.mli", lines 22-24, characters 0-15:
+22 | type ('a, 'b) either = ('a, 'b) OpamCompat.Either.t =
+23 |   | Left of 'a
+24 |   | Right of 'b
+Error: This variant or record definition does not match that of type
+         ('a, 'b) OpamCompat.Either.t
+       Private variant constructor(s) would be revealed.
+File "src/core/opamCompat.ml", line 75, characters 4-16:
+75 |     | Left of 'a
+         ^^^^^^^^^^^^
+Error (warning 37 [unused-constructor]): constructor Left is never used to build values.
+Its type is exported as a private type.
+
+File "src/core/opamCompat.ml", line 76, characters 4-17:
+76 |     | Right of 'b
+         ^^^^^^^^^^^^^
+Error (warning 37 [unused-constructor]): constructor Right is never used to build values.
+Its type is exported as a private type.
+File "src/core/opamConsole.ml", line 1106, characters 35-44:
+1106 |   OpamStd.Sys.(set_warning_printer {warning})
+                                          ^^^^^^^^^
+Error: Cannot create values of the private type warning_printer
+File "src/core/opamStd.ml", line 1:
+Error: The implementation src/core/opamStd.ml
+       does not match the interface src/core/opamStd.mli:  ... In module Sys:
+       Type declarations do not match:
+         type os =
+           Sys.os =
+             Darwin
+           | Linux
+           | FreeBSD
+           | OpenBSD
+           | NetBSD
+           | DragonFly
+           | Cygwin
+           | Win32
+           | Unix
+           | Other of string
+       is not included in
+         type os = Cygwin | Win32
+       1. An extra constructor, Darwin, is provided in the first declaration.
+       2. An extra constructor, Linux, is provided in the first declaration.
+       3. An extra constructor, FreeBSD, is provided in the first declaration.
+       4. An extra constructor, OpenBSD, is provided in the first declaration.
+       5. An extra constructor, NetBSD, is provided in the first declaration.
+       6. An extra constructor, DragonFly, is provided in the first declaration.
+       9. An extra constructor, Unix, is provided in the first declaration.
+       10. An extra constructor, Other, is provided in the first declaration.
+       File "src/core/opamStd.mli", lines 454-455, characters 2-17:
+         Expected declaration
+       File "src/core/opamStd.ml", lines 880-890, characters 2-21:
+         Actual declaration
+```
+</details>
+
+Let's look at the invalid type equation at the top first:
+```
+File "src/format/opamTypes.mli", lines 22-24, characters 0-15:
+22 | type ('a, 'b) either = ('a, 'b) OpamCompat.Either.t =
+23 |   | Left of 'a
+24 |   | Right of 'b
+Error: This variant or record definition does not match that of type
+         ('a, 'b) OpamCompat.Either.t
+       Private variant constructor(s) would be revealed.
+File "src/core/opamCompat.ml", line 75, characters 4-16:
+75 |     | Left of 'a
+         ^^^^^^^^^^^^
+Error (warning 37 [unused-constructor]): constructor Left is never used to build values.
+Its type is exported as a private type.
+
+File "src/core/opamCompat.ml", line 76, characters 4-17:
+76 |     | Right of 'b
+         ^^^^^^^^^^^^^
+Error (warning 37 [unused-constructor]): constructor Right is never used to build values.
+Its type is exported as a private type.
+```
+Here we have 2 kinds of reports: an invalid type equation and warnings 37.\
+I did not clean these warnings because they are directly connected to the error.
+
+To fix the invalid type equation we could make `OpamTypes.either` private, like
+`OpamCompat.Either.t`. This would leave us with unfixable warnings. This dead-end
+might be a sign that we hit a limitation of the analyzer and found false
+positives.
+<div class="alert-note">
+
+> The warnings could actually be fixed by making the type private within
+> `src/core/opamCompat.ml`, which would make it impossible to build any value of
+> this type. There may be situations were this makes sense but the current one
+> is not.
+</div>
+
+Alternatively, we could choose to fix the warnings first by making the type abstract.
+Because we updated the type in the `.ml`, the compiler will complain about a
+type mismatch, and we need to update the `.mli` to reflect the change.\
+With the type abstract in both the signature and the implementation,
+the warnings are gone, and the invalid type equation changed to:
+```
+File "src/format/opamTypes.mli", lines 22-24, characters 0-15:
+22 | type ('a, 'b) either = ('a, 'b) OpamCompat.Either.t =
+23 |   | Left of 'a
+24 |   | Right of 'b
+Error: This variant or record definition does not match that of type
+         ('a, 'b) OpamCompat.Either.t
+       The original is abstract, but this is a variant.
+```
+We can fix it by making `OpamTypes.either` abstract as well. This unveils a new
+invalid type equation:
+```
+File "src/format/opamTypes.mli", line 320, characters 0-81:
+320 | type powershell_host = OpamStd.Sys.powershell_host = Powershell_pwsh | Powershell
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error: This variant or record definition does not match that of type
+         OpamStd.Sys.powershell_host
+       Private variant constructor(s) would be revealed.
+```
+The situation is similar to our original case but there is no warning 37 to
+indicate that the constructors are not used within their compilation units.
+This time, we can simply make `OpamTypes.powershell_host` private to satisfy the
+equation.\
+This unveils yet another invalid equation which can be solved by making the new
+type private as well:
+```
+File "src/format/opamTypes.mli", lines 321-323, characters 0-10:
+321 | type shell = OpamStd.Sys.shell =
+322 |   | SH_sh | SH_bash | SH_zsh | SH_csh | SH_fish | SH_pwsh of powershell_host
+323 |   | SH_cmd
+Error: This variant or record definition does not match that of type
+         OpamStd.Sys.shell
+       Private variant constructor(s) would be revealed.
+```
+
+With all the invalid type equations resolved, the compiler is now able to report
+more errors. In particular, the 2 following errors tell use that constructors
+`Left` and `Right` are actually used to build values:
+```
+File "src/client/opamAction.ml", line 1062, characters 32-37:
+1062 |     | Some (_, result) -> Done (Right (OpamSystem.Process_error result))
+                                       ^^^^^
+Error: Unbound constructor Right
+File "src/client/opamCommands.ml", line 439, characters 31-35:
+439 |       | Some d, false -> Some (Left d)
+                                     ^^^^
+Error: Unbound constructor Left
+```
+As we suspected in our initial attempt to fix the invalid type equation on
+`OpamTypes.either`, we hit a limitation of the analyzer. Even better, we hit an
+[undocumented limitation](https://github.com/fantazio/dead_code_analyzer/blob/master/docs/fields_and_constructors/FIELDS_AND_CONSTRUCTORS.md#limitations)
+so we can open an [issue](https://github.com/LexiFi/dead_code_analyzer/issues/79)
+to report it.\
+We can conclude that the following findings are <span class="alert-danger">false positives</span>:
+```
+/tmp/proj/opam/src/core/opamCompat.mli:36: Either.t.Left
+/tmp/proj/opam/src/core/opamCompat.mli:37: Either.t.Right
+```
+
+Among the new compilation errors there is also an error telling us that the
+constructor `SH_bash` is used:
+```
+File "src/client/opamArg.ml", line 1149, characters 16-23:
+1149 |     None,"bash",SH_bash;
+                       ^^^^^^^
+Error: Cannot create values of the private type shell
+```
+We are hitting the same limitation as with `OpamTypes.either`, and can conclude
+that the following findings are also <span class="alert-danger">false positives</span>:
+```
+/tmp/proj/opam/src/core/opamStd.mli:506: Sys.shell.SH_sh
+/tmp/proj/opam/src/core/opamStd.mli:506: Sys.shell.SH_bash
+/tmp/proj/opam/src/core/opamStd.mli:506: Sys.shell.SH_zsh
+/tmp/proj/opam/src/core/opamStd.mli:506: Sys.shell.SH_csh
+/tmp/proj/opam/src/core/opamStd.mli:506: Sys.shell.SH_fish
+/tmp/proj/opam/src/core/opamStd.mli:507: Sys.shell.SH_pwsh
+/tmp/proj/opam/src/core/opamStd.mli:507: Sys.shell.SH_cmd
+```
+
+Finally, after re-building the project, an new error tells us that the constructor `Powershell_pwsh` is used:
+```
+File "src/client/opamArg.ml", line 1154, characters 31-46:
+1154 |     Some cli2_2,"pwsh",SH_pwsh Powershell_pwsh;
+                                      ^^^^^^^^^^^^^^^
+Error: Cannot create values of the private type powershell_host
+```
+Once again, we are hitting the same limitation, and can conclude the following
+findings are <span class="alert-danger">false positives</span>:
+```
+/tmp/proj/opam/src/core/opamStd.mli:505: Sys.powershell_host.Powershell_pwsh
+/tmp/proj/opam/src/core/opamStd.mli:505: Sys.powershell_host.Powershell
+```
+
+Now that we explored the 1st error and identified false positives, we can come
+back to our original build errors and move on to the next one:
+```
+File "src/core/opamConsole.ml", line 1106, characters 35-44:
+1106 |   OpamStd.Sys.(set_warning_printer {warning})
+                                          ^^^^^^^^^
+Error: Cannot create values of the private type warning_printer
+```
+The analyzer reported `Sys.warning_printer.warning` as unused. This means that
+it is never read. Because this is the only field in its type, we maked the type
+private. Hence the error when creating a value of that type from outside its
+compilation unit.\
+Although the error is not surprising, the associated function is telling us
+something. `Opam.Std.Sys.set_warning_printer` has type `warning_printer -> unit`.
+This indicates that it must be storing the argument somewhere as a side effect.
+By looking at its definition, it does store it in a variable named `console`:
+```OCaml
+  let set_warning_printer =
+    let called = ref false in
+    fun printer ->
+      if !called then invalid_arg "Just what do you think you're doing, Dave?";
+      called := true;
+      console := printer
+```
+`console` is an unexported value of type `warning_printer` and if we look at its
+uses, its `warning` field is actually read a couple times.
+
+The issue here is that the type `warning_printer` is defined twice in
+`src/core/opamStd.ml`: once before the definition of `console` and another
+before the definition of `set_warning_printer` with a type equation indicating
+that the 2 are equal.\
+Thus, we are facing a situation similar to the previous type equation where the
+analyzer did not associate uses to its type. We can open another
+[issue](https://github.com/LexiFi/dead_code_analyzer/issues/80) to report this
+limitation, and conclude that the following finding is a
+<span class="alert-danger">false positive</span>:
+```
+/tmp/proj/opam/src/core/opamStd.mli:613: Sys.warning_printer.warning
+```
+
+Finally, the last of our error in the build output is:
+```
+File "src/core/opamStd.ml", line 1:
+Error: The implementation src/core/opamStd.ml
+       does not match the interface src/core/opamStd.mli:  ... In module Sys:
+       Type declarations do not match:
+         type os =
+           Sys.os =
+             Darwin
+           | Linux
+           | FreeBSD
+           | OpenBSD
+           | NetBSD
+           | DragonFly
+           | Cygwin
+           | Win32
+           | Unix
+           | Other of string
+       is not included in
+         type os = Cygwin | Win32
+       1. An extra constructor, Darwin, is provided in the first declaration.
+       2. An extra constructor, Linux, is provided in the first declaration.
+       3. An extra constructor, FreeBSD, is provided in the first declaration.
+       4. An extra constructor, OpenBSD, is provided in the first declaration.
+       5. An extra constructor, NetBSD, is provided in the first declaration.
+       6. An extra constructor, DragonFly, is provided in the first declaration.
+       9. An extra constructor, Unix, is provided in the first declaration.
+       10. An extra constructor, Other, is provided in the first declaration.
+       File "src/core/opamStd.mli", lines 454-455, characters 2-17:
+         Expected declaration
+       File "src/core/opamStd.ml", lines 880-890, characters 2-21:
+         Actual declaration
+```
+This type mismatch could fit our 2nd kind of errors: the expected type mismatch
+between the interface and the implementation. However, the reported code contains
+the type equation `type os = Sys.os`, so it will fit our 4th kind. This is why
+we did not fix it earlier.\
+If we try to fix it like a regular type mismatch by updating the type in the
+`.ml` to match the `.mli`, we get this new compilation error:
+```
+File "src/core/opamStd.ml", line 889, characters 27-33:
+889 |           | "Darwin"    -> Darwin
+                                 ^^^^^^
+Error: Unbound constructor Darwin
+```
+This indicates that the constructor is used to build a value. Thus, it should
+not be reported as unused. We hit a new undocumented limitation of the analyzer
+so we can open an [issue](https://github.com/LexiFi/dead_code_analyzer/issues/81)
+to report it.\
+We can conclude that the following findings are
+<span class="alert-danger">false positives</span>:
+```
+/tmp/proj/opam/src/core/opamStd.mli:474: Sys.os.Darwin
+/tmp/proj/opam/src/core/opamStd.mli:475: Sys.os.Linux
+/tmp/proj/opam/src/core/opamStd.mli:476: Sys.os.FreeBSD
+/tmp/proj/opam/src/core/opamStd.mli:477: Sys.os.OpenBSD
+/tmp/proj/opam/src/core/opamStd.mli:478: Sys.os.NetBSD
+/tmp/proj/opam/src/core/opamStd.mli:479: Sys.os.DragonFly
+/tmp/proj/opam/src/core/opamStd.mli:482: Sys.os.Unix
+/tmp/proj/opam/src/core/opamStd.mli:483: Sys.os.Other
+```
+
+With all those errors fixed, we are now done with the naive cleaning, using
+private type when their content is entirely unused.
+
+The only remaining private type is `uname` in `src/core/opamStubsTypes.ml`
+and `src/core/opamStubs.mli`.
+We can try to clean it further by making it abstract. Building produces the following output:
+```
+$ dune build @check
+File "src/core/opamStd.ml", line 896, characters 27-34:
+896 |           match (uname ()).sysname with
+                                 ^^^^^^^
+Error: Unbound record field sysname
+File "src/state/opamSysPoll.ml", line 40, characters 55-62:
+40 |     | "Unix" | "Cygwin" -> Some (OpamStd.Sys.uname ()).machine
+                                                            ^^^^^^^
+Error: Unbound record field machine
+```
+This indicates that the fields `sysname` and `machine` are read. If we search a
+bit further, the field `release` is also read. Thus, they should not be reported
+as unused.\
+Actually, I made a mistake earlier: I assumed that the following error was a
+2nd kind error (mismatch between interface and implementation) when it is more
+subtle than that. The type `uname` is defined in 2 separate compilation units
+(`OpamStubsTypes` and `OpamStubs`), and one is included in the other (the former
+into the latter).
+```
+File "src/core/opamStubs.ml", line 1:
+Error: The implementation src/core/opamStubs.ml
+       does not match the interface src/core/opamStubs.mli:
+       Type declarations do not match:
+         type uname =
+           OpamStubsTypes.uname = private {
+           sysname : string;
+           release : string;
+           machine : string;
+         }
+       is not included in
+         type uname = {
+           sysname : string;
+           release : string;
+           machine : string;
+         }
+       A private record constructor would be revealed.
+       File "src/core/opamStubs.mli", lines 166-170, characters 0-1:
+         Expected declaration
+       File "src/core/opamStubsTypes.ml", lines 85-89, characters 0-1:
+         Actual declaration
+```
+We hit a new undocumented limitation of the analyzer so we can open an
+[issue](https://github.com/LexiFi/dead_code_analyzer/issues/82) to report it.\
+We can conclude that the following findings are
+<span class="alert-danger">false positives</span>:
+```
+/tmp/proj/opam/src/core/opamStubsTypes.ml:118: uname.sysname
+/tmp/proj/opam/src/core/opamStubsTypes.ml:119: uname.release
+/tmp/proj/opam/src/core/opamStubsTypes.ml:120: uname.machine
+```
+
+We are done with the aggressive cleanup and can move on to the informed cleanup
+
+#### Informed cleanup
+
+This section takes the findings in-order (often at once in a single file) and indicates if their cleanup is
+reasonable or if it should be undone, along with a short explanation.
+
+- `src/core/cmdliner`: <span class="alert-safe">**clean**</span>\
+    I'll assume all the findings in this subcomponent to be valid, because it
+    is meant for internal use.
+
+- `src/core/opamCompat.mli:45: Lazy.map_val`: <span class="alert-danger">**undo**</span>\
+    Based on the intent of `OpamCompat`, the value `Lazy.map_val` should not be
+    be removed, although it has never been used according to its history.
+
+- `src/core/opamConsole.mli`: <span class="alert-safe">**clean**</span>\
+    The reported values were either never used or their uses have been
+    internalized during refactors.\
+    Additionally, I did not find any use of the findings outside of opam.
+
+- `src/core/opamCoreConfig.mli`: <span class="alert-safe">**clean**</span>\
+    The reported values uses have been internalized during refactors.\
+    Additionally, I did not find any use of the findings outside of opam.
+
+- `src/core/opamDirTrack.mli`: <span class="alert-safe">**clean**</span>\
+    The reported findings were never used outside their compilation unit.\
+    Additionally, I did not find any use of the findings outside of opam.
+
+- `src/core/opamFilename.mli`: <span class="alert-safe">**clean**</span>\
+    The reported values uses have been removed or internalized during refactors.\
+    Additionally, I did not find any use of the findings outside of opam.
+
+- `src/core/opamHash.mli`: <span class="alert-safe">**clean**</span>\
+    The reported findings were never used outside their compilation unit.\
+    Additionally, I did not find any use of the findings outside of opam.\
+    Finally, `OpamHash.compute` (12 occurences) and
+    `OpamHash.compute_from_string` (6 occurences) seem to be the entry points to
+    compute hashes, instead of calling the direct hash function (`OpamHash.md5`
+    and `OpamHash.sha256`: 0 occurence, `OpamHash.sha512`: 1 occurence).\
+    Thus, I'll go even further in the cleanup by unexporting `OpamHash.sha512`
+    and replace its use with ``OpamHash.compute ~kind:`SHA512``.
+
+- `src/core/opamParallel.mli:42: iter`: <span class="alert-danger">**undo**</span>\
+    I found a use outside of opam in [opam-bundle](https://github.com/AltGr/opam-bundle/blob/master/src/opamBundleMain.ml#L732).
+
+- `src/core/opamProcess.mli:54: is_verbose_command`: <span class="alert-safe">**clean**</span>\
+  `src/core/opamProcess.mli:73: t.p_info`
+  `src/core/opamProcess.mli:217: Job.seq_map`: <span class="alert-danger">**undo**</span>\
+    I could not find any use outside opam of the 1st and 2nd findings but I did
+    find one of the 3rd in [opam-bundle](https://github.com/AltGr/opam-bundle/blob/master/src/opamBundleMain.ml#L685).
+
+- `src/core/opamSHA.mli`: <span class="alert-safe">**clean**</span>\
+    Similar observations as for `OpamHash` can be made for `OpamSHA`, with the
+    `hash_file` and `hash_string` functions as entry points and not the
+    `sha*_file` and `sha_string` ones.\
+    Thus, I'll go even further in the cleanup by unexporting `OpamSHA.sha1_string`
+    and replace its use with ``OpamSHA.hash_string `SHA1``.
+
+- `src/core/opamStd.mli`: <span class="alert-danger">**undo**</span>\
+    Based on the intent of `OpamStd`,its findings should not be removed.
+
+- `src/core/opamStubs.mli`: <span class="alert-danger">**undo**</span>\
+    According to the module documentation below, most of its functions are
+    windows-specific.
+    ```OCaml
+    (** OS-specific functions requiring C code on at least one platform.
+
+        Most functions are Windows-specific and raise an exception on other
+        platforms. *)
+    ```
+    I am using Linux, and the compilation of opam is dependent on os-type, as shown in `src/core/dune`:
+    ```dune
+    (rule
+      (enabled_if (<> %{os_type} "Win32"))
+      (action (copy# opamStubs.unix.ml opamStubs.ml)))
+
+    (rule
+     (enabled_if (= %{os_type} "Win32"))
+     (action (copy# opamWin32Stubs.win32.ml opamWin32Stubs.ml)))
+    ```
+
+- `src/core/opamStubsTypes.ml`: <span class="alert-danger">**undo**</span>\
+    The documentation of the module below indicates that it exposes types for
+    C stubs. If we look deeper, the mentioned stubs can be found in
+    `src/core/opamWindows.c`, and the exported OCaml types are based on their
+    C equivalents. Although the reported OCaml fields seem to only be written to
+    in those stubs, keeping both types structurally equivalent will be easier to
+    maintain.\
+    Additionally, handling FFI is out of scope for the `dead_code_analyzer`, although undocumented.
+    ```OCaml
+    (** Types for C stubs modules and common C stubs. *)
+    ```
+
+
+- `src/core/opamSystem.mli`: <span class="alert-safe">**clean**</span>\
+    The file contains the following comment line 216, so I'll consider
+    everything reported below that line can be safely removed.
+    ```OCaml
+    (** OLD COMMAND API, DEPRECATED *)
+    ```
+    Regarding the 4 values reported above that comment, the opam's history shows
+    that they became unused through consecutive improvements of opam.
+
+- `src/core/opamVersion.mli`: <span class="alert-safe">**clean**</span>\
+    The findings are not used anymore and I did not find any use outside opam.
+
+- `src/core/opamVersionCompare.mli:35: equal`: <span class="alert-safe">**clean**</span>\
+    According to the value's history, it has never been used inside opam.\
+    Additionally, I did not find any use outside opam.
+
+#### Results
+
+The analyzer reported 209 findings in this component:
+153 unused reported values, 56 unused fields and constructors.\
+The aggressive cleanup revealed 24 false positives (1 value and 23 fields and
+constructors), and 2 new limitations.\
+The informed cleanup indicates that 65 additional findings (33 values and
+32 fields) should not be removed.
+
+From these results, we can compute the precision of the analyzer shown in the
+table below. The estimated precision for the informed cleanup can be
+extrapolated as the potential fix rate.
+
+| section                 | aggressive | informed |
+|:-----------------------:|:----------:|:--------:|
+| exported values         | 99.3%      | 77.8%    |
+| constructors and fields | 58.9%      |  1.8%    |
+| total                   | 88.5%      | 57.4%    |
