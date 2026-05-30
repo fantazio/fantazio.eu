@@ -123,6 +123,11 @@ details summary {
   --code-background-color: #3a9278;
 }
 
+.alert-cite {
+  border-color: var(--main-foreground-color);
+  font-style: italic;
+}
+
 span.alert-danger,
 span.alert-safe {
   background-color: var(--quote-background-color);
@@ -155,6 +160,10 @@ div.alert-caution > blockquote > p:first-child::before {
 
 div.alert-danger > blockquote > p:first-child::before {
     content: var(--alert-title, "Warning") ":";
+}
+
+div.alert-cite > blockquote > p:first-child::before {
+    content: var(--alert-title) ":";
 }
 
 body {
