@@ -39,9 +39,8 @@ To keep this report accessible and its goals explicit, the report is organized
 by "component" although, in practice, I followed the analyzer's results by
 "report section". This will be discussed in more details at the end of this report.
 
-<div class="alert-caution">
+<div class="alert-caution" style='--alert-title: "Disclaimer"'>
 
-> **Disclaimer:**\
 > I am not an opam developer. My observations and judgements are those of a
 > newcomer and may be mistaken. They will be corrected by an external
 > review process.
@@ -77,7 +76,6 @@ Switched to a new branch 'dca_opam'
 
 <div class="alert-note">
 
-> **Note:**\
 > We are selecting a specific release as reference (2.5.1) for 2 reasons:
 > 1. For reproducibility. Without it, depending on the date, the code may be
 >    different and the results as well.
@@ -102,7 +100,6 @@ to build opam is pretty straigthforward. However, it needed a few adjustment:
 
 <div class="alert-note">
 
-> **Note:**\
 > When running `make`, only the `.cmi` and `.cmti` files are generated, but
 > not the `.cmt` files. This is because the OCaml compiler flag `-keep-locs`
 > is enabled by default but not `-bin-annot`.
@@ -161,7 +158,6 @@ Finally, the `stderr` (output of verbose) is redirected to `dca.err`, and
 
 <div class="alert-tip">
 
-> **Tip:**\
 > I would generally recommend redirecting the output of the analyzer to a file.\
 > Similarly, on the first run, I'd recommend using `--verbose` to verify that
 > nothing went wrong. Issues when reading files or noticing some files are
@@ -219,7 +215,6 @@ In this report, we can distinguish 7 components and 1 subcomponent :
 We will focus only on the findings in `src`.
 <div class="alert-tip">
 
-> **Tip:**
 > In order to avoid tracking declarations in `tests` (and reporting on it),
 > we can update our `dead_code_analyzer` command to:
 > ```bash
@@ -283,9 +278,8 @@ phase separately, this report will discuss the findings by component (grouping
 sections) and discuss the 2 phases for each component.
 I hope the results will be clearer to follow this way.
 
-<div class="alert-warning">
+<div class="alert-caution" style='--alert-title: "Important"'>
 
-> **Important**:\
 > Removing dead code reported by either the analyzer or the compiler can lead to
 > the discovery of new dead code for both the analyzer and the analyzer.
 > Because neither the analyzer nor the compiler reports "transitively" dead code,
@@ -307,7 +301,6 @@ Cleaning up unused exported values is pretty straightforward:
 
 <div class="alert-tip">
 
-> **Tip:**\
 > Because removing content from a file will change the location of subsequent
 > content, I would recommend to start at the bottom of a file and go up.
 </div>
@@ -341,7 +334,6 @@ There can be cases of types used externally but not their content.
 
 <div class="alert-caution">
 
-> **Caution:**\
 > Removing a field or a constructor will most likely trigger compilation errors.
 > This is for 2 reasons:
 > 1. the types described in the signature and the structure must be equal,
@@ -387,7 +379,6 @@ finding (in no particular order):
 
 <div class="alert-caution">
 
-> **Caution**:\
 > Using Sherlocode may be helpful to verify if a finding is used somewhere.
 > However, it may not be sufficient because it only scans opam packages (I think?),
 > and may be slightly outdated. Consequently, unlisted projects or newer
@@ -414,7 +405,6 @@ Here are the different components that we will explore:
 
 <div class="alert-tip">
 
-> **Tip**:\
 > During the aggressive cleanup, some compiler warnings will be reported as errors.
 > More sepecifically, we will encounter warnings 16, 27, 32, 33, 34, 37, and 60.\
 > The obtain a list and short description of available compiler warnings, use
@@ -426,7 +416,6 @@ Here are the different components that we will explore:
 
 <div class="alert-note">
 
-> **Note**:\
 > The warning 70 below, triggered when building, will be ignored for the
 > remaining of this report:
 >   ```bash
@@ -649,18 +638,18 @@ We are done with the aggressive cleanup and can move on to the informed cleanup
 This section takes the findings in-order (often at once in a single file) and indicates if their cleanup is
 reasonable or if it should be undone, along with a short explanation.
 
-- `src/client/opamAction.mli:42: prepare_package_build`: <span class="alert-warning">**undo**</span>\
+- `src/client/opamAction.mli:42: prepare_package_build`: <span class="alert-danger">**undo**</span>\
     I was able to find an external use in
     [opam2nix](https://github.com/timbertson/opam2nix/blob/v1/src/invoke.ml#L258),
     thanks to the file's history ([PR #4147](https://github.com/ocaml/opam/pull/4147)).
 
-- `src/client/opamAdminCheck.mli`: <span class="alert-positive">**clean**</span>\
+- `src/client/opamAdminCheck.mli`: <span class="alert-safe">**clean**</span>\
     The reported values were added in the same
     [PR #3253](https://github.com/ocaml/opam/pull/3253) and never used outside
     their compilation units.\
     I did not find any use of `OpamAdminCheck`.
 
-- `src/client/opamArg.mli`: <span class="alert-positive">**clean**</span>\
+- `src/client/opamArg.mli`: <span class="alert-safe">**clean**</span>\
     The documentation of the module below leads me to believe the module is
     intended for internal use.\
     Additionally, I did not find any use of the findings outside of opam.\
@@ -670,30 +659,30 @@ reasonable or if it should be undone, along with a short explanation.
     (** Command-line argument parsers and helpers *)
     ```
 
-- `src/client/opamAuxCommands.mli`: <span class="alert-positive">**clean**</span>\
+- `src/client/opamAuxCommands.mli`: <span class="alert-safe">**clean**</span>\
     Based on its documentation and its naming, I assume this module is not
     intended for use outside of opam.\
     Additionally, I did not find any external use of `OpamAuxCommands`.
 
-- `src/client/opamCliMain.mli`: <span class="alert-positive">**clean**</span>\
+- `src/client/opamCliMain.mli`: <span class="alert-safe">**clean**</span>\
     My understanding of the module `OpamCliMain` is that it is meant for use
     by the binary entry point, not as a library.\
     I did not find any use outside opam, and only 1 use inside opam in
     [`src/client/opamMain.ml`](https://github.com/ocaml/opam/blob/2.5.1/src/client/opamMain.ml#L12).
 
-- `src/client/opamClient.mli`: <span class="alert-positive">**clean**</span>\
+- `src/client/opamClient.mli`: <span class="alert-safe">**clean**</span>\
     The only user of `OpamClient` outside of opam I found is
     [opam-build-revdeps](https://github.com/gildor478/opam-build-revdeps),
     which is archived.\
     The reported findings' histories show that they have not been used outside
     their compilation units for many years.
 
-- `src/client/opamClientConfig.mli:93: search_files`: <span class="alert-positive">**clean**</span>\
+- `src/client/opamClientConfig.mli:93: search_files`: <span class="alert-safe">**clean**</span>\
     Although `OpamClientConfig` is used outside of opam, I could not find any
     use of `search_files`.\
     Additionally, it has not been used inside opam for a decade.
 
-- `src/client/opamConfigCommand.mli`: <span class="alert-positive">**clean**</span>\
+- `src/client/opamConfigCommand.mli`: <span class="alert-safe">**clean**</span>\
     The documentation of the module below leads me to believe the module is
     intended for internal use.\
     Additionally, I did not find any use of `OpamConfigCommand` outside of opam.
@@ -701,7 +690,7 @@ reasonable or if it should be undone, along with a short explanation.
     (** Functions handling the `opam config` subcommand and configuration actions *)
     ```
 
-- `src/client/opamInitDefaults.mli`: <span class="alert-positive">**clean**</span>\
+- `src/client/opamInitDefaults.mli`: <span class="alert-safe">**clean**</span>\
     The documentation of the module below leads me to believe the module is
     intended for internal use.\
     Additionally, I only found 1 use of `OpamInitDefaults` outside of opam, in
@@ -713,11 +702,11 @@ reasonable or if it should be undone, along with a short explanation.
         through the init command flags or an init config file. *)
     ```
 
-- `src/client/opamListCommand.mli:31: default_dependency_toggles`: <span class="alert-warning">**undo**</span>\
+- `src/client/opamListCommand.mli:31: default_dependency_toggles`: <span class="alert-danger">**undo**</span>\
     I found a use in [opam-bundle](https://github.com/AltGr/opam-bundle/blob/master/src/opamBundleMain.ml#L175).
 
-- `src/client/opamListCommand.mli:38: pattern_selector.ext_fields`:  <span class="alert-positive">**clean**</span>\
-  `src/client/opamListCommand.mli:59: selector.Atoms`:  <span class="alert-positive">**clean**</span>\
+- `src/client/opamListCommand.mli:38: pattern_selector.ext_fields`:  <span class="alert-safe">**clean**</span>\
+  `src/client/opamListCommand.mli:59: selector.Atoms`:  <span class="alert-safe">**clean**</span>\
     The documentation of the module below leads me to believe the module is
     intended for internal use (although there is an external use documented above).\
     Additionally, I did not find any external use of these findings.
@@ -725,7 +714,7 @@ reasonable or if it should be undone, along with a short explanation.
     (** Functions handling the "opam list" subcommand *)
     ```
 
-- `src/client/opamRepositoryCommand.mli`: <span class="alert-positive">**clean**</span>\
+- `src/client/opamRepositoryCommand.mli`: <span class="alert-safe">**clean**</span>\
     The documentation of the module below leads me to believe the module is
     intended for internal use.\
     Additionally, I only found 1 use of `OpamRepositoryCommand` outside of opam,
@@ -735,14 +724,14 @@ reasonable or if it should be undone, along with a short explanation.
     (** Functions handling the "opam repository" subcommand *)
     ```
 
-- `src/client/opamSolution.mli:102: eq_atom`: <span class="alert-positive">**clean**</span>\
+- `src/client/opamSolution.mli:102: eq_atom`: <span class="alert-safe">**clean**</span>\
     When exploring the finding's history, I was under the impression that its
     package specific version `OpamSolution.eq_atom_of_package` was meant to
     replace it.\
     Additionally, I did not find any use of this value outside of opam, but I
     found a use of `eq_atom_of_package` in [opam-bundle](https://github.com/AltGr/opam-bundle/blob/master/src/opamBundleMain.ml#L34).
 
-- `src/client/opamSolution.mli:136: sum`: <span class="alert-positive">**clean**</span>\
+- `src/client/opamSolution.mli:136: sum`: <span class="alert-safe">**clean**</span>\
     I did not find any use outside of opam.\
     According to its history, it exists almost since the origins of opam in
     [2012](https://github.com/ocaml/opam/commit/dd0c0ca284aeb520394acb91d15e01f919ed8b7e).
