@@ -441,7 +441,7 @@ as:
 </div>
 
 
-There are 34 unused reported values, 1 unused field and 1 unused constructor
+There are 34 unused values, 1 unused field and 1 unused constructor
 reported by the `dead_code_analyzer`for this component.
 
 #### Aggressive cleanup
@@ -741,7 +741,7 @@ reasonable or if it should be undone, along with a short explanation.
 #### Results
 
 The analyzer reported 36 findings in this component:
-34 unused reported values, 1 unused field and 1 unused constructor.\
+34 unused values, 1 unused field and 1 unused constructor.\
 The aggressive cleanup was able did not reveal any false positive or limitation.\
 The informed cleanup indicates that only 2 findings shold not be removed.
 They are exported values used outside of opam.
@@ -778,8 +778,8 @@ It has 1 subcomponent : `src/core/cmdliner` which defines the sub-library
 > it is meant for internal use only.
 </div>
 
-In total, there are 153 unused reported values, and 56 unused fields and
-constructors reported by the `dead_code_analyzer`for this component.\
+In total, there are 153 unused values, and 56 unused fields and constructors
+reported by the `dead_code_analyzer`for this component.\
 Among the findings, 75 values are reported for the subcomponent.\
 This is the component with the most fields and constructors reported.
 
@@ -1646,7 +1646,7 @@ reasonable or if it should be undone, along with a short explanation.
 #### Results
 
 The analyzer reported 209 findings in this component:
-153 unused reported values, 56 unused fields and constructors.\
+153 unused values, 56 unused fields and constructors.\
 The aggressive cleanup revealed 24 false positives (1 value and 23 fields and
 constructors), and 2 new limitations.\
 The informed cleanup indicates that 65 additional findings (33 values and
@@ -1661,3 +1661,742 @@ extrapolated as the potential fix rate.
 | exported values         | 99.3%      | 77.8%    |
 | constructors and fields | 58.9%      |  1.8%    |
 | total                   | 88.5%      | 57.4%    |
+
+### src/format
+
+#### Description
+
+This component is distributed as the package
+[`opam-format`](https://ocaml.org/p/opam-format/2.5.1), and has
+[18 reverse package dependencies](https://ocaml.org/p/opam-format/2.5.1#used-by).\
+It is described in
+[opam/CONTRIBUTING.md#layout](https://github.com/ocaml/opam/blob/2.5.1/CONTRIBUTING.md#layout)
+as:
+<div class="alert-cite">
+
+>  entirely dedicated to parsing opam files (higher level, but still using opam-file-format) and other internal config files
+</div>
+
+In total, there are 147 unused values, and 16 unused fields and constructors
+reported by the `dead_code_analyzer`for this component.\
+This is the component with the most unused values reported.
+
+#### Aggressive cleanup
+
+##### Unused exported values
+
+Because more than half (82 out of 147, i.e. 55.8%) of the reported values are
+lcoated in `src/format/opamFile.mli, we will clean it first. The intent is to
+reduce the workload during step 3 of the cleanup, although it may lead to more
+iterations.
+
+Applying steps 1 and 2 of the cleanup methodology for
+[unused exported values](#cleaning-up-unused-exported-values) on the fidings in
+`src/format/opamFile.mli` is trivial.\
+Applying step 3 triggers 9 warnings 32 (reoprted as errors).
+<details><summary>build output</summary>
+
+```bash
+$ dune build @check
+File "src/format/opamFile.ml", line 1741, characters 6-26:
+1741 |   let with_solver_criteria solver_criteria t = {t with solver_criteria}
+             ^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value with_solver_criteria.
+
+File "src/format/opamFile.ml", line 2299, characters 6-15:
+2299 |   let variables t = List.rev_map fst t.vars
+             ^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value variables.
+
+File "src/format/opamFile.ml", line 2368, characters 6-20:
+2368 |   let with_stamp_opt stamp t = { t with stamp }
+             ^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value with_stamp_opt.
+
+File "src/format/opamFile.ml", line 2452, characters 6-16:
+2452 |   let with_swhid swhid t = { t with swhid = Some swhid }
+             ^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value with_swhid.
+
+File "src/format/opamFile.ml", line 2746, characters 6-14:
+2746 |   let extended t fld parse =
+             ^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value extended.
+
+File "src/format/opamFile.ml", line 2776, characters 6-22:
+2776 |   let with_version_opt version (t:t) = { t with version }
+             ^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value with_version_opt.
+
+File "src/format/opamFile.ml", line 2851, characters 6-20:
+2851 |   let with_descr_opt descr t = { t with descr }
+             ^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value with_descr_opt.
+
+File "src/format/opamFile.ml", line 3431, characters 6-14:
+3431 |   let contents = Syntax.contents pp
+             ^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value contents.
+
+File "src/format/opamFile.ml", line 3968, characters 6-25:
+3968 |   let create_preinstalled name version packages env =
+             ^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value create_preinstalled.
+```
+</details>
+
+The warnings 32 can be fixed following the technique described in [src/client](#anchor_warning_fix_methodology)
+
+Moving on to the rest of the `src/format` component,  applying steps 1 and 2 is
+trivial again.\
+However, applying step 3 triggers 25 warnings 32 (reported as errors).
+<details><summary>build output</summary>
+
+```bash
+$ dune build @check
+File "src/format/opamSysPkg.ml", line 65, characters 4-20:
+65 | let string_of_status sp =
+         ^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value string_of_status.
+
+File "src/format/opamSysPkg.ml", line 85, characters 4-24:
+85 | let string_of_to_install ti =
+         ^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value string_of_to_install.
+
+File "src/format/opamFormula.ml", line 100, characters 4-25:
+100 | let string_of_disjunction string_of_atom c =
+          ^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value string_of_disjunction.
+
+File "src/format/opamFormula.ml", line 105, characters 4-17:
+105 | let string_of_cnf string_of_atom cnf =
+          ^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value string_of_cnf.
+
+File "src/format/opamFormula.ml", line 114, characters 4-17:
+114 | let string_of_dnf string_of_atom cnf =
+          ^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value string_of_dnf.
+
+File "src/format/opamFormula.ml", line 194, characters 8-12:
+194 | let rec iter f = function
+              ^^^^
+Error (warning 32 [unused-value-declaration]): unused value iter.
+
+File "src/format/opamFormula.ml", line 462, characters 4-18:
+462 | let of_conjunction c =
+          ^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value of_conjunction.
+
+File "src/format/opamFormula.ml", line 536, characters 4-18:
+536 | let to_conjunction t =
+          ^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value to_conjunction.
+
+File "src/format/opamFormula.ml", line 540, characters 4-18:
+540 | let to_disjunction t =
+          ^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value to_disjunction.
+
+File "src/format/opamFormula.ml", line 544, characters 4-18:
+544 | let of_disjunction d =
+          ^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value of_disjunction.
+
+File "src/format/opamPp.ml", line 133, characters 4-10:
+133 | let ignore = {
+          ^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value ignore.
+
+File "src/format/opamTypesBase.ml", line 117, characters 4-12:
+117 | let pos_best pos1 pos2 =
+          ^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value pos_best.
+
+File "src/format/opamTypesBase.ml", line 329, characters 4-16:
+329 | let iter_success f = function
+          ^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value iter_success.
+
+File "src/format/opamTypesBase.ml", line 334, characters 4-14:
+334 | let env_update ?comment:envu_comment ~rewrite:envu_rewrite
+          ^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value env_update.
+
+File "src/format/opamFilter.ml", line 395, characters 4-8:
+395 | let eval ?default env e = value ?default (reduce env e)
+          ^^^^
+Error (warning 32 [unused-value-declaration]): unused value eval.
+
+File "src/format/opamFilter.ml", line 421, characters 4-15:
+421 | let ident_value ?default env id = value ?default (resolve_ident env id)
+          ^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value ident_value.
+
+File "src/format/opamFilter.ml", line 425, characters 4-14:
+425 | let ident_bool ?default env id = value_bool ?default (resolve_ident env id)
+          ^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value ident_bool.
+
+File "src/format/opamFormat.ml", line 165, characters 6-15:
+165 |   let map_group pp1 = group -| map_list ~posf:value_pos pp1
+            ^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value map_group.
+
+File "src/format/opamFormat.ml", line 480, characters 6-18:
+480 |   let package_atom constraints =
+            ^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value package_atom.
+
+File "src/format/opamFormat.ml", line 959, characters 6-12:
+959 |   let signed ~check =
+            ^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value signed.
+
+File "src/format/opamPath.ml", line 63, characters 4-10:
+63 | let backup t = backup_dir t /- backup_file ()
+         ^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value backup.
+
+File "src/format/opamPath.ml", line 79, characters 4-10:
+79 | let plugin t name =
+         ^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value plugin.
+
+File "src/format/opamPath.ml", line 137, characters 6-16:
+137 |   let extra_file t a h = extra_files_dir t a // OpamHash.contents h
+            ^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value extra_file.
+
+File "src/format/opamPath.ml", line 182, characters 8-16:
+182 |     let man_dirs t a = List.map (fun num -> man_dir ~num t a) mans
+              ^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value man_dirs.
+```
+</details>
+
+We can clean up the warnings using the same methodology and re-iterate step 3
+until there is no more warning or error to fix.\
+This cleanup requires multiple iterations because some values were not exported
+and only used by unused values that appear in the above build output. Now that
+we removed these unused values, new unused values are uncovered.
+
+Going ever further, there are a type and an exception that are exported by
+`OpamFormat` but unused: `signature` and `Invalid_signature`.
+They can be removed both from the `.mli` and the `.ml` without breaking the compilation.
+
+##### Unused constructors and fields
+
+Some of the findings accumulate to the whole type definition of `OpamTypes.lock`,
+so we will follow the more specific cleanup methodology of
+[unused constructors and fields](#cleaning-up-unused-constructors-and-fields)
+for this case.
+
+Applying steps 1 and 2 is trivial.\
+Applying step 3 a first time triggers 2 errors.
+<details><summary>build output</summary>
+
+```
+$ dune build @check
+File "src/format/opamTypes.mli", lines 102-105, characters 0-20:
+102 | type variable_contents = OpamVariable.variable_contents =
+103 |   | B of bool
+104 |   | S of string
+105 |   | L of string list
+Error: This variant or record definition does not match that of type
+         OpamVariable.variable_contents
+       A constructor, L, is missing in the original definition.
+
+File "src/format/opamVariable.ml", line 1:
+Error: The implementation src/format/opamVariable.ml
+       does not match the interface src/format/opamVariable.mli:
+       Type declarations do not match:
+         type variable_contents =
+             B of bool
+           | S of variable
+           | L of variable list
+       is not included in
+         type variable_contents = B of bool | S of variable
+       An extra constructor, L, is provided in the first declaration.
+       File "src/format/opamVariable.mli", lines 23-25, characters 0-15:
+         Expected declaration
+       File "src/format/opamVariable.ml", lines 16-19, characters 0-20:
+         Actual declaration
+```
+</details>
+
+The first error is related to a type equation:
+`type variable_contents = OpamVariable.variable_contents`,
+and we already hit a limitation on this when exploring [src/core](#srccore)
+(documented in [issue #79](https://github.com/LexiFi/dead_code_analyzer/issues/79)).\
+We will still explore it because on of the goals of this analysis is also to
+properly qualify the results of the `dead_code_analyzer`.
+
+<div class="alert-tip">
+
+> In a given codebase, the same patterns will probably repeat, so the same limitations will probably be encountered.
+> For a more efficient cleanup, it is recommended to skip reports on patterns already associated with false positives.
+</div>
+
+We can quickly verify if we hit the same type-equation-related limitation by
+removing the constructor `L` in the type alias `variable_contents`.
+Re-building triggers new errors among which a couple indicate that `L` is
+actually used to build values:
+```
+File "src/client/opamAction.ml", line 1101, characters 15-16:
+1101 |         (Some (L added))
+                      ^
+Error: Unbound constructor L
+File "src/client/opamSolution.ml", line 1478, characters 42-43:
+1478 |         OpamVariable.Full.of_string name, L l
+                                                 ^
+Error: Unbound constructor L
+```
+Thus, wee can conclude the the following finding is a
+<span class="alert-danger">false positive</span>:
+```
+/tmp/proj/opam/src/format/opamVariable.mli:26: variable_contents.L
+```
+
+Now that we identified a false positive, we can re-apply step 3 and explore the
+new errors.
+<details><summary>build output</summary>
+
+```
+$ dune build @check
+File "src/state/opamSwitchAction.ml", line 35, characters 4-9:
+35 |     paths = [];
+         ^^^^^
+Error: Unbound record field OpamFile.Switch_config.paths
+File "src/state/opamFormatUpgrade.ml", line 946, characters 23-28:
+946 |             opam_root; paths; variables; wrappers = OpamFile.Wrappers.empty;
+                             ^^^^^
+Error: Unbound record field OpamFile.Switch_config.paths
+File "src/client/opamAdminCheck.ml", line 38, characters 4-12:
+38 |     u_action = Query;
+         ^^^^^^^^
+Error: Unbound record field u_action
+File "src/state/opamSwitchState.ml", line 1042, characters 2-10:
+1042 |   u_action = user_action;
+         ^^^^^^^^
+Error: Unbound record field u_action
+File "src/format/opamFile.ml", line 1:
+Error: The implementation src/format/opamFile.ml
+       does not match the interface src/format/opamFile.mli:  ...
+       In module OPAM:
+       Type declarations do not match:
+         type t =
+           OPAM.t = {
+           opam_version : OpamVersion.t;
+           name : StateTable.M.key option;
+           version : OpamPackage.Version.t option;
+           depends : OpamTypes.filtered_formula;
+           depopts : OpamTypes.filtered_formula;
+           conflicts : OpamTypes.filtered_formula;
+           conflict_class : StateTable.M.key list;
+           available : OpamTypes.filter;
+           flags : OpamTypes.package_flag list;
+           env :
+             (OpamTypes.spf_unresolved, OpamTypes.euok_writeable)
+             OpamTypes.env_update list;
+           build : OpamTypes.command list;
+           run_test : OpamTypes.command list;
+           install : OpamTypes.command list;
+           remove : OpamTypes.command list;
+           substs : OpamFilename.Base.t list;
+           patches : (OpamFilename.Base.t * OpamTypes.filter option) list;
+           build_env :
+             (OpamTypes.spf_unresolved, OpamTypes.euok_writeable)
+             OpamTypes.env_update list;
+           features :
+             (OpamVariable.t * OpamTypes.filtered_formula * string) list;
+           extra_sources : (OpamFilename.Base.t * URL.t) list;
+           messages : (string * OpamTypes.filter option) list;
+           post_messages : (string * OpamTypes.filter option) list;
+           depexts : (OpamSysPkg.Set.t * OpamTypes.filter) list;
+           libraries : (string * OpamTypes.filter option) list;
+           syntax : (string * OpamTypes.filter option) list;
+           dev_repo : OpamUrl.t option;
+           pin_depends : (OpamPackage.t * OpamUrl.t) list;
+           maintainer : string list;
+           author : string list;
+           license : string list;
+           tags : string list;
+           homepage : string list;
+           doc : string list;
+           bug_reports : string list;
+           extensions : OpamParserTypes.FullPos.value ChangesSyntax.SM.t;
+           url : URL.t option;
+           descr : Descr.t option;
+           metadata_dir : (OpamRepositoryName.t option * string) option;
+           extra_files : (OpamFilename.Base.t * OpamHash.t) list option;
+           locked : string option;
+           format_errors : (string * Pp.bad_format) list;
+           ocaml_version :
+             (OpamParserTypes.relop * string) OpamFormula.formula option;
+           os : (bool * string) OpamFormula.formula;
+           deprecated_build_test : OpamTypes.command list;
+           deprecated_build_doc : OpamTypes.command list;
+         }
+       is not included in
+         type t = private {
+           opam_version : OpamVersion.t;
+           name : StateTable.M.key option;
+           version : OpamPackage.Version.t option;
+           depends : OpamTypes.filtered_formula;
+           depopts : OpamTypes.filtered_formula;
+           conflicts : OpamTypes.filtered_formula;
+           available : OpamTypes.filter;
+           flags : OpamTypes.package_flag list;
+           build : OpamTypes.command list;
+           run_test : OpamTypes.command list;
+           install : OpamTypes.command list;
+           remove : OpamTypes.command list;
+           patches : (OpamFilename.Base.t * OpamTypes.filter option) list;
+           features :
+             (OpamVariable.t * OpamTypes.filtered_formula * string) list;
+           extra_sources : (OpamFilename.Base.t * URL.t) list;
+           messages : (string * OpamTypes.filter option) list;
+           post_messages : (string * OpamTypes.filter option) list;
+           depexts : (OpamSysPkg.Set.t * OpamTypes.filter) list;
+           libraries : (string * OpamTypes.filter option) list;
+           syntax : (string * OpamTypes.filter option) list;
+           dev_repo : OpamUrl.t option;
+           pin_depends : (OpamPackage.t * OpamUrl.t) list;
+           maintainer : string list;
+           author : string list;
+           license : string list;
+           tags : string list;
+           homepage : string list;
+           doc : string list;
+           bug_reports : string list;
+           url : URL.t option;
+           descr : Descr.t option;
+           extra_files : (OpamFilename.Base.t * OpamHash.t) list option;
+           format_errors : (string * OpamPp.bad_format) list;
+           ocaml_version :
+             (OpamParserTypes.relop * string) OpamFormula.formula option;
+           os : (bool * string) OpamFormula.formula;
+           deprecated_build_test : OpamTypes.command list;
+           deprecated_build_doc : OpamTypes.command list;
+         }
+       7. An extra field, conflict_class, is provided in the first declaration.
+       10. An extra field, env, is provided in the first declaration.
+       15. An extra field, substs, is provided in the first declaration.
+       17. An extra field, build_env, is provided in the first declaration.
+       34. An extra field, extensions, is provided in the first declaration.
+       37. An extra field, metadata_dir, is provided in the first declaration.
+       39. An extra field, locked, is provided in the first declaration.
+       File "src/format/opamFile.mli", lines 333-390, characters 2-3:
+         Expected declaration
+       File "src/format/opamFile.ml", lines 2528-2603, characters 2-3:
+         Actual declaration
+```
+</details>
+
+The last error reminds a lot the one that lead to opening
+[issue #81](https://github.com/LexiFi/dead_code_analyzer/issues/81)
+when exploring [src/core](#srccore).\
+We can verify if we hit the same limitation by looking for the actual definition
+of `t` and the definition of `OPAM` in the `.ml`. It turns out that `t` is
+defined in `OPAMSyntax` which is included in `OPAM`. Thus, the situation is
+closer to [issue #82](https://github.com/LexiFi/dead_code_analyzer/issues/82).\
+Now to see if we actually hit the limitation, we can update the type in
+`OPAMSyntax` to match the definition in `OPAM`.
+Quickly we can reach a compilation error synonym of a false positive:
+```
+File "src/format/opamFile.ml", line 2649, characters 34-46:
+2649 |         OpamStd.Option.Op.(>>|) t.metadata_dir @@ function
+                                         ^^^^^^^^^^^^
+Error: Unbound record field metadata_dir
+```
+We can conclude that the following findings are
+<span class="alert-danger">false positives</span>:
+```
+/tmp/proj/opam/src/format/opamFile.mli:366: OPAM.t.conflict_class
+/tmp/proj/opam/src/format/opamFile.mli:369: OPAM.t.env
+/tmp/proj/opam/src/format/opamFile.mli:378: OPAM.t.substs
+/tmp/proj/opam/src/format/opamFile.mli:380: OPAM.t.build_env
+/tmp/proj/opam/src/format/opamFile.mli:403: OPAM.t.extensions
+/tmp/proj/opam/src/format/opamFile.mli:413: OPAM.t.metadata_dir
+/tmp/proj/opam/src/format/opamFile.mli:419: OPAM.t.locked
+```
+
+If we re-apply step 3, and the following error is triggered:
+```
+File "src/format/opamFile.ml", line 1:
+Error: The implementation src/format/opamFile.ml
+       does not match the interface src/format/opamFile.mli:  ...
+       In module Repo_config_legacy:
+       Type declarations do not match:
+         type t =
+           Repo_config_legacy.t = {
+           repo_name : OpamRepositoryName.t;
+           repo_root : OpamFilename.Dir.t;
+           repo_url : OpamUrl.t;
+           repo_priority : int;
+         }
+       is not included in
+         type t = { repo_url : OpamUrl.t; repo_priority : int; }
+       1. An extra field, repo_name, is provided in the first declaration.
+       2. An extra field, repo_root, is provided in the first declaration.
+       File "src/format/opamFile.mli", lines 854-857, characters 2-3:
+         Expected declaration
+       File "src/format/opamFile.ml", lines 2174-2179, characters 2-3:
+         Actual declaration
+```
+We are facing the the same pattern as with the type `t` in modules `OPAM` and
+`OPAMSyntax`. This time it is the module `Repo_config_legacySyntax` that is
+included in `Repo_config_legacy`.
+Both fields `repo_name` and `repo_root` are used in `src/format/opamFile.ml` in
+the definition of the value `Repo_config_legacySyntax.fields`.\
+We can move on with the same conclusion that the following findings are
+<span class="alert-danger">false positives</span>:
+```
+/tmp/proj/opam/src/format/opamFile.mli:1019: Repo_config_legacy.t.repo_name
+/tmp/proj/opam/src/format/opamFile.mli:1020: Repo_config_legacy.t.repo_root
+```
+
+Once again we can re-apply step 3, and once again it triggers a similar error:
+```
+File "src/format/opamFile.ml", line 1:
+Error: The implementation src/format/opamFile.ml
+       does not match the interface src/format/opamFile.mli:  ...
+       In module Switch_config:
+       Type declarations do not match:
+         type t =
+           Switch_config.t = {
+           opam_version : OpamVersion.t;
+           synopsis : string;
+           repos : OpamRepositoryName.t list option;
+           paths : (OpamTypes.std_path * string) list;
+           variables : (OpamVariable.t * OpamVariable.variable_contents) list;
+           opam_root : OpamFilename.Dir.t option;
+           wrappers : Wrappers.t;
+           env :
+             (OpamTypes.spf_resolved, OpamTypes.euok_writeable)
+             OpamTypes.env_update list;
+           invariant : OpamFormula.t option;
+           depext_bypass : OpamSysPkg.Set.t;
+         }
+       is not included in
+         type t = {
+           opam_version : OpamVersion.t;
+           synopsis : string;
+           repos : OpamRepositoryName.t list option;
+           variables : (OpamVariable.t * OpamVariable.variable_contents) list;
+           opam_root : OpamFilename.Dir.t option;
+           wrappers : Wrappers.t;
+           env :
+             (OpamTypes.spf_resolved, OpamTypes.euok_writeable)
+             OpamTypes.env_update list;
+           invariant : OpamFormula.t option;
+           depext_bypass : OpamSysPkg.Set.t;
+         }
+       An extra field, paths, is provided in the first declaration.
+       File "src/format/opamFile.mli", lines 870-880, characters 2-3:
+         Expected declaration
+       File "src/format/opamFile.ml", lines 1990-2001, characters 2-3:
+         Actual declaration
+```
+We are facing the same pattern, with module `Switch_configSyntax` included in
+`Switch_config`. The field `paths` is actually used in `src/format/opamFile.ml`
+in the definition of the value `Switch_configSyntax.sections`.\
+Once again, we can conclude that the following finding is a
+<span class="alert-danger">false positive</span>:
+```
+/tmp/proj/opam/src/format/opamFile.mli:1038: Switch_config.t.paths
+```
+
+Now that we are done with the false positives in `src/format/opamFile.ml`,
+applying iterating on step 3 only triggers "safe" errors.\
+During the iterations, we wil encounter the following warning 26 (reported as error):
+```
+File "src/state/opamSwitchState.ml", line 959, characters 4-15:
+959 |     user_action =
+          ^^^^^^^^^^^
+Error (warning 27 [unused-var-strict]): unused variable user_action.
+```
+This error points to an unused parameter. Removing it would trigger a warning 16
+(reported as error) that is more problematic :
+```
+File "src/state/opamSwitchState.ml", line 957, characters 5-14:
+957 |     ?reinstall
+           ^^^^^^^^^
+Error (warning 16 [unerasable-optional-argument]): this optional argument cannot be erased.
+```
+In order to keep this exploration simple enough, I will silence the parameter
+reported by the warning 27 by prefixing its name with an underscore: `_user_action`.
+<div class="alert-note">
+
+> In practice, fixing such situation can lead to a replacement of the parameter with unit and updating all the callers accordingly,
+> or more heavy-handed refactors.
+</div>
+
+All the errors can be fixed without encountering any more limitation of the analyzer.
+
+We are done with the aggressive cleanup and can move on to the informed cleanup
+
+#### Informed cleanup
+
+This section takes the findings in-order (often at once in a single file) and indicates if their cleanup is
+reasonable or if it should be undone, along with a short explanation.
+
+- `src/format/opamFile.mli:112: Wrappers.with_wrap_remove`: <span class="alert-danger">**undo**</span>\
+    While investigating the unused `OpamFile.*.with_*` functions, I found a
+    mistake in opam : `OpamFile.Wrappers.with_pre_remove` is used in
+    [`src/client/opamConfigCommand.ml`](https://github.com/ocaml/opam/blob/2.5.1/src/client/opamConfigCommand.ml#L665),
+    where `OpamFile.Wrappers.with_wrap_remove` is expected.
+
+- `src/format/opamFile.mli:145: Config.with_best_effort_prefix`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFile.mli:148: Config.with_solver`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFile.mli:153: Config.with_dl_tool`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFile.mli:257: InitConfig.opam_version`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFile.mli:276: InitConfig.with_opam_version`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFile.mli:281: InitConfig.with_jobs`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFile.mli:283: InitConfig.with_dl_jobs`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFile.mli:284: InitConfig.with_dl_cache`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFile.mli:285: InitConfig.with_solver_criteria`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFile.mli:286: InitConfig.with_solver`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFile.mli:288: InitConfig.with_global_variables`: <span class="alert-safe">**clean**</span>\
+
+    These functions are meant to update values of abstract types `t`.
+    Keeping them, even if unused, would be reasonable.\
+    However, because the 2 APIs already show some inconsistencies, I think it
+    would also be reasonable to reduce them to what is actually used in order to
+    reduce maintenance cost.
+
+- `src/format/opamFile.mli:307: Descr.of_string`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFile.mli:316: Descr.full`: <span class="alert-safe">**clean**</span>\
+    I only found a use of `OpamFile.Descr.full` outside opam in
+    [opamfu](https://github.com/ocamllabs/opamfu/blob/master/lib/opamfUniverse.ml#L123).\
+    However the project has not seen activity for the past 8 years so I will
+    consider it dead.
+
+- `src/format/opamFile.mli:342: URL.with_mirrors`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFile.mli:343: URL.with_swhid`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFile.mli:345: URL.with_subpath`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFile.mli:346: URL.with_subpath_opt`: <span class="alert-safe">**clean**</span>\
+    Same reasoning as with `OpamFile.Config.with_*`.
+
+- `src/format/opamFile.mli:*: OPAM.*`: <span class="alert-danger">**undo**</span>\
+    Some of the reported values in `OpamFile.OPAM` are simple accessors that
+    existed for a long time and were sensical when `OpamFile.OPAM.t` was abstract.\
+    Now that the type is private, the fields can be accessed directly and the getters do not provide any additional value.\
+    Additionally, the same argument as before could be applied to the setters
+    (`with_*` values).\
+    However, multiple reported values are used by external packages:
+    - `extended` in [opam-monorepo](https://github.com/tarides/opam-monorepo/blob/main/lib/opam.ml#L313)
+    - `homepage`, `author`, `license`, and more in [dune-release](https://github.com/tarides/dune-release/blob/main/lib/opam.ml#L181)
+
+    Thus, it will be safer to consider the values in `OpamFile.OPAM` as used and not remove them.
+
+
+- `src/format/opamFile.mli:804: Environment.read`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFile.mli:807: Environment.read_from_channel`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFile.mli:808: Environment.read_from_string`: <span class="alert-safe">**clean**</span>\
+    I did not find an use of `OpamFile.Environment` outside opam.
+
+- `src/format/opamFile.mli:*: Comp.*`: <span class="alert-safe">**clean**</span>\
+    The `Comp` module is documented as deprecated:
+    ```OCaml
+    (** Compiler version [$opam/compilers/]. Deprecated, only used to upgrade old
+        data *)
+    ```
+
+- `src/format/opamFile.mli:*: Dot_install.*`: <span class="alert-safe">**clean**</span>\
+    Same reasoning as with `OpamFile.Config.with_*`.
+
+- `src/format/opamFile.mli:1087: Repo.browse`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFile.mli:1090: Repo.upstream`: <span class="alert-danger">**undo**</span>\
+    I have not found any use of `OpamFile.Repo.browse` outside of opam but found
+    one of `OpamFile.Repo.upstream` in [opam2Web](https://github.com/ocaml-opam/opam2web/blob/master/src/o2wPackage.ml#L472).
+
+- `src/format/opamFile.mli:*: Repo.with_*`: <span class="alert-safe">**clean**</span>\
+    Same reasoning as with `OpamFile.Config.with_*`.
+
+- `src/format/opamFile.mli:*: Syntax.*`: <span class="alert-safe">**clean**</span>\
+    I did not find any use outside opam.\
+    Additionally, I have not found any historical use outside their compilation unit.
+
+
+- `src/format/opamFilter.mli:109: eval`: <span class="alert-danger">**undo**</span>\
+  `src/format/opamFilter.mli:121: eval_to_string`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFilter.mli:134: ident_value`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFilter.mli:140: ident_bool`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFilter.mli:142: expand_interpolations_in_file_full`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFilter.mli:188: gen_filter_formula`: <span class="alert-safe">**clean**</span>\
+    Among all the values reported in `src/format/opamFilter.mli`, I could only
+    find the use of one outside opam: `OpamFilter.eval` in
+    [opam-0install](https://github.com/ocaml-opam/opam-0install-solver/blob/master/lib/dir_context.ml#L104).
+
+- `src/format/opamFormat.mli:19: value_pos`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFormat.mli:64: V.simple_arg`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFormat.mli:73: V.group`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFormat.mli:80: V.map_group`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFormat.mli:122: V.filter_ident`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFormat.mli:157: V.package_atom`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFormat.mli:196: I.file`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFormat.mli:200: I.item`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFormat.mli:271: I.extract_field`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFormat.mli:292: I.signature`: <span class="alert-danger">**undo**</span>\
+  `src/format/opamFormat.mli:299: I.signed`: <span class="alert-danger">**undo**</span>\
+    I did not find any use outside of opam of the findings in
+    `src/format/opamFormat.mli`.\
+    However, the file contains the following comment line 287 indicating a work
+    in progress, so I'll consider everything reported below that line must not
+    be removed.
+    ```OCaml
+      (** Signature handling (wip) *)
+    ```
+
+- `src/format/opamFormula.mli:144: iter`: <span class="alert-danger">**undo**</span>\
+  `src/format/opamFormula.mli:172: compare`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFormula.mli:190: compare_nc`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFormula.mli:199: formula_to_cnf`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFormula.mli:202: dnf_of_formula`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFormula.mli:218: simplify_ineq_formula`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFormula.mli:245: to_conjunction`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFormula.mli:248: of_conjunction`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFormula.mli:252: to_disjunction`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFormula.mli:260: of_disjunction`: <span class="alert-safe">**clean**</span>\
+    I did not find any use outside opam of the findings.\
+    However,`OpamFormula.iter` is actually used inside opam by
+    `admin-scripts/depopts_to_conflicts.ml`.
+    This was missed by the analyzer because the files in `admin-scripts` are not
+    part of the build.
+
+- `src/format/opamPath.mli`: <span class="alert-safe">**clean**</span>\
+    I did not find any use of the findings outside opam.
+
+- `src/format/opamPp.mli:96: ignore`: <span class="alert-safe">**clean**</span>\
+    I did not find any use of the finding outside opam.
+
+- `src/format/opamSysPkg.mli`: <span class="alert-safe">**clean**</span>\
+    I did not find any use of the findings outside opam.
+
+- `src/format/opamTypesBase.mli`: <span class="alert-safe">**clean**</span>\
+    I did not find any use of the findings outside opam.
+
+- `src/format/opamTypes.mli`: <span class="alert-safe">**clean**</span>\
+    I did not find any use of the findings outside opam.
+
+#### Results
+
+The analyzer reported 163 findings in this component:
+147 unused values, 16 unused fields and constructors.\
+The aggressive cleanup revealed 11 false positives (only fields and constructors),
+all caused by the same pattern already encountered in [src/core](#srccore).\
+The informed cleanup indicates that 27 additional findings (only values) should
+not be removed.
+
+From these results, we can compute the precision of the analyzer shown in the
+table below. The estimated precision for the informed cleanup can be
+extrapolated as the potential fix rate.
+
+| section                 | aggressive | informed |
+|:-----------------------:|:----------:|:--------:|
+| exported values         | 100%       | 81.6%    |
+| constructors and fields | 31.3%      | 31.3%    |
+| total                   | 93.3%      | 76.7%    |
