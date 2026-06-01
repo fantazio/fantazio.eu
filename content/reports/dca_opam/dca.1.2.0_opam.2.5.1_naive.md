@@ -500,35 +500,9 @@ All the reported unused values and modules can be removed, just like the reports
 
 This section focuses on reports in `/tmp/proj/opam/src/tools`.
 
-The `dead_code_analyzer` only reports values in `src/tools/opam_admin_top.mli` and reports all the values in that file.
-There is a type that is exported that only seems to be used by the exported values, and an open that becomes unused without the values.
-Consequently, we can go even further than a naive cleanup and remove all the content of the file (except for the copyright and module description).
 
 Running our `dune` command gives a few compiler reports:
-```
-$ dune build @check
-File "src/tools/opam_admin_topstart.ml", line 1:
-Warning 70 [missing-mli]: Cannot find interface file.
-File "src/tools/opam_admin_top.ml", line 18, characters 4-12:
-18 | let packages = OpamRepository.packages repo
-         ^^^^^^^^
-Error (warning 32 [unused-value-declaration]): unused value packages.
 
-File "src/tools/opam_admin_top.ml", line 29, characters 0-51:
-29 | type 'a action = [`Update of 'a | `Remove  | `Keep]
-     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error (warning 34 [unused-type-declaration]): unused type action.
-
-File "src/tools/opam_admin_top.ml", line 93, characters 4-17:
-93 | let iter_packages ?quiet
-         ^^^^^^^^^^^^^
-Error (warning 32 [unused-value-declaration]): unused value iter_packages.
-
-File "src/tools/opam_admin_top.ml", line 129, characters 4-19:
-129 | let filter_packages = filter OpamPackage.to_string
-          ^^^^^^^^^^^^^^^
-Error (warning 32 [unused-value-declaration]): unused value filter_packages.
-```
 The warnings 32 are triggered because the values are not exported (anymore) and not used inside their compilation unit. All the reported unused values can be removed, just like reports from the analyzer.
 
 After this first cleanup, running our `dune` command a second time outputs even more reports:
@@ -595,43 +569,6 @@ Error (warning 32 [unused-value-declaration]): unused value regexps_of_patterns.
 ```
 
 Third time's the charm. After cleaning up these reports, the file does not contain anything but comments.
-Therefore, we can go further in the cleanup and remove this module entirely.
-Doing so requires a few extra steps.
-
-First we need to remove the whole `library` stanza from `src/tools/dune`:
-```dune
-(library
-  (name         opam_admin_top)
-  (public_name  opam-admin.top)
-  (synopsis     "OCaml Package Manager admin toplevel")
-  (modules      opam_admin_top)
-  ; TODO: Remove (re_export ...) when CI uses the OCaml version that includes https://github.com/ocaml/ocaml/pull/11989
-  (libraries    opam-client opam-file-format (re_export compiler-libs.toplevel) re)
-  (wrapped      false))
-```
-
-Then we also need to edit the `executable` stanza in the same file, to replace the dependecy on the removed lib to a dependency on the ocaml toplevel:
-```diff
-(executable
-  (name         opam_admin_topstart)
-  (public_name  opam-admin.top)
-  (package      opam-admin)
-  (modes        byte)
-  (modules      opam_admin_topstart)
--  (libraries    opam-admin.top)
-+  (libraries    compiler-libs.toplevel)
-  (ocamlc_flags (:standard
-                (:include ../ocaml-flags-standard.sexp)
-                (:include ../ocaml-flags-configure.sexp)
-                (:include ../ocaml-context-flags.sexp)
-                -linkall)))
-```
-
-Finally, we must update the rule to generate `src/tools/opam_admin_topstart.ml` in the same `dune` file:
-```diff
--(rule (with-stdout-to opam_admin_topstart.ml (echo "include Opam_admin_top\n\nlet _ = Topmain.main ()")))
-+(rule (with-stdout-to opam_admin_topstart.ml (echo "let _ = Topmain.main ()")))
-```
 
 ### Unused constructors/record fields
 

@@ -24,15 +24,6 @@ This section focuses on reports in `/tmp/proj/opam/src/client`.
 
 This component builds into the library [`opam-client`](https://opam.ocaml.org/packages/opam-client/). Thus, we must be very careful when choosing to remove a value.
 
-
-#### Tools
-
-This section focuses on reports in `/tmp/proj/opam/src/tools`.
-
-`Opam_admin_top` is actaully used in `admin-scripts`.
-This was missed by the analyzer because the files in `admin-scripts` are not part of the build.
-Thus, I'll consider its values are used and should not be removed
-
 ### Unused constructors/record fields
 
 The [report](../assets/reports/dca/opam/dca.out)'s unused constructors/record fields section initial content is 75 lines long after discarding the header, footer, and blank lines.

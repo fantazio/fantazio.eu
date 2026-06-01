@@ -2957,3 +2957,138 @@ extrapolated as the potential fix rate.
 | exported values         | 100%       | 100%     |
 | constructors and fields | 100%       | 100%     |
 | total                   | 100%       | 100%     |
+
+### src/tools
+
+#### Description
+
+This component is not distributed.
+
+In total, there are 5 unused values, and no unused field or constructor
+reported by the `dead_code_analyzer` for this component.
+
+#### Aggressive cleanup
+
+##### Unused exported values
+
+All the findings are located in `src/tools/opam_admin_top.mli` and they amount
+to all the values exported by this module.
+
+Applying steps 1 and 2 of the cleanup methodology for
+[unused exported values](#cleaning-up-unused-exported-values) is trivial.\
+There is a type exported that only seems to be used by the exported values,
+and an open that becomes unused without the values. Consequently, we can go even
+further than a naive cleanup and remove all the content of the file (except for
+the copyright and module description).\
+Applying step 3 triggers 3 warnings 32 (reported as errors) and 1 warning 34
+(reported as error).
+<details><summary>build output</summary>
+
+```bash
+$ dune build @check
+File "src/tools/opam_admin_top.ml", line 18, characters 4-12:
+18 | let packages = OpamRepository.packages repo
+         ^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value packages.
+
+File "src/tools/opam_admin_top.ml", line 29, characters 0-51:
+29 | type 'a action = [`Update of 'a | `Remove  | `Keep]
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 34 [unused-type-declaration]): unused type action.
+
+File "src/tools/opam_admin_top.ml", line 93, characters 4-17:
+93 | let iter_packages ?quiet
+         ^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value iter_packages.
+
+File "src/tools/opam_admin_top.ml", line 129, characters 4-19:
+129 | let filter_packages = filter OpamPackage.to_string
+          ^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value filter_packages.
+```
+</details>
+
+The warnings 34 and 32 can be fixed following the technique described in [src/client](#anchor_warning_fix_methodology).\
+After 2 more iterations on step 3, building does not trigger any new error or
+warning.
+Now both the `.mli` and the `.ml` only contain the copyright notice and
+a documentation comment.\
+Therefore, we can go further in the cleanup and remove this module entirely.
+Doing so requires a few extra steps.
+
+First we need to remove the whole `library` stanza from `src/tools/dune`:
+```dune
+(library
+  (name         opam_admin_top)
+  (public_name  opam-admin.top)
+  (synopsis     "OCaml Package Manager admin toplevel")
+  (modules      opam_admin_top)
+  ; TODO: Remove (re_export ...) when CI uses the OCaml version that includes https://github.com/ocaml/ocaml/pull/11989
+  (libraries    opam-client opam-file-format (re_export compiler-libs.toplevel) re)
+  (wrapped      false))
+```
+
+Then, we also need to edit the `executable` stanza in the same file, to replace
+the dependecy on the removed lib to a dependency on the ocaml toplevel:
+```diff
+ (executable
+   (name         opam_admin_topstart)
+   (public_name  opam-admin.top)
+   (package      opam-admin)
+   (modes        byte)
+   (modules      opam_admin_topstart)
+-  (libraries    opam-admin.top)
++  (libraries    compiler-libs.toplevel)
+   (ocamlc_flags (:standard
+                 (:include ../ocaml-flags-standard.sexp)
+                 (:include ../ocaml-flags-configure.sexp)
+                 (:include ../ocaml-context-flags.sexp)
+                 -linkall)))
+```
+
+Finally, we must update the rule to generate `src/tools/opam_admin_topstart.ml`
+in the same `dune` file:
+```diff
+-(rule (with-stdout-to opam_admin_topstart.ml (echo "include Opam_admin_top\n\nlet _ = Topmain.main ()")))
++(rule (with-stdout-to opam_admin_topstart.ml (echo "let _ = Topmain.main ()")))
+```
+
+##### Unused constructors and fields
+
+There is no finding in this section.
+
+We are done with the aggressive cleanup and can move on to the informed cleanup
+
+#### Informed cleanup
+
+This section takes the findings in-order (often at once in a single file) and indicates if their cleanup is
+reasonable or if it should be undone, along with a short explanation.
+
+- `src/tools/opam_admin_top.mli`: <span class="alert-danger">**undo**</span>\
+    The module is actually used inside opam in `admin-scripts`.
+    This was missed by the analyzer because the files in `admin-scripts` are not
+    part of the build.\
+    The only value I could not find using `grep` is `filter_packages`.
+    I would not dismiss it, because the component should have been considered
+    out of scope as its documentation indicates:
+    ```OCaml
+    (** Small lib for writing opam-repo admin scripts *)
+    ```
+
+#### Results
+
+The analyzer reported 5 findings in this component:
+5 unused values, 0 unused field or constructor.\
+The aggressive cleanup did not reveal any false positive or limitation.\
+The informed cleanup revealed 5 false positives but no limitation. It was
+actually a methodology mistake.
+
+From these results, we can compute the precision of the analyzer shown in the
+table below. The estimated precision for the informed cleanup can be
+extrapolated as the potential fix rate.
+
+| section                 | aggressive | informed |
+|:-----------------------:|:----------:|:--------:|
+| exported values         | 100%       |   0%     |
+| constructors and fields | NA         | NA       |
+| total                   | 100%       | 100%     |
