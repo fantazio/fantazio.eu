@@ -2526,3 +2526,249 @@ extrapolated as the potential fix rate.
 | exported values         | 100%       | 100%     |
 | constructors and fields | NA         | NA       |
 | total                   | 100%       | 100%     |
+
+### src/solver
+
+#### Description
+
+This component is distributed as the package
+[`opam-solver`](https://ocaml.org/p/opam-solver/2.5.1), and has
+[4 reverse package dependencies](https://ocaml.org/p/opam-solver/2.5.1#used-by).\
+It is described in
+[opam/CONTRIBUTING.md#layout](https://github.com/ocaml/opam/blob/2.5.1/CONTRIBUTING.md#layout)
+as:
+<div class="alert-cite">
+
+> gathers everything related to the various options for constraint solving that opam can use (custom search, dose, mccs, z3, 0install, …)
+</div>
+
+In total, there are 58 unused values, and 4 unused fields ans constructors
+reported by the `dead_code_analyzer` for this component.
+
+#### Aggressive cleanup
+
+##### Unused exported values
+
+Because the vas majority of the findings are located in `src/solver/opamCudf.mli`
+(51 out of 58, i.e. 87.9%), we will clean it first.
+
+Applying steps 1 and 2 of the cleanup methodology for
+[unused exported values](#cleaning-up-unused-exported-values) on the fidings in
+`src/solver/opamCudf.mli` is trivial.\
+All the values exported by `OpamCudf.Json` are unused. This leaves the module's
+signature defined as below. The module does not export anything anymore, so it
+can be removed as a whole.
+```OCaml
+module Json: sig
+  open Cudf_types
+end
+```
+Applying step 3 triggers 8 warnings 32 (reported as errors).
+<details><summary>build output</summary>
+
+```bash
+$ dune build @check
+File "src/solver/opamCudf.ml", line 51, characters 4-23:
+51 | let unavailable_package = unavailable_package_name, unavailable_package_version
+         ^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value unavailable_package.
+
+File "src/solver/opamCudf.ml", line 52, characters 4-26:
+52 | let is_unavailable_package p = p.Cudf.package = unavailable_package_name
+         ^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value is_unavailable_package.
+
+File "src/solver/opamCudf.ml", line 624, characters 4-22:
+624 | let string_of_universe u =
+          ^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value string_of_universe.
+
+File "src/solver/opamCudf.ml", line 1226, characters 4-19:
+1226 | let conflict_cycles = function
+           ^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value conflict_cycles.
+
+File "src/solver/opamCudf.ml", line 1288, characters 4-17:
+1288 | let uninstall_all universe =
+           ^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value uninstall_all.
+
+File "src/solver/opamCudf.ml", line 1293, characters 4-11:
+1293 | let install universe package =
+           ^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value install.
+
+File "src/solver/opamCudf.ml", line 1303, characters 4-39:
+1303 | let remove_all_uninstalled_versions_but universe name constr =
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value remove_all_uninstalled_versions_but.
+
+File "src/solver/opamCudf.ml", line 2057, characters 4-12:
+2057 | let packages u = Cudf.get_packages u
+           ^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value packages.
+```
+</details>
+
+The warnings 32 can be fixed following the technique described in [src/client](#anchor_warning_fix_methodology)\
+After 2 more iterations on step 3, building does not trigger any new error or
+warning.
+
+Moving on to the rest of the `src/solver` component, all the remaining findings
+are in `src/solver/opamSolver.mli`.\
+Applying steps 1 and 2 is trivial again.\
+Applying step 3 triggers 4 warnings 32 (reported as errors) which can be
+cleaned up using the same methodology.
+<details><summary>build output</summary>
+
+```bash
+dune build @check
+File "src/solver/opamSolver.ml", line 23, characters 4-18:
+23 | let empty_universe =
+         ^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value empty_universe.
+
+File "src/solver/opamSolver.ml", line 39, characters 4-20:
+39 | let solution_to_json solution =
+         ^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value solution_to_json.
+
+File "src/solver/opamSolver.ml", line 41, characters 4-20:
+41 | let solution_of_json json =
+         ^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value solution_of_json.
+
+File "src/solver/opamSolver.ml", line 617, characters 4-23:
+617 | let check_for_conflicts universe =
+          ^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value check_for_conflicts.
+```
+</details>
+
+##### Unused constructors and fields
+
+All the findings are located in `src/solver/opamCudfSolverSig.ml`.
+In particular, they are all fields of the same type `criteria_def` and amount to
+all the fields of that type.
+We will follow the more specific cleanup methodology of
+[unused constructors and fields](#cleaning-up-unused-constructors-and-fields)
+for this case.
+
+Applying steps 1 and 2 is trivial.\
+Applying step 3 triggers 4 errors.
+<details><summary>build output</summary>
+
+```
+$ dune build @check
+File "src/solver/opamBuiltinZ3.dummy.ml", lines 23-28, characters 23-1:
+Error: Cannot create values of the private type criteria_def
+
+File "src/solver/opamBuiltinMccs.real.ml", lines 15-32, characters 23-1:
+Error: Cannot create values of the private type criteria_def
+
+File "src/solver/opamBuiltin0install.ml", lines 25-31, characters 23-1:
+25 | .......................{
+26 |   crit_default = "-changed,\
+27 |                   -count[avoid-version,solution]";
+28 |   crit_upgrade = "-count[avoid-version,solution]";
+29 |   crit_fixup = "-count[avoid-version,solution]";
+30 |   crit_best_effort_prefix = None;
+31 | }
+Error: Cannot create values of the private type criteria_def
+
+File "src/solver/opamCudfSolver.ml", lines 15-20, characters 30-1:
+15 | ..............................{
+16 |   crit_default = "-removed,-notuptodate,-changed";
+17 |   crit_upgrade = "-removed,-notuptodate,-changed";
+18 |   crit_fixup = "-changed,-notuptodate";
+19 |   crit_best_effort_prefix = None;
+20 | }
+Error: Cannot create values of the private type criteria_def
+```
+</details>
+
+As expected we have errors about the impossibility to write into the fields.
+Remember, a field is considered used if it is read. If none of its fields is ever
+used, then the values created of type `criteria_def` become useless. We can fix
+our errors by removing them and their use, guided by the compilation errors.
+
+After a couple of iterations of step 3, we get the following error:
+```
+File "src/solver/opamSolverConfig.ml", line 161, characters 4-22:
+161 |     S.default_criteria
+          ^^^^^^^^^^^^^^^^^^
+Error: Unbound value S.default_criteria
+```
+This is not surprising because we removed the value because it was of type
+`criteria_def`.\
+However, the referenced code is part of the following larger piece of code in which
+the removed value `S.default_criteria` is stored in `criteria`, and its fields
+(`crit_default`, `crit_upgrade`, `crit_fixup`, and `crit_best_effort_prefix`) are all visibly read.
+```OCaml
+  let criteria = lazy (
+    let module S = (val Lazy.force config.solver) in
+    S.default_criteria
+  ) in
+  set config
+    ~solver_preferences_default:
+      (lazy (match config.solver_preferences_default with
+           | lazy None -> Some (Lazy.force criteria).OpamCudfSolver.crit_default
+           | lazy some -> some))
+    ~solver_preferences_upgrade:
+      (lazy (match config.solver_preferences_upgrade with
+           | lazy None -> Some (Lazy.force criteria).OpamCudfSolver.crit_upgrade
+           | lazy some -> some))
+    ~solver_preferences_fixup:
+      (lazy (match config.solver_preferences_fixup with
+           | lazy None -> Some (Lazy.force criteria).OpamCudfSolver.crit_fixup
+           | lazy some -> some))
+    ~solver_preferences_best_effort_prefix:
+      (lazy (match config.solver_preferences_best_effort_prefix with
+           | lazy None ->
+             (Lazy.force criteria).OpamCudfSolver.crit_best_effort_prefix
+           | lazy some -> some))
+    ()
+```
+We hit a new limitation of the analyzer and can open an
+[issue](https://github.com/LexiFi/dead_code_analyzer/issues/83) to report it.\
+We can conclude that the following reports are
+<span class="alert-danger">false positives</span>:
+```
+/tmp/proj/opam/src/solver/opamCudfSolverSig.ml:12: criteria_def.crit_default
+/tmp/proj/opam/src/solver/opamCudfSolverSig.ml:13: criteria_def.crit_upgrade
+/tmp/proj/opam/src/solver/opamCudfSolverSig.ml:14: criteria_def.crit_fixup
+/tmp/proj/opam/src/solver/opamCudfSolverSig.ml:15: criteria_def.crit_best_effort_prefix
+```
+
+We are done with the aggressive cleanup and can move on to the informed cleanup
+
+#### Informed cleanup
+
+This section takes the findings in-order (often at once in a single file) and indicates if their cleanup is
+reasonable or if it should be undone, along with a short explanation.
+
+- `src/solver/opamCudf.mli`: <span class="alert-safe">**clean**</span>\
+    I have found only one use of `OpamCudf` outside of opam, in
+    [opam-0install](https://github.com/ocaml-opam/opam-0install-solver/blob/master/test/test.ml#L34),
+    and it does not concern any of its findings.
+
+- `src/solver/opamSolver.mli`: <span class="alert-safe">**clean**</span>\
+    I did not find any use of the findings outside opam.
+
+#### Results
+
+The analyzer reported 62 findings in this component:
+58 unused values, 4 unused field or constructor.\
+The aggressive cleanup revealed 4 false positives (only fields and constructors),
+and 1 new limitation.\
+The informed cleanup did not reveal any false positive or limitation.
+
+From these results, we can compute the precision of the analyzer shown in the
+table below. The estimated precision for the informed cleanup can be
+extrapolated as the potential fix rate.
+
+| section                 | aggressive | informed |
+|:-----------------------:|:----------:|:--------:|
+| exported values         | 100%       | 100%     |
+| constructors and fields |   0%       |   0%     |
+| total                   | 93.5%      | 93.5%    |
