@@ -13,8 +13,7 @@
 }
 
 [class*="OCaml-constant"],
-.OCaml-string-quoted-double,
-.OCaml-string-quoted-single {
+[class^="OCaml-string"] {
   color: var(--constant-color);
 }
 
