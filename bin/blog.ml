@@ -142,7 +142,9 @@ let create_css =
   let www_style = Path.(www / "style.css") in
   let pipeline =
     let open Task in
-let css_paths = build_paths css [ "reset.css"; "style.css"; "ocaml.css" ] in
+    let css_paths =
+      build_paths css [ "reset.css"; "style.css"; "ocaml.css"; "diff.css" ]
+    in
     let+ () = track_binary
     and+ content = Pipeline.pipe_files ~separator:"\n" css_paths in
     content

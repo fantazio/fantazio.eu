@@ -20,6 +20,9 @@
     --constant-color: #549bf2;
     --type-color: var(--tip-color);
     --comment-color: #656056;
+
+    --delete-color: var(--danger-color);
+    --insert-color: var(--note-color);
 }
 
 .icon {
