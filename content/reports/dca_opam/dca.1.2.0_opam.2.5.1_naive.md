@@ -495,44 +495,6 @@ The warning 60 on module `RegistryHive` appears because I removed it from `src/c
 
 All the reported unused values and modules can be removed, just like the reports from the analyzer.
 
-#### Repository
-
-This section focuses on reports in `/tmp/proj/opam/src/repository`.
-
-There are not a lot of reports (8) in that direcotry. Applying a naive cleanup is straightforward.
-Our `dune` command provides the following output:
-```
-$ dune build @check
-File "src/repository/opamRepositoryPath.ml", line 60, characters 6-10:
-60 |   let repo root_url =
-           ^^^^
-Error (warning 32 [unused-value-declaration]): unused value repo.
-
-File "src/repository/opamRepositoryPath.ml", line 66, characters 6-13:
-66 |   let archive root_url nv =
-           ^^^^^^^
-Error (warning 32 [unused-value-declaration]): unused value archive.
-File "src/repository/opamRepositoryBackend.ml", line 40, characters 4-11:
-40 | let compare r1 r2 = compare r1.repo_name r2.repo_name
-         ^^^^^^^
-Error (warning 32 [unused-value-declaration]): unused value compare.
-
-File "src/repository/opamRepositoryBackend.ml", line 47, characters 4-11:
-47 | let to_json r =
-         ^^^^^^^
-Error (warning 32 [unused-value-declaration]): unused value to_json.
-
-File "src/repository/opamRepositoryBackend.ml", line 52, characters 4-16:
-52 | let check_digest filename = function
-         ^^^^^^^^^^^^
-Error (warning 32 [unused-value-declaration]): unused value check_digest.
-File "src/tools/opam_admin_topstart.ml", line 1:
-Warning 70 [missing-mli]: Cannot find interface file.
-```
-
-The warnings 32 are triggered because the values are not exported (anymore) and not used inside their compilation unit.
-All the reported unused values can be removed, just like reports from the analyzer.
-
 #### Solver
 
 This section focuses on reports in `/tmp/proj/opam/src/solver`.

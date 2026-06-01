@@ -653,7 +653,7 @@ reasonable or if it should be undone, along with a short explanation.
 - `src/client/opamArg.mli`: <span class="alert-safe">**clean**</span>\
     The documentation of the module below leads me to believe the module is
     intended for internal use.\
-    Additionally, I did not find any use of the findings outside of opam.\
+    Additionally, I did not find any use of the findings outside opam.\
     Finally, I tried to follow the history of `OpamArg.name_list` and it appears
     to have been made redundant by the unexported `OpamCommands.name_list`.
     ```OCaml
@@ -662,7 +662,7 @@ reasonable or if it should be undone, along with a short explanation.
 
 - `src/client/opamAuxCommands.mli`: <span class="alert-safe">**clean**</span>\
     Based on its documentation and its naming, I assume this module is not
-    intended for use outside of opam.\
+    intended for use outside opam.\
     Additionally, I did not find any external use of `OpamAuxCommands`.
 
 - `src/client/opamCliMain.mli`: <span class="alert-safe">**clean**</span>\
@@ -672,21 +672,21 @@ reasonable or if it should be undone, along with a short explanation.
     [`src/client/opamMain.ml`](https://github.com/ocaml/opam/blob/2.5.1/src/client/opamMain.ml#L12).
 
 - `src/client/opamClient.mli`: <span class="alert-safe">**clean**</span>\
-    The only user of `OpamClient` outside of opam I found is
+    The only user of `OpamClient` outside opam I found is
     [opam-build-revdeps](https://github.com/gildor478/opam-build-revdeps),
     which is archived.\
     The reported findings' histories show that they have not been used outside
     their compilation units for many years.
 
 - `src/client/opamClientConfig.mli:93: search_files`: <span class="alert-safe">**clean**</span>\
-    Although `OpamClientConfig` is used outside of opam, I could not find any
+    Although `OpamClientConfig` is used outside opam, I could not find any
     use of `search_files`.\
     Additionally, it has not been used inside opam for a decade.
 
 - `src/client/opamConfigCommand.mli`: <span class="alert-safe">**clean**</span>\
     The documentation of the module below leads me to believe the module is
     intended for internal use.\
-    Additionally, I did not find any use of `OpamConfigCommand` outside of opam.
+    Additionally, I did not find any use of `OpamConfigCommand` outside opam.
     ```OCaml
     (** Functions handling the `opam config` subcommand and configuration actions *)
     ```
@@ -694,7 +694,7 @@ reasonable or if it should be undone, along with a short explanation.
 - `src/client/opamInitDefaults.mli`: <span class="alert-safe">**clean**</span>\
     The documentation of the module below leads me to believe the module is
     intended for internal use.\
-    Additionally, I only found 1 use of `OpamInitDefaults` outside of opam, in
+    Additionally, I only found 1 use of `OpamInitDefaults` outside opam, in
     [opam-bundle](https://github.com/AltGr/opam-bundle/blob/master/src/opamBundleMain.ml#L875),
     and it does not concern the findings.
     ```OCaml
@@ -718,7 +718,7 @@ reasonable or if it should be undone, along with a short explanation.
 - `src/client/opamRepositoryCommand.mli`: <span class="alert-safe">**clean**</span>\
     The documentation of the module below leads me to believe the module is
     intended for internal use.\
-    Additionally, I only found 1 use of `OpamRepositoryCommand` outside of opam,
+    Additionally, I only found 1 use of `OpamRepositoryCommand` outside opam,
     in [opam-bundle](https://github.com/AltGr/opam-bundle/blob/master/src/opamBundleMain.ml#L191),
     and it does not concern the finding.
     ```OCaml
@@ -729,11 +729,11 @@ reasonable or if it should be undone, along with a short explanation.
     When exploring the finding's history, I was under the impression that its
     package specific version `OpamSolution.eq_atom_of_package` was meant to
     replace it.\
-    Additionally, I did not find any use of this value outside of opam, but I
+    Additionally, I did not find any use of this value outside opam, but I
     found a use of `eq_atom_of_package` in [opam-bundle](https://github.com/AltGr/opam-bundle/blob/master/src/opamBundleMain.ml#L34).
 
 - `src/client/opamSolution.mli:136: sum`: <span class="alert-safe">**clean**</span>\
-    I did not find any use outside of opam.\
+    I did not find any use outside opam.\
     According to its history, it exists almost since the origins of opam in
     [2012](https://github.com/ocaml/opam/commit/dd0c0ca284aeb520394acb91d15e01f919ed8b7e).
     I assume it was moved around and forgotten since then.
@@ -742,9 +742,9 @@ reasonable or if it should be undone, along with a short explanation.
 
 The analyzer reported 36 findings in this component:
 34 unused values, 1 unused field and 1 unused constructor.\
-The aggressive cleanup was able did not reveal any false positive or limitation.\
+The aggressive cleanup did not reveal any false positive or limitation.\
 The informed cleanup indicates that only 2 findings shold not be removed.
-They are exported values used outside of opam.
+They are exported values used outside opam.
 
 From these results, we can compute the precision of the analyzer shown in the
 table below. The estimated precision for the informed cleanup can be
@@ -1551,23 +1551,23 @@ reasonable or if it should be undone, along with a short explanation.
 - `src/core/opamConsole.mli`: <span class="alert-safe">**clean**</span>\
     The reported values were either never used or their uses have been
     internalized during refactors.\
-    Additionally, I did not find any use of the findings outside of opam.
+    Additionally, I did not find any use of the findings outside opam.
 
 - `src/core/opamCoreConfig.mli`: <span class="alert-safe">**clean**</span>\
     The reported values uses have been internalized during refactors.\
-    Additionally, I did not find any use of the findings outside of opam.
+    Additionally, I did not find any use of the findings outside opam.
 
 - `src/core/opamDirTrack.mli`: <span class="alert-safe">**clean**</span>\
     The reported findings were never used outside their compilation unit.\
-    Additionally, I did not find any use of the findings outside of opam.
+    Additionally, I did not find any use of the findings outside opam.
 
 - `src/core/opamFilename.mli`: <span class="alert-safe">**clean**</span>\
     The reported values uses have been removed or internalized during refactors.\
-    Additionally, I did not find any use of the findings outside of opam.
+    Additionally, I did not find any use of the findings outside opam.
 
 - `src/core/opamHash.mli`: <span class="alert-safe">**clean**</span>\
     The reported findings were never used outside their compilation unit.\
-    Additionally, I did not find any use of the findings outside of opam.\
+    Additionally, I did not find any use of the findings outside opam.\
     Finally, `OpamHash.compute` (12 occurences) and
     `OpamHash.compute_from_string` (6 occurences) seem to be the entry points to
     compute hashes, instead of calling the direct hash function (`OpamHash.md5`
@@ -1576,7 +1576,7 @@ reasonable or if it should be undone, along with a short explanation.
     and replace its use with ``OpamHash.compute ~kind:`SHA512``.
 
 - `src/core/opamParallel.mli:42: iter`: <span class="alert-danger">**undo**</span>\
-    I found a use outside of opam in [opam-bundle](https://github.com/AltGr/opam-bundle/blob/master/src/opamBundleMain.ml#L732).
+    I found a use outside opam in [opam-bundle](https://github.com/AltGr/opam-bundle/blob/master/src/opamBundleMain.ml#L732).
 
 - `src/core/opamProcess.mli:54: is_verbose_command`: <span class="alert-safe">**clean**</span>\
   `src/core/opamProcess.mli:73: t.p_info`
@@ -2310,7 +2310,7 @@ reasonable or if it should be undone, along with a short explanation.
 
 - `src/format/opamFile.mli:1087: Repo.browse`: <span class="alert-safe">**clean**</span>\
   `src/format/opamFile.mli:1090: Repo.upstream`: <span class="alert-danger">**undo**</span>\
-    I have not found any use of `OpamFile.Repo.browse` outside of opam but found
+    I have not found any use of `OpamFile.Repo.browse` outside opam but found
     one of `OpamFile.Repo.upstream` in [opam2Web](https://github.com/ocaml-opam/opam2web/blob/master/src/o2wPackage.ml#L472).
 
 - `src/format/opamFile.mli:*: Repo.with_*`: <span class="alert-safe">**clean**</span>\
@@ -2342,7 +2342,7 @@ reasonable or if it should be undone, along with a short explanation.
   `src/format/opamFormat.mli:271: I.extract_field`: <span class="alert-safe">**clean**</span>\
   `src/format/opamFormat.mli:292: I.signature`: <span class="alert-danger">**undo**</span>\
   `src/format/opamFormat.mli:299: I.signed`: <span class="alert-danger">**undo**</span>\
-    I did not find any use outside of opam of the findings in
+    I did not find any use outside opam of the findings in
     `src/format/opamFormat.mli`.\
     However, the file contains the following comment line 287 indicating a work
     in progress, so I'll consider everything reported below that line must not
@@ -2400,3 +2400,129 @@ extrapolated as the potential fix rate.
 | exported values         | 100%       | 81.6%    |
 | constructors and fields | 31.3%      | 31.3%    |
 | total                   | 93.3%      | 76.7%    |
+
+### src/repository
+
+#### Description
+
+This component is distributed as the package
+[`opam-repository`](https://ocaml.org/p/opam-repository/2.5.1), and has
+[3 reverse package dependencies](https://ocaml.org/p/opam-repository/2.5.1#used-by).\
+It is described in
+[opam/CONTRIBUTING.md#layout](https://github.com/ocaml/opam/blob/2.5.1/CONTRIBUTING.md#layout)
+as:
+<div class="alert-cite">
+
+> gathers code handling everything related to how to download and store repositories. The same code path is also reused when downloading a package for example.
+</div>
+
+In total, there are 8 unused values, and no unused field or constructor
+reported by the `dead_code_analyzer` for this component.
+
+#### Aggressive cleanup
+
+##### Unused exported values
+
+Applying steps 1 and 2 of the cleanup methodology for
+[unused exported values](#cleaning-up-unused-exported-values) on the fidings in
+is trivial.\
+Applying step 3 triggers 10 warnings 32 (reported as errors).
+<details><summary>build output</summary>
+
+```bash
+$ dune build @check
+File "src/state/opamScript.ml", line 23, characters 4-10:
+23 | let prompt =
+         ^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value prompt.
+
+File "src/state/opamGlobalState.ml", line 165, characters 4-17:
+165 | let all_installed gt =
+          ^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value all_installed.
+File "src/state/opamFileTools.ml", line 1236, characters 4-15:
+1236 | let lint_string ?check_extra_files ?check_upstream ?handle_dirname
+           ^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value lint_string.
+
+File "src/state/opamUpdate.ml", line 475, characters 4-19:
+475 | let pinned_packages st ?autolock ?(working_dir=OpamPackage.Name.Set.empty) names =
+          ^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value pinned_packages.
+
+File "src/state/opamSwitchState.ml", line 705, characters 4-9:
+705 | let descr st nv =
+          ^^^^^
+Error (warning 32 [unused-value-declaration]): unused value descr.
+
+File "src/state/opamSwitchState.ml", line 793, characters 4-16:
+793 | let dev_packages st =
+          ^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value dev_packages.
+
+File "src/state/opamEnv.ml", line 701, characters 4-12:
+701 | let get_opam ~set_opamroot ~set_opamswitch ~force_path st =
+          ^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value get_opam.
+
+File "src/state/opamEnv.ml", line 722, characters 4-16:
+722 | let get_opam_raw ~set_opamroot ~set_opamswitch ?(base=[]) ~force_path
+          ^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value get_opam_raw.
+
+File "src/state/opamEnv.ml", line 811, characters 4-8:
+811 | let path ~force_path root switch =
+          ^^^^
+Error (warning 32 [unused-value-declaration]): unused value path.
+
+File "src/state/opamEnv.ml", line 1251, characters 4-30:
+1251 | let clear_dynamic_init_scripts gt =
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value clear_dynamic_init_scripts.
+```
+</details>
+
+The warnings 32 can be fixed following the technique described in [src/client](#anchor_warning_fix_methodology)
+
+##### Unused constructors and fields
+
+There is no finding in this section.
+
+We are done with the aggressive cleanup and can move on to the informed cleanup
+
+#### Informed cleanup
+
+This section takes the findings in-order (often at once in a single file) and indicates if their cleanup is
+reasonable or if it should be undone, along with a short explanation.
+
+- `src/repository/opamRepository.mli:87: find_backend`: <span class="alert-safe">**clean**</span>\
+    I did not find any use outisde opam and all its historical uses have been
+    removed.\
+    The value seems to be replaced with `find_backend_by_kind`.
+
+- `src/repository/opamRepositoryBackend.mli`: <span class="alert-safe">**clean**</span>\
+    I did not find any use of the findings outside opam.
+
+- `src/repository/opamRepositoryConfig.mli`: <span class="alert-safe">**clean**</span>\
+    The values `E.fetch` and `E.curl` reported in `src/repository/opamRepositoryConfig.mli` are replaced by their eager equivalent `E.fetch_t` and `E.curl_t`.\
+    I did not find any use of the findings outside opam.
+
+- `src/repository/opamRepositoryPath.mli`: <span class="alert-safe">**clean**</span>\
+    I did not find any use of the findings outside opam.
+
+#### Results
+
+The analyzer reported 8 findings in this component:
+8 unused values, 0 unused field or constructor.\
+The aggressive cleanup did not reveal any false positive or limitation.\
+The informed cleanup did not reveal any false positive or limitation.
+
+From these results, we can compute the precision of the analyzer shown in the
+table below. The estimated precision for the informed cleanup can be
+extrapolated as the potential fix rate.
+
+| section                 | aggressive | informed |
+|:-----------------------:|:----------:|:--------:|
+| exported values         | 100%       | 100%     |
+| constructors and fields | NA         | NA       |
+| total                   | 100%       | 100%     |
