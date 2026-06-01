@@ -25,40 +25,6 @@ This section focuses on reports in `/tmp/proj/opam/src/client`.
 This component builds into the library [`opam-client`](https://opam.ocaml.org/packages/opam-client/). Thus, we must be very careful when choosing to remove a value.
 
 
-#### State
-
-This section focuses on reports in `/tmp/proj/opam/src/state`.
-
-I have not found any external use of the values reported in `src/state/opamEnv.mli`.
-Thus, I'll consider they are indeed unused and can be kept removed.
-
-I have not found any external use of `OpamFileTools.lint_string`.
-Thus, I'll consider it is indeed unused and can be kept removed.
-
-I have not found any external use of `OpamFormatUpgrade.latest_version`.
-Thus, I'll consider it is indeed unused and can be kept removed.
-
-I have not found any external use of the values reported in `src/state/opamGlobalState.mli`.
-Thus, I'll consider they are indeed unused and can be kept removed.
-
-I have not found any external use of the values reported in `src/state/opamRepositoryState.mli`.
-Thus, I'll consider they are indeed unused and can be kept removed.
-
-I have not found any use of `OpamScript` outside of opam.
-Thus, I'll consider its reported value is indeed unused and can be kept removed, along with all the code generation cleanup.
-
-I have not found any external use of the values reported in `src/state/opamStateConfig.mli`.
-Thus, I'll consider they are indeed unused and can be kept removed.
-
-I have not found any external use of the values reported in `src/state/opamSwitchState.mli`.
-Thus, I'll consider they are indeed unused and can be kept removed.
-
-I have not found any external use of `OpamSysPoll.os_version`.
-Thus, I'll consider it is indeed unused and can be kept removed.
-
-I have not found any use of `OpamUpdate` outside of opam.
-Thus, I'll consider its reported value is indeed unused and can be kept removed.
-
 #### Tools
 
 This section focuses on reports in `/tmp/proj/opam/src/tools`.
@@ -77,12 +43,3 @@ This section focuses on reports in `/tmp/proj/opam/src/core`.
 
 It is, however, more complicated to verify
 if a type component is used than a value component. The Serlocode search requires looking for places where the module is used, and then for the use of the component near those places.
-
-
-#### State
-
-This section focuses on reports in `/tmp/proj/opam/src/state`.
-
-I did not find any external use of `OpamStateTypes.switch_state.invalidated`.
-According to the project's history, this field existed for a single purpose and made obsolete during a refactor.
-Thus, I'll consider it is indeed unused and can be kept removed.
