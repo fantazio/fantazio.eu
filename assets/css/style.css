@@ -180,6 +180,19 @@ div.alert-cite > blockquote > p:first-child::before {
     content: var(--alert-title) ":";
 }
 
+.thanks {
+  &::before {
+    content: "Thanks ";
+    white-space: preserve;
+  }
+  white-space: preserve;
+  display: flex;
+  justify-content: end;
+  font-variant: small-caps;
+  font-weight: bold;
+  font-style: italic;
+}
+
 body {
     display: flex;
     flex-direction: column;
