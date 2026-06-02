@@ -1,7 +1,7 @@
 ---
 title: Dead code analyzing Opam
-description: This report is the result of an audit of opam using the dead_code_analyzer.
-date: 2026-05-28
+description: This is a study report of the dead_code_analyzer on opam.
+date: 2026-06-04
 tags: [dead_code_analyzer, opam, ocaml, static analysis, dead code, ocaml software foundation]
 ---
 
@@ -28,7 +28,7 @@ tags: [dead_code_analyzer, opam, ocaml, static analysis, dead code, ocaml softwa
 
 ## Foreword
 
-This audit was funded by the [OCaml Software Fundation](https://ocaml-sf.org/).
+This study was funded by the [OCaml Software Fundation](https://ocaml-sf.org/).
 Thanks again for their trust.
 
 It has 2 main goals :
@@ -38,7 +38,7 @@ It has 2 main goals :
 Hopefully, this report will provide more visibility to the `dead_code_analyzer`
 and a practical demonstration of its usage.
 
-To keep this report accessible and its goals explicit, the report is organized
+To keep this report accessible and its goals explicit, the cleanup is organized
 by "component" although, in practice, I followed the analyzer's results by
 "report section". This will be discussed in more details at the end of this report.
 
@@ -53,7 +53,7 @@ by "component" although, in practice, I followed the analyzer's results by
 
 This work is done using **OCaml 5.3**.
 
-### opam
+### <li>opam</li>
 
 In order to analyze opam, we need to build the project and generate the `.cmt`
 and `.cmti` files necessary for the `dead_code_analyzer`.
@@ -88,7 +88,7 @@ Switched to a new branch 'dca_opam'
 
 
 Then, following [these instructions](https://github.com/ocaml/opam/tree/2.5.1#compiling-this-repo)
-to build opam is pretty straigthforward. However, it needed a few adjustment:
+to build opam is pretty straigthforward. However, it needed a few adjustments:
 1.  Run `opam install . --deps-only` before `./configure`.\
     This ensures all the dependencies are installed.
 2.  Run `dune build @check` instead of `make`.\
@@ -103,7 +103,7 @@ to build opam is pretty straigthforward. However, it needed a few adjustment:
 
 <div class="alert-note">
 
-> When running `make`, only the `.cmi` and `.cmti` files are generated, but
+> When running `make`, only the `.cmi` and `.cmti` files are generated,
 > not the `.cmt` files. This is because the OCaml compiler flag `-keep-locs`
 > is enabled by default but not `-bin-annot`.
 >
@@ -123,9 +123,9 @@ to build opam is pretty straigthforward. However, it needed a few adjustment:
 Now that we have generated the necessary files, let's move on to running the
 `dead_code_analyzer`.
 
-### dead_code_analyzer
+### <li>dead_code_analyzer</li>
 
-This audit is made using the
+This study is made using the
 [latest release](https://github.com/LexiFi/dead_code_analyzer/releases/tag/1.2.0)
 of the `dead_code_analyzer` available : `1.2.0`. It is available via opam.
 ```bash
@@ -154,7 +154,7 @@ somewhere within that directory. We could have been more precise and provided
 e.g. `_build/default` as argument or even `_build/default/src` but we'll keep
 things as simple as possible for now.\
 Finally, the `stderr` (output of verbose) is redirected to `dca.err`, and
-`stdout` (the results) is redirected to `dca.out`.
+`stdout` (the findings) is redirected to `dca.out`.
 
 [dca.out is available here.](../../assets/reports/dca/opam/dca.1.2.0_opam.2.5.1.out)\
 [dca.err is available here.](../../assets/reports/dca/opam/dca.1.2.0_opam.2.5.1.err)
@@ -163,29 +163,29 @@ Finally, the `stderr` (output of verbose) is redirected to `dca.err`, and
 
 > I would generally recommend redirecting the output of the analyzer to a file.\
 > Similarly, on the first run, I'd recommend using `--verbose` to verify that
-> nothing went wrong. Issues when reading files or noticing some files are
-> missing from the analyzer's list can quickly help debug some unexpected results.
+> nothing went wrong. Reported issues or noticing files are missing from
+> the analyzer's list can quickly help debug some unexpected results.
 
 We are not using any other argument. The analyzer is running with the default
 sections activated:
 - unused exported values
 - unused methods
-- unused fields and constructors
+- unused constructors and fields
 
 For more information on the report sections and the usage of the analyzer,
 feel free to explore [its documentation](https://github.com/LexiFi/dead_code_analyzer/blob/master/docs/USER_DOC.md)
 
-According to the `dca.err`, 248 files were scanned successfully, and nothing
+According to `dca.err`, 248 files were scanned successfully, and nothing
 seems to be missing.
 
-We can get an order of magnitude of the amount of reports by counting the lines
+We can get an order of magnitude of the amount of findings by counting the lines
 in the output :
 ```bash
 $ wc -l dca.out
 545 dca.out
 ```
 The analyzer reported 500+ unused exported values, unused methods, and unused
-constructors and fields. 512 more precisely. Let's explore the reports !
+constructors and fields. 512 more precisely. Let's explore them !
 
 ## Observations
 
@@ -264,7 +264,7 @@ src/format/opamFile.ml:  3008:        "conflict-class", no_cleanup Pp.ppacc with
 The analyzer does not track "transitively" dead elements of code (i.e. code only used by dead code).
 Thus, all the findings can be examined independently from each other.
 
-Because there are 2 goals to this audit, I processed the analyzer's reports in
+Because there are 2 goals to this study, I processed the analyzer's findings in
 2 phases:
 1.  An aggressive cleanup, which assumes all the findings can be removed from the
     codebase. The goal is to verify that none of them is a false positive.
@@ -284,7 +284,7 @@ I hope the results will be clearer to follow this way.
 <div class="alert-caution" style='--alert-title: "Important"'>
 
 > Removing dead code reported by either the analyzer or the compiler can lead to
-> the discovery of new dead code for both the analyzer and the analyzer.
+> the discovery of new dead code for both the analyzer and the compiler.
 > Because neither the analyzer nor the compiler reports "transitively" dead code,
 > multiple iterations may be necessary to uncover it all.
 >
@@ -317,9 +317,9 @@ In general, it is the same as for unused exported values:
 3. build and fix the warnings and errors,
 4. repeat step 3 until there is nothing left to fix.
 
-However, sometimes the findings cumulate to whole types. The analyzer does not
+However, sometimes the findings accumulate to whole types. The analyzer does not
 report unused types yet but will report all their components. In this situation,
-step 2 changes and more cleanup iterations are necessary:
+step 2 changes and more cleanup steps are necessary:
 1. go to the reported locations,
 2. make the exported types `private`,
 3. build, fix, repeat,
@@ -354,9 +354,8 @@ There can be cases of types used externally but not their content.
 There are multiple reasons for some code to be reported as unused by the
 `dead_code_analyzer` while it should not be cleaned up from the codebase:
 1.  The most obvious and common reason is that the reported element is part
-    of an exposed API.
-    The API is probably used outside the project so the element's uses cannot be
-    detected.\
+    of a library.
+    Its API is probably used outside the project so its uses cannot be detected.\
     If unused, the element may still exist for coherence.
 
 2.  The build configuration removed/replaced the uses of the reported element.
@@ -371,12 +370,13 @@ deciding whether a finding should be cleaned up.\
 There are different sources of information that can be used to contextualize a
 finding (in no particular order):
 -   related documentation,
--   [Sherlocode](https://sherlocode.com) to look for external uses,
+-   [Sherlocode](https://sherlocode.com) to look for uses in other projects,
 -   [ocaml.org](https://ocaml.org/packages) to look for reverse dependencies
     and search in them,
 -   surrounding code,
 -   `Makefile` and `dune` files,
 -   `git log -S` to look for the finding's history,
+-   `grep`
 -   naming conventions,
 -   instinct and experience.
 
@@ -396,7 +396,9 @@ cleanup. Finally, we will conclude on the results of the cleanups.
 
 To avoid redundancy, the first phase will be focused on the actual cleanup
 actions, while the second will discuss contextualization and indicate which
-findings are actually considered for cleanup and which are ignored.
+findings are actually considered for cleanup and which are ignored.\
+If you are interested in using the audit of opam, you might want to skip the
+aggressive cleanup sections.
 
 Here are the different components that we will explore:
 - [src/client](#srcclient)
@@ -405,6 +407,22 @@ Here are the different components that we will explore:
 - [src/solver](#srcsolver)
 - [src/state](#srcstate)
 - [src/tools](#srctools)
+
+<div class="alert-caution" style='--alert-title: "Important"'>
+
+> During the informed cleanup, some projects have been discarded from the
+> research for uses outside opam. This is because they are archived or have not
+> been active for years.\
+> One such project escaped the filter because a user recently interacted with it:
+> [opam-bundle](https://github.com/AltGr/opam-bundle).
+>
+> The following projects have been discarded:
+> - [marracheck](https://github.com/Armael/marracheck/)
+> - [opamfu](https://github.com/ocamllabs/opamfu)
+> - [opam-build-revdeps](https://github.com/gildor478/opam-build-revdeps),
+> - [opam-lock](https://github.com/AltGr/opam-lock)
+> - [opam-package-upgrade](https://github.com/AltGr/opam-package-upgrade)
+</div>
 
 <div class="alert-tip">
 
@@ -428,7 +446,7 @@ Here are the different components that we will explore:
 >   ```
 </div>
 
-### src/client
+### <li>src/client</li>
 
 #### Description
 
@@ -444,7 +462,7 @@ as:
 </div>
 
 
-There are 34 unused values, 1 unused field and 1 unused constructor
+There are 34 unused values, 1 unused constructor and 1 unused field
 reported by the `dead_code_analyzer`for this component.
 
 #### Aggressive cleanup
@@ -462,10 +480,12 @@ File "src/client/opamClientConfig.ml", line 207, characters 4-16:
 207 | let search_files = ["findlib"]
           ^^^^^^^^^^^^
 Error (warning 32 [unused-value-declaration]): unused value search_files.
+
 File "src/client/opamListCommand.ml", line 32, characters 4-30:
 32 | let default_dependency_toggles = {
          ^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error (warning 32 [unused-value-declaration]): unused value default_dependency_toggles.
+
 File "src/client/opamArg.ml", line 1208, characters 4-13:
 1208 | let name_list =
            ^^^^^^^^^
@@ -485,10 +505,12 @@ File "src/client/opamArg.ml", line 1239, characters 4-14:
 1239 | let param_list =
            ^^^^^^^^^^
 Error (warning 32 [unused-value-declaration]): unused value param_list.
+
 File "src/client/opamConfigCommand.ml", line 526, characters 4-15:
 526 | let parse_whole fv =
           ^^^^^^^^^^^
 Error (warning 32 [unused-value-declaration]): unused value parse_whole.
+
 File "src/client/opamSolution.ml", line 117, characters 4-7:
 117 | let sum stats =
           ^^^
@@ -499,9 +521,10 @@ Error (warning 32 [unused-value-declaration]): unused value sum.
 <a id="anchor_warning_fix_methodology"></a>
 Fixing a warning 32 is the same as cleaning up a an unused value:
 1. go to the reported location,
-2. remove the value (along with its associated attributes and comments)
+2. remove the element (along with its associated attributes and comments)
 
 After cleaning up the warnings 32, the build works without error.
+
 We are done with the unused exported values.
 
 ##### Unused constructors and fields
@@ -604,7 +627,7 @@ Applying the steps 3 and 4 leads to:
            File "src/client/opamListCommand.ml", lines 46-66, characters 0-25:
              Actual declaration
 
-    dune build @check
+    $ dune build @check
     File "src/client/opamListCommand.ml", line 111, characters 4-9:
     111 |   | Atoms atoms ->
               ^^^^^
@@ -635,15 +658,16 @@ The errors can be fixed quite easily:
 This simple cleanup took 6 builds in total. This is not ideal but easy to follow
 and the builds are fast so it does not incur a big overhead.
 
-We are done with the aggressive cleanup and can move on to the informed cleanup
+We are done with the aggressive cleanup and can move on to the informed cleanup.
 
 #### Informed cleanup
 
-This section takes the findings in-order (often at once in a single file) and indicates if their cleanup is
-reasonable or if it should be undone, along with a short explanation.
+This section takes the findings in lexicographical order (often at once in a
+single file) and indicates if their cleanup is reasonable or if it should be
+undone, along with a short explanation.
 
 - `src/client/opamAction.mli:42: prepare_package_build`: <span class="alert-danger">**undo**</span>\
-    I was able to find an external use in
+    I was able to find a use in
     [opam2nix](https://github.com/timbertson/opam2nix/blob/v1/src/invoke.ml#L258),
     thanks to the file's history ([PR #4147](https://github.com/ocaml/opam/pull/4147)).
 
@@ -651,7 +675,7 @@ reasonable or if it should be undone, along with a short explanation.
     The reported values were added in the same
     [PR #3253](https://github.com/ocaml/opam/pull/3253) and never used outside
     their compilation units.\
-    I did not find any use of `OpamAdminCheck`.
+    I did not find any use outside opam of `OpamAdminCheck`.
 
 - `src/client/opamArg.mli`: <span class="alert-safe">**clean**</span>\
     The documentation of the module below leads me to believe the module is
@@ -666,7 +690,7 @@ reasonable or if it should be undone, along with a short explanation.
 - `src/client/opamAuxCommands.mli`: <span class="alert-safe">**clean**</span>\
     Based on its documentation and its naming, I assume this module is not
     intended for use outside opam.\
-    Additionally, I did not find any external use of `OpamAuxCommands`.
+    Additionally, I did not find any use outside opam of `OpamAuxCommands`.
 
 - `src/client/opamCliMain.mli`: <span class="alert-safe">**clean**</span>\
     My understanding of the module `OpamCliMain` is that it is meant for use
@@ -675,9 +699,6 @@ reasonable or if it should be undone, along with a short explanation.
     [`src/client/opamMain.ml`](https://github.com/ocaml/opam/blob/2.5.1/src/client/opamMain.ml#L12).
 
 - `src/client/opamClient.mli`: <span class="alert-safe">**clean**</span>\
-    The only user of `OpamClient` outside opam I found is
-    [opam-build-revdeps](https://github.com/gildor478/opam-build-revdeps),
-    which is archived.\
     The reported findings' histories show that they have not been used outside
     their compilation units for many years.
 
@@ -712,8 +733,9 @@ reasonable or if it should be undone, along with a short explanation.
 - `src/client/opamListCommand.mli:38: pattern_selector.ext_fields`:  <span class="alert-safe">**clean**</span>\
   `src/client/opamListCommand.mli:59: selector.Atoms`:  <span class="alert-safe">**clean**</span>\
     The documentation of the module below leads me to believe the module is
-    intended for internal use (although there is an external use documented above).\
-    Additionally, I did not find any external use of these findings.
+    intended for internal use (although there is a use outside opam documented
+    above).\
+    Additionally, I did not find any use outside opam of these findings.
     ```OCaml
     (** Functions handling the "opam list" subcommand *)
     ```
@@ -744,22 +766,22 @@ reasonable or if it should be undone, along with a short explanation.
 #### Results
 
 The analyzer reported 36 findings in this component:
-34 unused values, 1 unused field and 1 unused constructor.\
+34 unused values, 1 unused constructor and 1 unused field.\
 The aggressive cleanup did not reveal any false positive or limitation.\
 The informed cleanup indicates that only 2 findings should not be removed.
 They are exported values used outside opam.
 
 From these results, we can compute the precision of the analyzer shown in the
-table below. The estimated precision for the informed cleanup can be
+table below. The estimated precision after the informed cleanup can be
 extrapolated as the potential fix rate.
 
-| section                 | aggressive | informed |
-|:-----------------------:|:----------:|:--------:|
-| exported values         | 100%       | 94.1%    |
-| constructors and fields | 100%       | 100%     |
-| total                   | 100%       | 94.4%    |
+| section                 | aggressive | + informed |
+|:-----------------------:|:----------:|:----------:|
+| exported values         | 100%       | 94.1%      |
+| constructors and fields | 100%       | 100%       |
+| total                   | 100%       | 94.4%      |
 
-### src/core
+### <li>src/core</li>
 
 #### Description
 
@@ -781,11 +803,13 @@ It has 1 subcomponent : `src/core/cmdliner` which defines the sub-library
 > it is meant for internal use only.
 </div>
 
-In total, there are 153 unused values, and 56 unused fields and constructors
+In total, there are 153 unused values, and 56 unused constructors and fields
 reported by the `dead_code_analyzer`for this component.\
 Among the findings, 75 values are reported for the subcomponent.\
-This is the component with the most fields and constructors reported.
-
+This is the component with the most findings, and the most unused conconstructors
+and fields reported. It is the component with the most unused values reported
+if
+ we include its subcomponent.
 #### Aggressive cleanup
 
 ##### Unused exported values
@@ -796,7 +820,7 @@ reduce the workload during step 3 of the cleanup, although it may lead to more
 iterations.
 
 Applying steps 1 and 2 of the cleanup methodology for
-[unused exported values](#cleaning-up-unused-exported-values) on the fidings in
+[unused exported values](#cleaning-up-unused-exported-values) on the findings in
 `src/core/cmdliner` is trivial.\
 Applying step 3 did not trigger any new warning or error.
 <details><summary>build output</summary>
@@ -814,8 +838,8 @@ and a module (`Term.Syntax`) is only composed of unused values.
 
 Moving on to the rest of the `src/core` component,  applying steps 1 and 2 is
 trivial again.\
-However, applying step 3 triggers 1 warning 60 and 36 warnings 32 (reported as
-errors) and 1 actual error.
+However, applying step 3 triggers 1 warning 60, 36 warnings 32 (reported as
+errors), and 1 actual error.
 <details><summary>build output</summary>
 
 ```bash
@@ -1017,28 +1041,29 @@ Error (warning 32 [unused-value-declaration]): unused value update.
 </details>
 
 The error is:
-```
+```OCaml-error
 File "src/core/opamSystem.ml", line 858, characters 32-47:
 858 |   let nproc = Nativeint.to_int (OpamStubs.nproc ()) in
                                       ^^^^^^^^^^^^^^^
 Error: Unbound value OpamStubs.nproc
 ```
-The value is actually exported by `OpamStubsType` and included `OpamSubs`.
-The latter re-exports the interface of the former, as itself via the following construct:
+The value is actually exported by `OpamStubsType` and included `OpamStubs`.
+The latter re-exports the interface of the former, as its own via the following
+construct:
 ```OCaml
 include module type of struct include OpamStubsTypes end
 ```
 This is close enough to a
 [known limitation](https://github.com/LexiFi/dead_code_analyzer/blob/master/docs/exported_values/EXPORTED_VALUES.md#include-module-type-with-substitution)
 so we do not need to document it further.
-The following finding is <span class="alert-danger">false positive</span>:
-```
+The following finding is a <span class="alert-danger">false positive</span>:
+```dca
 /tmp/proj/opam/_build/default/src/core/opamStubsTypes.ml:128: nproc
 ```
 
 The warning 60 on module `RegistryHive` below appears because I removed it from
 `src/core/opamStd.mli`. It was only exporting unused values.
-```
+```OCaml-error
 File "src/core/opamStd.ml", lines 1336-1356, characters 2-5:
 1336 | ..module RegistryHive = struct
 1337 |     let to_string = function
@@ -1053,15 +1078,18 @@ File "src/core/opamStd.ml", lines 1336-1356, characters 2-5:
 Warning 60 [unused-module]: unused module RegistryHive.
 ```
 
-The warnings 60 and 32 can be fixed following the technique described in [src/client](#anchor_warning_fix_methodology)
+The warnings 60 and 32 can be fixed by following the technique described in [section src/client](#anchor_warning_fix_methodology).
+
+We are done with the unused exported values.
 
 ##### Unused constructors and fields
 
-More than half of the findings are located in `src/core/opamStubsTypes.ml`
-(35 out of 56, i.e. 62.5%). However, unlike with unused exported values, we will
-try to minimize the amount of re-builds necessary to clean them. Thus, we will
-not focus on this file specifically but clean up all the findings in the
-directory at once, hoping to get multiple compiler errors reported at once.
+More than half (35 out of 56, i.e. 62.5%) of the findings are located in
+`src/core/opamStubsTypes.ml`. However, unlike with unused exported values,
+we will try to minimize the amount of re-builds necessary to clean them.
+Thus, we will not focus on this file specifically but clean up all the findings
+in the directory at once, hoping to get multiple compiler errors reported at
+once.
 
 Some of the findings accumulate to whole type definitions (e.g. `Either.t.Left`
 and `Either.t.Right` in `src/core/opamCompat.mli`), so we will follow the more
@@ -1071,7 +1099,7 @@ for those cases.
 
 Applying steps 1 and 2 is trivial.\
 Applying step 3 a first time triggers 2 warnings 37 (reported as errors) and
-2 errors.
+6 errors.
 <details><summary>build output</summary>
 
 ```bash
@@ -1087,6 +1115,7 @@ File "src/core/opamCompat.ml", line 76, characters 4-17:
          ^^^^^^^^^^^^^
 Error (warning 37 [unused-constructor]): constructor Right is never used to build values.
 Its type is exported as a private type.
+
 File "src/core/opamStubs.ml", line 1:
 Error: The implementation src/core/opamStubs.ml
        does not match the interface src/core/opamStubs.mli:
@@ -1108,15 +1137,18 @@ Error: The implementation src/core/opamStubs.ml
          Expected declaration
        File "src/core/opamStubsTypes.ml", lines 85-89, characters 0-1:
          Actual declaration
+
 File "src/core/opamConsole.ml", line 43, characters 6-12:
 43 |     | Darwin -> true
            ^^^^^^
 Error: This variant pattern is expected to have type OpamStd.Sys.os
        There is no constructor Darwin within type OpamStd.Sys.os
+
 File "src/core/opamProcess.ml", line 470, characters 4-10:
 470 |     p_info   = info_file;
           ^^^^^^
 Error: Unbound record field p_info
+
 File "src/core/opamStd.ml", line 1:
 Error: The implementation src/core/opamStd.ml
        does not match the interface src/core/opamStd.mli:  ... In module Sys:
@@ -1147,10 +1179,12 @@ Error: The implementation src/core/opamStd.ml
          Expected declaration
        File "src/core/opamStd.ml", lines 880-890, characters 2-21:
          Actual declaration
+
 File "src/core/opamSystem.ml", line 934, characters 6-25:
 934 |     | OpamStd.Sys.OpenBSD -> "gtar"
             ^^^^^^^^^^^^^^^^^^^
 Error: Unbound constructor OpamStd.Sys.OpenBSD
+
 File "src/format/opamTypes.mli", lines 22-24, characters 0-15:
 22 | type ('a, 'b) either = ('a, 'b) OpamCompat.Either.t =
 23 |   | Left of 'a
@@ -1165,16 +1199,16 @@ There are different kinds of errors reported.
 1.  The first one is the warning 37.\
     It indicates the constructor is never constructed. This is expected to happen.
     Because we exported the type as `private`, its constructors can only be
-    used to build values inside its compilation unit. Thus, the compiler is able
-    to check if they are actually used and report them if not.\
+    used to build values inside its compilation unit. Thus, the compiler can
+    check if they are used in their compilation unit and report them if not.\
     This is solved by removing the unused constructor.
 
-2.  The second kind is a type mismatch between the definition  in the interface
-    and the implementation of a type.\
+2.  The second kind is a type definition mismatch between the interface
+    and the implementation.\
     This is also expected to happen and is solved by updating the `.ml` to match
     the `.mli`.
 
-3.  The third kind is an invalid constructor or record field.\
+3.  The third kind is an unbound constructor or record field.\
     Again, this is expected to happen and is solved by removing the
     corresponding code.
 
@@ -1209,6 +1243,7 @@ File "src/core/opamConsole.ml", line 1106, characters 35-44:
 1106 |   OpamStd.Sys.(set_warning_printer {warning})
                                           ^^^^^^^^^
 Error: Cannot create values of the private type warning_printer
+
 File "src/core/opamStd.ml", line 1:
 Error: The implementation src/core/opamStd.ml
        does not match the interface src/core/opamStd.mli:  ... In module Sys:
@@ -1243,7 +1278,7 @@ Error: The implementation src/core/opamStd.ml
 </details>
 
 Let's look at the invalid type equation at the top first:
-```
+```OCaml-error
 File "src/format/opamTypes.mli", lines 22-24, characters 0-15:
 22 | type ('a, 'b) either = ('a, 'b) OpamCompat.Either.t =
 23 |   | Left of 'a
@@ -1263,7 +1298,7 @@ File "src/core/opamCompat.ml", line 76, characters 4-17:
 Error (warning 37 [unused-constructor]): constructor Right is never used to build values.
 Its type is exported as a private type.
 ```
-Here we have 2 kinds of reports: an invalid type equation and warnings 37.\
+Here we have 2 kinds of errors: an invalid type equation and warnings 37.\
 I did not clean these warnings because they are directly connected to the error.
 
 To fix the invalid type equation we could make `OpamTypes.either` private, like
@@ -1278,12 +1313,13 @@ positives.
 > is not.
 </div>
 
-Alternatively, we could choose to fix the warnings first by making the type abstract.
+Alternatively, we could choose to fix the warnings first by making the type
+abstract in `src/core/opamCompat.ml`.
 Because we updated the type in the `.ml`, the compiler will complain about a
 type mismatch, and we need to update the `.mli` to reflect the change.\
-With the type abstract in both the signature and the implementation,
+With the type abstract in both the interface and the implementation,
 the warnings are gone, and the invalid type equation changed to:
-```
+```OCaml-error
 File "src/format/opamTypes.mli", lines 22-24, characters 0-15:
 22 | type ('a, 'b) either = ('a, 'b) OpamCompat.Either.t =
 23 |   | Left of 'a
@@ -1294,7 +1330,7 @@ Error: This variant or record definition does not match that of type
 ```
 We can fix it by making `OpamTypes.either` abstract as well. This unveils a new
 invalid type equation:
-```
+```OCaml-error
 File "src/format/opamTypes.mli", line 320, characters 0-81:
 320 | type powershell_host = OpamStd.Sys.powershell_host = Powershell_pwsh | Powershell
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1308,7 +1344,7 @@ This time, we can simply make `OpamTypes.powershell_host` private to satisfy the
 equation.\
 This unveils yet another invalid equation which can be solved by making the new
 type private as well:
-```
+```OCaml-error
 File "src/format/opamTypes.mli", lines 321-323, characters 0-10:
 321 | type shell = OpamStd.Sys.shell =
 322 |   | SH_sh | SH_bash | SH_zsh | SH_csh | SH_fish | SH_pwsh of powershell_host
@@ -1321,11 +1357,12 @@ Error: This variant or record definition does not match that of type
 With all the invalid type equations resolved, the compiler is now able to report
 more errors. In particular, the 2 following errors tell use that constructors
 `Left` and `Right` are actually used to build values:
-```
+```OCaml-error
 File "src/client/opamAction.ml", line 1062, characters 32-37:
 1062 |     | Some (_, result) -> Done (Right (OpamSystem.Process_error result))
                                        ^^^^^
 Error: Unbound constructor Right
+
 File "src/client/opamCommands.ml", line 439, characters 31-35:
 439 |       | Some d, false -> Some (Left d)
                                      ^^^^
@@ -1337,14 +1374,14 @@ As we suspected in our initial attempt to fix the invalid type equation on
 so we can open an [issue](https://github.com/LexiFi/dead_code_analyzer/issues/79)
 to report it.\
 We can conclude that the following findings are <span class="alert-danger">false positives</span>:
-```
+```dca
 /tmp/proj/opam/src/core/opamCompat.mli:36: Either.t.Left
 /tmp/proj/opam/src/core/opamCompat.mli:37: Either.t.Right
 ```
 
 Among the new compilation errors there is also an error telling us that the
 constructor `SH_bash` is used:
-```
+```OCaml-error
 File "src/client/opamArg.ml", line 1149, characters 16-23:
 1149 |     None,"bash",SH_bash;
                        ^^^^^^^
@@ -1352,7 +1389,7 @@ Error: Cannot create values of the private type shell
 ```
 We are hitting the same limitation as with `OpamTypes.either`, and can conclude
 that the following findings are also <span class="alert-danger">false positives</span>:
-```
+```dca
 /tmp/proj/opam/src/core/opamStd.mli:506: Sys.shell.SH_sh
 /tmp/proj/opam/src/core/opamStd.mli:506: Sys.shell.SH_bash
 /tmp/proj/opam/src/core/opamStd.mli:506: Sys.shell.SH_zsh
@@ -1363,7 +1400,7 @@ that the following findings are also <span class="alert-danger">false positives<
 ```
 
 Finally, after re-building the project, an new error tells us that the constructor `Powershell_pwsh` is used:
-```
+```OCaml-error
 File "src/client/opamArg.ml", line 1154, characters 31-46:
 1154 |     Some cli2_2,"pwsh",SH_pwsh Powershell_pwsh;
                                       ^^^^^^^^^^^^^^^
@@ -1371,25 +1408,25 @@ Error: Cannot create values of the private type powershell_host
 ```
 Once again, we are hitting the same limitation, and can conclude the following
 findings are <span class="alert-danger">false positives</span>:
-```
+```dca
 /tmp/proj/opam/src/core/opamStd.mli:505: Sys.powershell_host.Powershell_pwsh
 /tmp/proj/opam/src/core/opamStd.mli:505: Sys.powershell_host.Powershell
 ```
 
 Now that we explored the 1st error and identified false positives, we can come
 back to our original build errors and move on to the next one:
-```
+```OCaml-error
 File "src/core/opamConsole.ml", line 1106, characters 35-44:
 1106 |   OpamStd.Sys.(set_warning_printer {warning})
                                           ^^^^^^^^^
 Error: Cannot create values of the private type warning_printer
 ```
 The analyzer reported `Sys.warning_printer.warning` as unused. This means that
-it is never read. Because this is the only field in its type, we maked the type
+it is never read. Because this is the only field in its type, we made the type
 private. Hence the error when creating a value of that type from outside its
 compilation unit.\
 Although the error is not surprising, the associated function is telling us
-something. `Opam.Std.Sys.set_warning_printer` has type `warning_printer -> unit`.
+something. `OpamStd.Sys.set_warning_printer` has type `warning_printer -> unit`.
 This indicates that it must be storing the argument somewhere as a side effect.
 By looking at its definition, it does store it in a variable named `console`:
 ```OCaml
@@ -1412,12 +1449,12 @@ analyzer did not associate uses to its type. We can open another
 [issue](https://github.com/LexiFi/dead_code_analyzer/issues/80) to report this
 limitation, and conclude that the following finding is a
 <span class="alert-danger">false positive</span>:
-```
+```dca
 /tmp/proj/opam/src/core/opamStd.mli:613: Sys.warning_printer.warning
 ```
 
-Finally, the last of our error in the build output is:
-```
+Finally, the last of our errors in the build output is:
+```OCaml-error
 File "src/core/opamStd.ml", line 1:
 Error: The implementation src/core/opamStd.ml
        does not match the interface src/core/opamStd.mli:  ... In module Sys:
@@ -1455,7 +1492,7 @@ the type equation `type os = Sys.os`, so it will fit our 4th kind. This is why
 we did not fix it earlier.\
 If we try to fix it like a regular type mismatch by updating the type in the
 `.ml` to match the `.mli`, we get this new compilation error:
-```
+```OCaml-error
 File "src/core/opamStd.ml", line 889, characters 27-33:
 889 |           | "Darwin"    -> Darwin
                                  ^^^^^^
@@ -1467,7 +1504,7 @@ so we can open an [issue](https://github.com/LexiFi/dead_code_analyzer/issues/81
 to report it.\
 We can conclude that the following findings are
 <span class="alert-danger">false positives</span>:
-```
+```dca
 /tmp/proj/opam/src/core/opamStd.mli:474: Sys.os.Darwin
 /tmp/proj/opam/src/core/opamStd.mli:475: Sys.os.Linux
 /tmp/proj/opam/src/core/opamStd.mli:476: Sys.os.FreeBSD
@@ -1484,12 +1521,13 @@ private type when their content is entirely unused.
 The only remaining private type is `uname` in `src/core/opamStubsTypes.ml`
 and `src/core/opamStubs.mli`.
 We can try to clean it further by making it abstract. Building produces the following output:
-```
+```bash
 $ dune build @check
 File "src/core/opamStd.ml", line 896, characters 27-34:
 896 |           match (uname ()).sysname with
                                  ^^^^^^^
 Error: Unbound record field sysname
+
 File "src/state/opamSysPoll.ml", line 40, characters 55-62:
 40 |     | "Unix" | "Cygwin" -> Some (OpamStd.Sys.uname ()).machine
                                                             ^^^^^^^
@@ -1503,7 +1541,7 @@ Actually, I made a mistake earlier: I assumed that the following error was a
 subtle than that. The type `uname` is defined in 2 separate compilation units
 (`OpamStubsTypes` and `OpamStubs`), and one is included in the other (the former
 into the latter).
-```
+```OCaml-error
 File "src/core/opamStubs.ml", line 1:
 Error: The implementation src/core/opamStubs.ml
        does not match the interface src/core/opamStubs.mli:
@@ -1530,18 +1568,19 @@ We hit a new undocumented limitation of the analyzer so we can open an
 [issue](https://github.com/LexiFi/dead_code_analyzer/issues/82) to report it.\
 We can conclude that the following findings are
 <span class="alert-danger">false positives</span>:
-```
+```dca
 /tmp/proj/opam/src/core/opamStubsTypes.ml:118: uname.sysname
 /tmp/proj/opam/src/core/opamStubsTypes.ml:119: uname.release
 /tmp/proj/opam/src/core/opamStubsTypes.ml:120: uname.machine
 ```
 
-We are done with the aggressive cleanup and can move on to the informed cleanup
+We are done with the aggressive cleanup and can move on to the informed cleanup.
 
 #### Informed cleanup
 
-This section takes the findings in-order (often at once in a single file) and indicates if their cleanup is
-reasonable or if it should be undone, along with a short explanation.
+This section takes the findings in lexicographical order (often at once in a
+single file) and indicates if their cleanup is reasonable or if it should be
+undone, along with a short explanation.
 
 - `src/core/cmdliner`: <span class="alert-safe">**clean**</span>\
     I'll assume all the findings in this subcomponent to be valid, because it
@@ -1573,7 +1612,7 @@ reasonable or if it should be undone, along with a short explanation.
     Additionally, I did not find any use of the findings outside opam.\
     Finally, `OpamHash.compute` (12 occurences) and
     `OpamHash.compute_from_string` (6 occurences) seem to be the entry points to
-    compute hashes, instead of calling the direct hash function (`OpamHash.md5`
+    compute hashes, instead of calling the direct hash functions (`OpamHash.md5`
     and `OpamHash.sha256`: 0 occurence, `OpamHash.sha512`: 1 occurence).\
     Thus, I'll go even further in the cleanup by unexporting `OpamHash.sha512`
     and replace its use with ``OpamHash.compute ~kind:`SHA512``.
@@ -1590,7 +1629,7 @@ reasonable or if it should be undone, along with a short explanation.
 - `src/core/opamSHA.mli`: <span class="alert-safe">**clean**</span>\
     Similar observations as for `OpamHash` can be made for `OpamSHA`, with the
     `hash_file` and `hash_string` functions as entry points and not the
-    `sha*_file` and `sha_string` ones.\
+    `sha*_file` and `sha*_string` ones.\
     Thus, I'll go even further in the cleanup by unexporting `OpamSHA.sha1_string`
     and replace its use with ``OpamSHA.hash_string `SHA1``.
 
@@ -1636,8 +1675,8 @@ reasonable or if it should be undone, along with a short explanation.
     ```OCaml
     (** OLD COMMAND API, DEPRECATED *)
     ```
-    Regarding the 4 values reported above that comment, the opam's history shows
-    that they became unused through consecutive improvements of opam.
+    Regarding the 4 values reported above that comment, opam's history shows
+    that they became unused through consecutive improvements.
 
 - `src/core/opamVersion.mli`: <span class="alert-safe">**clean**</span>\
     The findings are not used anymore and I did not find any use outside opam.
@@ -1649,23 +1688,34 @@ reasonable or if it should be undone, along with a short explanation.
 #### Results
 
 The analyzer reported 209 findings in this component:
-153 unused values, 56 unused fields and constructors.\
-The aggressive cleanup revealed 24 false positives (1 value and 23 fields and
-constructors), and 3 new limitations.\
+153 unused values, 56 unused constructors and fields.\
+The aggressive cleanup revealed 24 false positives (1 value and 23 constructors
+and fields), and 4 new limitations.\
 The informed cleanup indicates that 65 additional findings (33 values and
 32 fields) should not be removed.
 
 From these results, we can compute the precision of the analyzer shown in the
-table below. The estimated precision for the informed cleanup can be
+table below. The estimated precision after the informed cleanup can be
 extrapolated as the potential fix rate.
 
-| section                 | aggressive | informed |
-|:-----------------------:|:----------:|:--------:|
-| exported values         | 99.3%      | 77.8%    |
-| constructors and fields | 58.9%      |  1.8%    |
-| total                   | 88.5%      | 57.4%    |
+| section                 | aggressive | + informed |
+|:-----------------------:|:----------:|:----------:|
+| exported values         | 99.3%      | 77.8%      |
+| constructors and fields | 58.9%      |  1.8%      |
+| total                   | 88.5%      | 57.4%      |
 
-### src/format
+Additionally, during the informed cleanup, we discovered that the `OpamHash` and
+`OpamSha` modules were exporting more entry-points for hash and sha computations
+than they should, and simplified their API.
+
+The estimated precision on the constructors and fields after the 2 phases is
+disappointing. It is entirely due to the analyzer's limitations.
+Either limitations that will be adressed (for 23 of the findings) or the use of
+FFI (for 32 of them). In the best-case scenario, with the actual false positives
+fixed, the estimated precision would not improve much (3%) because of the FFI
+limitation.
+
+### <li>src/format</li>
 
 #### Description
 
@@ -1680,7 +1730,7 @@ as:
 >  entirely dedicated to parsing opam files (higher level, but still using opam-file-format) and other internal config files
 </div>
 
-In total, there are 147 unused values, and 16 unused fields and constructors
+In total, there are 147 unused values, and 16 unused constructors and fields
 reported by the `dead_code_analyzer`for this component.\
 This is the component with the most unused values reported.
 
@@ -1689,14 +1739,14 @@ This is the component with the most unused values reported.
 ##### Unused exported values
 
 Because more than half (82 out of 147, i.e. 55.8%) of the reported values are
-lcoated in `src/format/opamFile.mli, we will clean it first. The intent is to
+lcoated in `src/format/opamFile.mli`, we will clean it first. The intent is to
 reduce the workload during step 3 of the cleanup, although it may lead to more
 iterations.
 
 Applying steps 1 and 2 of the cleanup methodology for
-[unused exported values](#cleaning-up-unused-exported-values) on the fidings in
+[unused exported values](#cleaning-up-unused-exported-values) on the findings in
 `src/format/opamFile.mli` is trivial.\
-Applying step 3 triggers 9 warnings 32 (reoprted as errors).
+Applying step 3 triggers 9 warnings 32 (reported as errors).
 <details><summary>build output</summary>
 
 ```bash
@@ -1748,7 +1798,7 @@ Error (warning 32 [unused-value-declaration]): unused value create_preinstalled.
 ```
 </details>
 
-The warnings 32 can be fixed following the technique described in [src/client](#anchor_warning_fix_methodology)
+The warnings 32 can be fixed by following the technique described in [section src/client](#anchor_warning_fix_methodology)
 
 Moving on to the rest of the `src/format` component,  applying steps 1 and 2 is
 trivial again.\
@@ -1889,6 +1939,8 @@ Going ever further, there are a type and an exception that are exported by
 `OpamFormat` but unused: `signature` and `Invalid_signature`.
 They can be removed both from the `.mli` and the `.ml` without breaking the compilation.
 
+We are done with the unused exported values.
+
 ##### Unused constructors and fields
 
 Some of the findings accumulate to the whole type definition of `OpamTypes.lock`,
@@ -1900,7 +1952,7 @@ Applying steps 1 and 2 is trivial.\
 Applying step 3 a first time triggers 2 errors.
 <details><summary>build output</summary>
 
-```
+```bash
 $ dune build @check
 File "src/format/opamTypes.mli", lines 102-105, characters 0-20:
 102 | type variable_contents = OpamVariable.variable_contents =
@@ -1931,10 +1983,10 @@ Error: The implementation src/format/opamVariable.ml
 
 The first error is related to a type equation:
 `type variable_contents = OpamVariable.variable_contents`,
-and we already hit a limitation on this when exploring [src/core](#srccore)
+and we already hit a limitation on this in [section src/core](#srccore)
 (documented in [issue #79](https://github.com/LexiFi/dead_code_analyzer/issues/79)).\
-We will still explore it because on of the goals of this analysis is also to
-properly qualify the results of the `dead_code_analyzer`.
+We will still explore it because one of the goals of this study is to properly
+qualify the results of the `dead_code_analyzer`.
 
 <div class="alert-tip">
 
@@ -1946,11 +1998,12 @@ We can quickly verify if we hit the same type-equation-related limitation by
 removing the constructor `L` in the type alias `variable_contents`.
 Re-building triggers new errors among which a couple indicate that `L` is
 actually used to build values:
-```
+```OCaml-error
 File "src/client/opamAction.ml", line 1101, characters 15-16:
 1101 |         (Some (L added))
                       ^
 Error: Unbound constructor L
+
 File "src/client/opamSolution.ml", line 1478, characters 42-43:
 1478 |         OpamVariable.Full.of_string name, L l
                                                  ^
@@ -1958,7 +2011,7 @@ Error: Unbound constructor L
 ```
 Thus, we can conclude the the following finding is a
 <span class="alert-danger">false positive</span>:
-```
+```dca
 /tmp/proj/opam/src/format/opamVariable.mli:26: variable_contents.L
 ```
 
@@ -1966,24 +2019,28 @@ Now that we identified a false positive, we can re-apply step 3 and explore the
 new errors.
 <details><summary>build output</summary>
 
-```
+```bash
 $ dune build @check
 File "src/state/opamSwitchAction.ml", line 35, characters 4-9:
 35 |     paths = [];
          ^^^^^
 Error: Unbound record field OpamFile.Switch_config.paths
+
 File "src/state/opamFormatUpgrade.ml", line 946, characters 23-28:
 946 |             opam_root; paths; variables; wrappers = OpamFile.Wrappers.empty;
                              ^^^^^
 Error: Unbound record field OpamFile.Switch_config.paths
+
 File "src/client/opamAdminCheck.ml", line 38, characters 4-12:
 38 |     u_action = Query;
          ^^^^^^^^
 Error: Unbound record field u_action
+
 File "src/state/opamSwitchState.ml", line 1042, characters 2-10:
 1042 |   u_action = user_action;
          ^^^^^^^^
 Error: Unbound record field u_action
+
 File "src/format/opamFile.ml", line 1:
 Error: The implementation src/format/opamFile.ml
        does not match the interface src/format/opamFile.mli:  ...
@@ -2100,15 +2157,15 @@ Error: The implementation src/format/opamFile.ml
 
 The last error reminds a lot the one that lead to opening
 [issue #81](https://github.com/LexiFi/dead_code_analyzer/issues/81)
-when exploring [src/core](#srccore).\
+in [section src/core](#srccore).\
 We can verify if we hit the same limitation by looking for the actual definition
 of `t` and the definition of `OPAM` in the `.ml`. It turns out that `t` is
 defined in `OPAMSyntax` which is included in `OPAM`. Thus, the situation is
 closer to [issue #82](https://github.com/LexiFi/dead_code_analyzer/issues/82).\
 Now to see if we actually hit the limitation, we can update the type in
 `OPAMSyntax` to match the definition in `OPAM`.
-Quickly we can reach a compilation error synonym of a false positive:
-```
+Quickly we can reach a compilation error synonymous of a false positive:
+```OCaml-error
 File "src/format/opamFile.ml", line 2649, characters 34-46:
 2649 |         OpamStd.Option.Op.(>>|) t.metadata_dir @@ function
                                          ^^^^^^^^^^^^
@@ -2116,7 +2173,7 @@ Error: Unbound record field metadata_dir
 ```
 We can conclude that the following findings are
 <span class="alert-danger">false positives</span>:
-```
+```dca
 /tmp/proj/opam/src/format/opamFile.mli:366: OPAM.t.conflict_class
 /tmp/proj/opam/src/format/opamFile.mli:369: OPAM.t.env
 /tmp/proj/opam/src/format/opamFile.mli:378: OPAM.t.substs
@@ -2126,8 +2183,8 @@ We can conclude that the following findings are
 /tmp/proj/opam/src/format/opamFile.mli:419: OPAM.t.locked
 ```
 
-If we re-apply step 3, and the following error is triggered:
-```
+If we re-apply step 3, the following error is triggered:
+```OCaml-error
 File "src/format/opamFile.ml", line 1:
 Error: The implementation src/format/opamFile.ml
        does not match the interface src/format/opamFile.mli:  ...
@@ -2156,13 +2213,13 @@ Both fields `repo_name` and `repo_root` are used in `src/format/opamFile.ml` in
 the definition of the value `Repo_config_legacySyntax.fields`.\
 We can move on with the same conclusion that the following findings are
 <span class="alert-danger">false positives</span>:
-```
+```dca
 /tmp/proj/opam/src/format/opamFile.mli:1019: Repo_config_legacy.t.repo_name
 /tmp/proj/opam/src/format/opamFile.mli:1020: Repo_config_legacy.t.repo_root
 ```
 
 Once again we can re-apply step 3, and once again it triggers a similar error:
-```
+```OCaml-error
 File "src/format/opamFile.ml", line 1:
 Error: The implementation src/format/opamFile.ml
        does not match the interface src/format/opamFile.mli:  ...
@@ -2208,14 +2265,14 @@ We are facing the same pattern, with module `Switch_configSyntax` included in
 in the definition of the value `Switch_configSyntax.sections`.\
 Once again, we can conclude that the following finding is a
 <span class="alert-danger">false positive</span>:
-```
+```dca
 /tmp/proj/opam/src/format/opamFile.mli:1038: Switch_config.t.paths
 ```
 
 Now that we are done with the false positives in `src/format/opamFile.ml`,
-applying iterating on step 3 only triggers "safe" errors.\
+iterating on step 3 only triggers "safe" errors.\
 During the iterations, we wil encounter the following warning 26 (reported as error):
-```
+```OCaml-error
 File "src/state/opamSwitchState.ml", line 959, characters 4-15:
 959 |     user_action =
           ^^^^^^^^^^^
@@ -2223,7 +2280,7 @@ Error (warning 27 [unused-var-strict]): unused variable user_action.
 ```
 This error points to an unused parameter. Removing it would trigger a warning 16
 (reported as error) that is more problematic :
-```
+```OCaml-error
 File "src/state/opamSwitchState.ml", line 957, characters 5-14:
 957 |     ?reinstall
            ^^^^^^^^^
@@ -2243,8 +2300,9 @@ We are done with the aggressive cleanup and can move on to the informed cleanup
 
 #### Informed cleanup
 
-This section takes the findings in-order (often at once in a single file) and indicates if their cleanup is
-reasonable or if it should be undone, along with a short explanation.
+This section takes the findings in lexicographical order (often at once in a
+single file or module) and indicates if their cleanup is reasonable or if it
+should be undone, along with a short explanation.
 
 - `src/format/opamFile.mli:112: Wrappers.with_wrap_remove`: <span class="alert-danger">**undo**</span>\
     While investigating the unused `OpamFile.*.with_*` functions, I found a
@@ -2252,36 +2310,22 @@ reasonable or if it should be undone, along with a short explanation.
     [`src/client/opamConfigCommand.ml`](https://github.com/ocaml/opam/blob/2.5.1/src/client/opamConfigCommand.ml#L665),
     where `OpamFile.Wrappers.with_wrap_remove` is expected.
 
-- `src/format/opamFile.mli:145: Config.with_best_effort_prefix`: <span class="alert-safe">**clean**</span>\
-  `src/format/opamFile.mli:148: Config.with_solver`: <span class="alert-safe">**clean**</span>\
-  `src/format/opamFile.mli:153: Config.with_dl_tool`: <span class="alert-safe">**clean**</span>\
-  `src/format/opamFile.mli:257: InitConfig.opam_version`: <span class="alert-safe">**clean**</span>\
-  `src/format/opamFile.mli:276: InitConfig.with_opam_version`: <span class="alert-safe">**clean**</span>\
-  `src/format/opamFile.mli:281: InitConfig.with_jobs`: <span class="alert-safe">**clean**</span>\
-  `src/format/opamFile.mli:283: InitConfig.with_dl_jobs`: <span class="alert-safe">**clean**</span>\
-  `src/format/opamFile.mli:284: InitConfig.with_dl_cache`: <span class="alert-safe">**clean**</span>\
-  `src/format/opamFile.mli:285: InitConfig.with_solver_criteria`: <span class="alert-safe">**clean**</span>\
-  `src/format/opamFile.mli:286: InitConfig.with_solver`: <span class="alert-safe">**clean**</span>\
-  `src/format/opamFile.mli:288: InitConfig.with_global_variables`: <span class="alert-safe">**clean**</span>\
-
+- `src/format/opamFile.mli:*: Config.*`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFile.mli:*: InitConfig.*`: <span class="alert-safe">**clean**</span>\
     These functions are meant to update values of abstract types `t`.
     Keeping them, even if unused, would be reasonable.\
     However, because the 2 APIs already show some inconsistencies, I think it
     would also be reasonable to reduce them to what is actually used in order to
     reduce maintenance cost.
 
-- `src/format/opamFile.mli:307: Descr.of_string`: <span class="alert-safe">**clean**</span>\
-  `src/format/opamFile.mli:316: Descr.full`: <span class="alert-safe">**clean**</span>\
+- `src/format/opamFile.mli:*: Descr.*`: <span class="alert-safe">**clean**</span>\
     I only found a use of `OpamFile.Descr.full` outside opam in
     [opamfu](https://github.com/ocamllabs/opamfu/blob/master/lib/opamfUniverse.ml#L123).\
     However the project has not seen activity for the past 8 years so I will
     consider it dead.
 
-- `src/format/opamFile.mli:342: URL.with_mirrors`: <span class="alert-safe">**clean**</span>\
-  `src/format/opamFile.mli:343: URL.with_swhid`: <span class="alert-safe">**clean**</span>\
-  `src/format/opamFile.mli:345: URL.with_subpath`: <span class="alert-safe">**clean**</span>\
-  `src/format/opamFile.mli:346: URL.with_subpath_opt`: <span class="alert-safe">**clean**</span>\
-    Same reasoning as with `OpamFile.Config.with_*`.
+- `src/format/opamFile.mli:*: URL.*`: <span class="alert-safe">**clean**</span>\
+    Same reasoning as with `OpamFile.Config.*`.
 
 - `src/format/opamFile.mli:*: OPAM.*`: <span class="alert-danger">**undo**</span>\
     Some of the reported values in `OpamFile.OPAM` are simple accessors that
@@ -2293,12 +2337,11 @@ reasonable or if it should be undone, along with a short explanation.
     - `extended` in [opam-monorepo](https://github.com/tarides/opam-monorepo/blob/main/lib/opam.ml#L313)
     - `homepage`, `author`, `license`, and more in [dune-release](https://github.com/tarides/dune-release/blob/main/lib/opam.ml#L181)
 
-    Thus, it will be safer to consider the values in `OpamFile.OPAM` as used and not remove them.
+    Thus, it will be safer to consider the findings in `OpamFile.OPAM` as used
+    and not remove them.
 
 
-- `src/format/opamFile.mli:804: Environment.read`: <span class="alert-safe">**clean**</span>\
-  `src/format/opamFile.mli:807: Environment.read_from_channel`: <span class="alert-safe">**clean**</span>\
-  `src/format/opamFile.mli:808: Environment.read_from_string`: <span class="alert-safe">**clean**</span>\
+- `src/format/opamFile.mli:*: Environment.*`: <span class="alert-safe">**clean**</span>\
     I did not find an use of `OpamFile.Environment` outside opam.
 
 - `src/format/opamFile.mli:*: Comp.*`: <span class="alert-safe">**clean**</span>\
@@ -2309,7 +2352,7 @@ reasonable or if it should be undone, along with a short explanation.
     ```
 
 - `src/format/opamFile.mli:*: Dot_install.*`: <span class="alert-safe">**clean**</span>\
-    Same reasoning as with `OpamFile.Config.with_*`.
+    Same reasoning as with `OpamFile.Config.*`.
 
 - `src/format/opamFile.mli:1087: Repo.browse`: <span class="alert-safe">**clean**</span>\
   `src/format/opamFile.mli:1090: Repo.upstream`: <span class="alert-danger">**undo**</span>\
@@ -2335,11 +2378,7 @@ reasonable or if it should be undone, along with a short explanation.
     [opam-0install](https://github.com/ocaml-opam/opam-0install-solver/blob/master/lib/dir_context.ml#L104).
 
 - `src/format/opamFormat.mli:19: value_pos`: <span class="alert-safe">**clean**</span>\
-  `src/format/opamFormat.mli:64: V.simple_arg`: <span class="alert-safe">**clean**</span>\
-  `src/format/opamFormat.mli:73: V.group`: <span class="alert-safe">**clean**</span>\
-  `src/format/opamFormat.mli:80: V.map_group`: <span class="alert-safe">**clean**</span>\
-  `src/format/opamFormat.mli:122: V.filter_ident`: <span class="alert-safe">**clean**</span>\
-  `src/format/opamFormat.mli:157: V.package_atom`: <span class="alert-safe">**clean**</span>\
+  `src/format/opamFormat.mli:*: V.*`: <span class="alert-safe">**clean**</span>\
   `src/format/opamFormat.mli:196: I.file`: <span class="alert-safe">**clean**</span>\
   `src/format/opamFormat.mli:200: I.item`: <span class="alert-safe">**clean**</span>\
   `src/format/opamFormat.mli:271: I.extract_field`: <span class="alert-safe">**clean**</span>\
@@ -2388,23 +2427,29 @@ reasonable or if it should be undone, along with a short explanation.
 #### Results
 
 The analyzer reported 163 findings in this component:
-147 unused values, 16 unused fields and constructors.\
-The aggressive cleanup revealed 11 false positives (only fields and constructors),
-all caused by the same pattern already encountered in [src/core](#srccore).\
-The informed cleanup indicates that 27 additional findings (only values) should
+147 unused values, 16 unused constructors and fields.\
+The aggressive cleanup revealed 11 false positives (constructors and fields
+only), all caused by patterns already encountered in [section src/core](#srccore).\
+The informed cleanup indicates that 27 additional findings (values only) should
 not be removed.
 
 From these results, we can compute the precision of the analyzer shown in the
-table below. The estimated precision for the informed cleanup can be
+table below. The estimated precision after the informed cleanup can be
 extrapolated as the potential fix rate.
 
-| section                 | aggressive | informed |
-|:-----------------------:|:----------:|:--------:|
-| exported values         | 100%       | 81.6%    |
-| constructors and fields | 31.3%      | 31.3%    |
-| total                   | 93.3%      | 76.7%    |
+| section                 | aggressive | + informed |
+|:-----------------------:|:----------:|:----------:|
+| exported values         | 100%       | 81.6%      |
+| constructors and fields | 31.3%      | 31.3%      |
+| total                   | 93.3%      | 76.7%      |
 
-### src/repository
+The precision on the constructors and fields after the aggressive cleanup could
+largely be improved. Especially, knowing that 10 out of 11 (i.e. 90.9%) of the
+false positives are caused by the same
+[issue](https://github.com/LexiFi/dead_code_analyzer/issues/82). Fixing this
+issue would increase the precision for this section after both phases to 83.3%.
+
+### <li>src/repository</li>
 
 #### Description
 
@@ -2427,7 +2472,7 @@ reported by the `dead_code_analyzer` for this component.
 ##### Unused exported values
 
 Applying steps 1 and 2 of the cleanup methodology for
-[unused exported values](#cleaning-up-unused-exported-values) on the fidings in
+[unused exported values](#cleaning-up-unused-exported-values) on the findings in
 is trivial.\
 Applying step 3 triggers 10 warnings 32 (reported as errors).
 <details><summary>build output</summary>
@@ -2443,6 +2488,7 @@ File "src/state/opamGlobalState.ml", line 165, characters 4-17:
 165 | let all_installed gt =
           ^^^^^^^^^^^^^
 Error (warning 32 [unused-value-declaration]): unused value all_installed.
+
 File "src/state/opamFileTools.ml", line 1236, characters 4-15:
 1236 | let lint_string ?check_extra_files ?check_upstream ?handle_dirname
            ^^^^^^^^^^^
@@ -2485,7 +2531,9 @@ Error (warning 32 [unused-value-declaration]): unused value clear_dynamic_init_s
 ```
 </details>
 
-The warnings 32 can be fixed following the technique described in [src/client](#anchor_warning_fix_methodology)
+The warnings 32 can be fixed by following the technique described in [section src/client](#anchor_warning_fix_methodology)
+
+We are done with the unused exported values.
 
 ##### Unused constructors and fields
 
@@ -2495,8 +2543,9 @@ We are done with the aggressive cleanup and can move on to the informed cleanup
 
 #### Informed cleanup
 
-This section takes the findings in-order (often at once in a single file) and indicates if their cleanup is
-reasonable or if it should be undone, along with a short explanation.
+This section takes the findings in lexicographical order (often at once in a
+single file) and indicates if their cleanup is reasonable or if it should be
+undone, along with a short explanation.
 
 - `src/repository/opamRepository.mli:87: find_backend`: <span class="alert-safe">**clean**</span>\
     I did not find any use outisde opam and all its historical uses have been
@@ -2507,7 +2556,7 @@ reasonable or if it should be undone, along with a short explanation.
     I did not find any use of the findings outside opam.
 
 - `src/repository/opamRepositoryConfig.mli`: <span class="alert-safe">**clean**</span>\
-    The values `E.fetch` and `E.curl` reported in `src/repository/opamRepositoryConfig.mli` are replaced by their eager equivalent `E.fetch_t` and `E.curl_t`.\
+    The values `E.fetch` and `E.curl` reported in `src/repository/opamRepositoryConfig.mli` are replaced with their eager equivalent `E.fetch_t` and `E.curl_t`.\
     I did not find any use of the findings outside opam.
 
 - `src/repository/opamRepositoryPath.mli`: <span class="alert-safe">**clean**</span>\
@@ -2521,16 +2570,16 @@ The aggressive cleanup did not reveal any false positive or limitation.\
 The informed cleanup did not reveal any false positive or limitation.
 
 From these results, we can compute the precision of the analyzer shown in the
-table below. The estimated precision for the informed cleanup can be
+table below. The estimated precision after the informed cleanup can be
 extrapolated as the potential fix rate.
 
-| section                 | aggressive | informed |
-|:-----------------------:|:----------:|:--------:|
-| exported values         | 100%       | 100%     |
-| constructors and fields | NA         | NA       |
-| total                   | 100%       | 100%     |
+| section                 | aggressive | + informed |
+|:-----------------------:|:----------:|:----------:|
+| exported values         | 100%       | 100%       |
+| constructors and fields | NA         | NA         |
+| total                   | 100%       | 100%       |
 
-### src/solver
+### <li>src/solver</li>
 
 #### Description
 
@@ -2545,22 +2594,22 @@ as:
 > gathers everything related to the various options for constraint solving that opam can use (custom search, dose, mccs, z3, 0install, …)
 </div>
 
-In total, there are 58 unused values, and 4 unused fields ans constructors
+In total, there are 58 unused values, and 4 unused fields
 reported by the `dead_code_analyzer` for this component.
 
 #### Aggressive cleanup
 
 ##### Unused exported values
 
-Because the vas majority of the findings are located in `src/solver/opamCudf.mli`
+Because the vast majority of the findings are located in `src/solver/opamCudf.mli`
 (51 out of 58, i.e. 87.9%), we will clean it first.
 
 Applying steps 1 and 2 of the cleanup methodology for
-[unused exported values](#cleaning-up-unused-exported-values) on the fidings in
+[unused exported values](#cleaning-up-unused-exported-values) on the findings in
 `src/solver/opamCudf.mli` is trivial.\
 All the values exported by `OpamCudf.Json` are unused. This leaves the module's
 signature defined as below. The module does not export anything anymore, so it
-can be removed as a whole.
+can be removed entirely.
 ```OCaml
 module Json: sig
   open Cudf_types
@@ -2613,7 +2662,7 @@ Error (warning 32 [unused-value-declaration]): unused value packages.
 ```
 </details>
 
-The warnings 32 can be fixed following the technique described in [src/client](#anchor_warning_fix_methodology).\
+The warnings 32 can be fixed by following the technique described in [section src/client](#anchor_warning_fix_methodology).\
 After 2 more iterations on step 3, building does not trigger any new error or
 warning.
 
@@ -2648,6 +2697,8 @@ Error (warning 32 [unused-value-declaration]): unused value check_for_conflicts.
 ```
 </details>
 
+We are done with the unused exported values.
+
 ##### Unused constructors and fields
 
 All the findings are located in `src/solver/opamCudfSolverSig.ml`.
@@ -2661,7 +2712,7 @@ Applying steps 1 and 2 is trivial.\
 Applying step 3 triggers 4 errors.
 <details><summary>build output</summary>
 
-```
+```bash
 $ dune build @check
 File "src/solver/opamBuiltinZ3.dummy.ml", lines 23-28, characters 23-1:
 Error: Cannot create values of the private type criteria_def
@@ -2696,7 +2747,7 @@ used, then the values created of type `criteria_def` become useless. We can fix
 our errors by removing them and their use, guided by the compilation errors.
 
 After a couple of iterations of step 3, we get the following error:
-```
+```OCaml-error
 File "src/solver/opamSolverConfig.ml", line 161, characters 4-22:
 161 |     S.default_criteria
           ^^^^^^^^^^^^^^^^^^
@@ -2736,7 +2787,7 @@ We hit a new limitation of the analyzer and can open an
 [issue](https://github.com/LexiFi/dead_code_analyzer/issues/83) to report it.\
 We can conclude that the following reports are
 <span class="alert-danger">false positives</span>:
-```
+```dca
 /tmp/proj/opam/src/solver/opamCudfSolverSig.ml:12: criteria_def.crit_default
 /tmp/proj/opam/src/solver/opamCudfSolverSig.ml:13: criteria_def.crit_upgrade
 /tmp/proj/opam/src/solver/opamCudfSolverSig.ml:14: criteria_def.crit_fixup
@@ -2747,8 +2798,9 @@ We are done with the aggressive cleanup and can move on to the informed cleanup
 
 #### Informed cleanup
 
-This section takes the findings in-order (often at once in a single file) and indicates if their cleanup is
-reasonable or if it should be undone, along with a short explanation.
+This section takes the findings in lexicographical order (at once in a
+single file) and indicates if their cleanup is reasonable or if it should be
+undone, along with a short explanation.
 
 - `src/solver/opamCudf.mli`: <span class="alert-safe">**clean**</span>\
     I have found only one use of `OpamCudf` outside of opam, in
@@ -2761,22 +2813,26 @@ reasonable or if it should be undone, along with a short explanation.
 #### Results
 
 The analyzer reported 62 findings in this component:
-58 unused values, 4 unused field or constructor.\
-The aggressive cleanup revealed 4 false positives (only fields and constructors),
+58 unused values, 4 unused fields.\
+The aggressive cleanup revealed 4 false positives (all the fields),
 and 1 new limitation.\
 The informed cleanup did not reveal any false positive or limitation.
 
 From these results, we can compute the precision of the analyzer shown in the
-table below. The estimated precision for the informed cleanup can be
+table below. The estimated precision after the informed cleanup can be
 extrapolated as the potential fix rate.
 
-| section                 | aggressive | informed |
-|:-----------------------:|:----------:|:--------:|
-| exported values         | 100%       | 100%     |
-| constructors and fields |   0%       |   0%     |
-| total                   | 93.5%      | 93.5%    |
+| section                 | aggressive | + informed |
+|:-----------------------:|:----------:|:----------:|
+| exported values         | 100%       | 100%       |
+| constructors and fields |   0%       |   0%       |
+| total                   | 93.5%      | 93.5%      |
 
-### src/state
+The null precision on constructors and fields is not suprising. Because all the
+findings amount to all the fields of a type, their truthfulness is strongly
+correlated. We are facing an "all or nothing" precision situtation.
+
+### <li>src/state</li>
 
 #### Description
 
@@ -2799,7 +2855,7 @@ reported by the `dead_code_analyzer` for this component.
 ##### Unused exported values
 
 Applying steps 1 and 2 of the cleanup methodology for
-[unused exported values](#cleaning-up-unused-exported-values) on the fidings in
+[unused exported values](#cleaning-up-unused-exported-values) on the findings in
 is trivial.\
 Applying step 3 triggers 10 warnings 32 (reported as errors).
 <details><summary>build output</summary>
@@ -2835,6 +2891,7 @@ File "src/state/opamSwitchState.ml", line 793, characters 4-16:
 793 | let dev_packages st =
           ^^^^^^^^^^^^
 Error (warning 32 [unused-value-declaration]): unused value dev_packages.
+
 File "src/state/opamEnv.ml", line 701, characters 4-12:
 701 | let get_opam ~set_opamroot ~set_opamswitch ~force_path st =
           ^^^^^^^^
@@ -2858,10 +2915,10 @@ Error (warning 32 [unused-value-declaration]): unused value clear_dynamic_init_s
 </details>
 
 The warnings 32 can all be fixed but one, following the technique described in
-[src/client](#anchor_warning_fix_methodology).\
+[section src/client](#anchor_warning_fix_methodology).\
 The following warning cannot be fixed trivially because the file
-`src/state/opamScript.ml` does not exist. I will come back to this later.
-```
+`src/state/opamScript.ml` does not exist. I will come back to this in no time.
+```OCaml-error
 File "src/state/opamScript.ml", line 23, characters 4-10:
 23 | let prompt =
          ^^^^^^
@@ -2888,25 +2945,32 @@ let name =
 As a result, this rule creates the `src/state/opamScript.ml` file and fills it
 with variables named after the shell scripts found in `src/state/shellscripts`.\
 If we continue applying a naive cleanup, we hit a wall here. 2 choices can be made:
-- go as far as possible in the cleanup and remove the unused script (`src/state/shellscripts/prompt.sh`);
-- or tolerate to leave the unused `prompt` variable in `src/state/opamScript.mli` because it is linked with generated code.
+- go as far as possible in the cleanup and remove the unused script
+    (`src/state/shellscripts/prompt.sh`);
+- or tolerate to leave the unused `prompt` variable in `src/state/opamScript.mli`
+    because it is generated code.
 
 Because we are doing an _aggressive_ cleanup, I chose to remove the script.
 After this, the compiler does not report any unused value.
 
+We are done with the unused exported values.
+
 ##### Unused constructors and fields
 
-There is only one report in this section for field `switch_state.invalidated`
+There is only one report in this section: field `switch_state.invalidated`
 in `src/state/opamStateTypes.mli`.\
-As usual, applying step 1 and 2 is trivial.\
-After 3 iterations of step3, building does not trigger any new error or warning.
+As usual, applying steps 1 and 2 of the general cleanup methodology for
+[unused constructors and fields](#cleaning-up-unused-constructors-and-fields)
+is trivial.\
+After 3 iterations of step 3, building does not trigger any new error or warning.
 
 We are done with the aggressive cleanup and can move on to the informed cleanup
 
 #### Informed cleanup
 
-This section takes the findings in-order (often at once in a single file) and indicates if their cleanup is
-reasonable or if it should be undone, along with a short explanation.
+This section takes the findings in lexicographical order (often at once in a
+single file) and indicates if their cleanup is reasonable or if it should be
+undone, along with a short explanation.
 
 - `src/state/opamEnv.mli`: <span class="alert-safe">**clean**</span>\
     I did not find any use of the findings outside opam.
@@ -2952,16 +3016,16 @@ The aggressive cleanup did not reveal any false positive or limitation.\
 The informed cleanup did not reveal any false positive or limitation.
 
 From these results, we can compute the precision of the analyzer shown in the
-table below. The estimated precision for the informed cleanup can be
+table below. The estimated precision after the informed cleanup can be
 extrapolated as the potential fix rate.
 
-| section                 | aggressive | informed |
-|:-----------------------:|:----------:|:--------:|
-| exported values         | 100%       | 100%     |
-| constructors and fields | 100%       | 100%     |
-| total                   | 100%       | 100%     |
+| section                 | aggressive | + informed |
+|:-----------------------:|:----------:|:----------:|
+| exported values         | 100%       | 100%       |
+| constructors and fields | 100%       | 100%       |
+| total                   | 100%       | 100%       |
 
-### src/tools
+### <li>src/tools</li>
 
 #### Description
 
@@ -3011,7 +3075,7 @@ Error (warning 32 [unused-value-declaration]): unused value filter_packages.
 ```
 </details>
 
-The warnings 34 and 32 can be fixed following the technique described in [src/client](#anchor_warning_fix_methodology).\
+The warnings 34 and 32 can be fixed by following the technique described in [section src/client](#anchor_warning_fix_methodology).\
 After 2 more iterations on step 3, building does not trigger any new error or
 warning.
 Now both the `.mli` and the `.ml` only contain the copyright notice and
@@ -3049,12 +3113,14 @@ the dependecy on the removed lib to a dependency on the ocaml toplevel:
                  -linkall)))
 ```
 
-Finally, we must update the rule to generate `src/tools/opam_admin_topstart.ml`
-in the same `dune` file:
+Finally, in the same `dune` file we must update the rule that generates
+`src/tools/opam_admin_topstart.ml` to remove its dependency on `Opam_admin_top`:
 ```diff
 -(rule (with-stdout-to opam_admin_topstart.ml (echo "include Opam_admin_top\n\nlet _ = Topmain.main ()")))
 +(rule (with-stdout-to opam_admin_topstart.ml (echo "let _ = Topmain.main ()")))
 ```
+
+We are done with the unused exported values.
 
 ##### Unused constructors and fields
 
@@ -3064,8 +3130,9 @@ We are done with the aggressive cleanup and can move on to the informed cleanup
 
 #### Informed cleanup
 
-This section takes the findings in-order (often at once in a single file) and indicates if their cleanup is
-reasonable or if it should be undone, along with a short explanation.
+This section takes all the findings at once in a single file and indicates if
+their cleanup is reasonable or if it should be undone, along with a short
+explanation.
 
 - `src/tools/opam_admin_top.mli`: <span class="alert-danger">**undo**</span>\
     The module is actually used inside opam in `admin-scripts`.
@@ -3073,7 +3140,7 @@ reasonable or if it should be undone, along with a short explanation.
     part of the build.\
     The only value I could not find using `grep` is `filter_packages`.
     I would not dismiss it, because the component should have been considered
-    out of scope as its documentation indicates:
+    out of scope based on its documentation:
     ```OCaml
     (** Small lib for writing opam-repo admin scripts *)
     ```
@@ -3083,30 +3150,38 @@ reasonable or if it should be undone, along with a short explanation.
 The analyzer reported 5 findings in this component:
 5 unused values, 0 unused field or constructor.\
 The aggressive cleanup did not reveal any false positive or limitation.\
-The informed cleanup revealed 5 false positives but no limitation. It was
-actually a methodology mistake.
+The informed cleanup indicates no finding should be removed. This is due to a
+methodology mistake.
 
 From these results, we can compute the precision of the analyzer shown in the
-table below. The estimated precision for the informed cleanup can be
+table below. The estimated precision after the informed cleanup can be
 extrapolated as the potential fix rate.
 
-| section                 | aggressive | informed |
-|:-----------------------:|:----------:|:--------:|
-| exported values         | 100%       |   0%     |
-| constructors and fields | NA         | NA       |
-| total                   | 100%       | 100%     |
+| section                 | aggressive | + informed |
+|:-----------------------:|:----------:|:----------:|
+| exported values         | 100%       |   0%       |
+| constructors and fields | NA         | NA         |
+| total                   | 100%       |   0%       |
 
 ## Conclusion
+
+The changes of the aggressive cleanup are available on my fork in branch
+[fantazio/dca_naive](https://github.com/fantazio/opam/tree/dca_naive)
+and remove
+[more than 2.3k lines of code](https://github.com/fantazio/opam/compare/2.5.1...dca_naive).\
+The changes of the informed cleanup are available on my fork in branch
+[fantazio/dca_informed](https://github.com/fantazio/opam/tree/dca_informed)
+and remove [almost 2k lines of code](https://github.com/fantazio/opam/compare/2.5.1...dca_informed).
 
 ### Results<a id="anchor_conclusion-results"></a>
 
 Overall, the analyzer reported 512 findings in opam:
-433 unused values, and 79 fields and constructors.
+433 unused values, and 79 constructors and fields.
 
 Out of them, 3 unused values findings were discarded from the study for being
 out of `src`.\
 We discovered <span class="alert-danger">39 actual false positives</span>
-(1 value and 38 fields and contructors), and documented 4 new limitations (
+(1 value and 38 constructors and fields), and documented 4 new limitations (
 [issue #79](https://github.com/LexiFi/dead_code_analyzer/issues/79),
 [issue #80](https://github.com/LexiFi/dead_code_analyzer/issues/80),
 [issue #81](https://github.com/LexiFi/dead_code_analyzer/issues/81), and
@@ -3124,52 +3199,62 @@ The reasons are, in order of importance:
 6. Mistake in opam (1 finding)
 
 From these results, we can compute the precision of the analyzer shown in the
-table below. The estimated precision for the informed cleanup can be
+table below. The estimated precision after the informed cleanup can be
 extrapolated as the potential fix rate.
 
-| section                 | aggressive | informed |
-|:-----------------------:|:----------:|:--------:|
-| exported values         | 99.8%      | 83.0%    |
-| constructors and fields | 51.9%      | 11.4%    |
-| total                   | 92.3%      | 71.9%    |
+| section                 | aggressive | + informed |
+|:-----------------------:|:----------:|:----------:|
+| exported values         | 99.8%      | 83.0%      |
+| constructors and fields | 51.9%      | 11.4%      |
+| total                   | 92.3%      | 71.9%      |
 
-The _total_ precision for both cleanups is reassuring, but there is a clear
+The _total_ precision after both cleanups is reassuring, but there is a clear
 unbalance in the precision of the analyzer on exported values and on
-constructors and fields.\
-In addition, identifying and documenting them may be time consuming (e.g. we are
-hitting 3 limitations in `src/core/opamStd.mli`).\
-However, the actual false positives are often grouped (e.g. in
-`src/core/opamStd.mli`) or related to similar
-limitations (e.g. issue #82 causes 9 false positives in `src/format/opamFile.mli`
-and 3 in `src/core/opamStubsTypes.ml`).\
-Moreover, from an informed cleanup perspective, some actual false positives
-would be labeled as such without requiring investigating their cause (e.g. the
-18 false positives in `src/core/opamStd.mli`).\
-At last, I assume the informed cleanup was more time consuming for me (learning
-and verifying a lot of things) than it would have been for an opam developer
-(already knowing things), so the transfer of false positives from the aggressive
-cleanup phase to the informed cleanup would make them even more tolerable.
+constructors and fields.
 
 Despite the large amount of actual or labeled false positives, the
 `dead_code_analyzer` actually helped discover a lot of actual dead code and _more_.\
 Indeed, during the agressive cleanup phase, we were able to easily discover
-exported types and modules that were only related to the analyzer's findings.\
+exported types and modules that were only related to the analyzer's findings,
+and even remove entire files.\
 Additionally, during the informed cleanup, we discovered that the `OpamHash` and
 `OpamSha` modules were exporting more entry-points for hash and sha computations
 than they should, and simplified their API.\
 Finally, as mentionned at the bottom of the list above, the findings actually
-pointed out a value that should not have been dead, which helped fix a
-mistake in opam.
+pointed out a value (`OpamFile.Wrappers.with_wrap_remove`) that should not have
+been dead, which helped fix a mistake in opam.
 
 ### Lessons learned
 
-Cleaning up code is time consuming. Although often easy (just follow the
+Cleaning up dead code is time consuming. Although often easy (just follow the
 analyzer's and compiler's reports), the lack of automated way of doing it makes
 the task repetitive and tedious. Ideally, I think that an "auto-cleaner" tool
 should take care of most of the cleanup and developers should only worry about
-filtering what the tool will take care of.\
+filtering what the tool will take care of (the "informed" part).\
 Such a tool should be not be tied to the `dead_code_analyzer` specifically but
-offer its service to all refactoring-related tools.
+offer its service to all the refactoring-related tools.
+
+In practice, a user may want to do an informed cleanup first, and aggressive
+second. This way, there are less chances to face limitations of the tool,
+and the overall cleanup will be focused on meaningful efforts.\
+Also, focusing the cleanup by component has the benefit of naturally creating
+"chunks" of findings (although unbalanced) with a similar context.
+
+Identifying and documenting actual false positives is time consuming
+.\
+However, they are often grouped (e.g. 4 limitations in `src/core/opamStd.mli`)
+or related to similar limitations (e.g.
+[issue #82](https://github.com/LexiFi/dead_code_analyzer/issues/82) causes
+10 false positives in `src/format/opamFile.mli` and 3 in
+`src/core/opamStubsTypes.ml`).\
+Moreover, by applying an informed cleanup first some actual false positives
+would be labeled as such before doing an aggressive cleanup, discarding the need
+to identify and document them (e.g. the 18 false positives in `src/core/opamStd.mli`).\
+At last, I assume the informed cleanup was more time consuming for me (undoing
+cleanups, learning and verifying a lot of things) than it would have been for
+an opam developer (already knowing things), so the transfer of false positives
+from the aggressive cleanup phase to the informed cleanup would make them even
+more tolerable.
 
 Doing an occasional cleanup can be effective to audit a codebase, and I would
 recommend doing it (but I might biased). The analyzer is fast, but doing
@@ -3190,35 +3275,35 @@ the reviewers. Going deeper would require more work on both sides.\
 Upon success, additional iterations may be applied during future audits.
 
 We only used the default sections of the analyzer: unused exported values,
-unused methods, and unused fields and constructors. There are 3 more sections
+unused methods, and unused constructors and fields. There are 3 more sections
 that are left to explore in future audits: optional arguments always used,
 optional arguments never used, and stylistic issues. Again, the goal is not to
 put too big of a workload on the reviewers. This is why those sections will be
 considered in future audits, and probably independently of the default ones
 first to ease their introduction in the cleanup process.
 
-Overall, I spent ~50h on this study: triaging the results and documenting issues
-during the aggressive cleanup phase, triaging the results in the informed
-cleanup phase, writing the report, proof reading and proof checking the results.\
+Overall, I spent ~55h on this study: triaging the results and documenting issues
+during the aggressive cleanup phase, triaging the results and undoing wrongful
+cleanups in the informed cleanup phase, writing the report, proof reading, and
+proof checking the results.\
 I believe that for an opam developer, doing a complete informed cleanup should
-not take half of that time. Maybe a couple days.\
+not take a third of that time. Maybe a couple days.\
 Because writing this report was interlaced with applying the cleanups, it is
-harder to precisely measure a precise duration per action. However, I can
-identify two clear pain points/mistaked I made during :
+harder to estimate a precise duration per action. However, I can identify two
+clear pain points/mistakes I made during this study:
 1. Not planning the structure of the report ahead. This forced me to adapt the
     structure as I was going, sometimes taking long and wordly notes that were
     removed during the final re-write. It also lead to a full re-write to
     clarify and focus its structure and content.
 2. Applying the aggressive cleanup entirely before doing the informed one.
-    This forced to come back and undo cleaning done days before, and remembering
-    important things I observed when I could just have done both at once and
-    organize the observations from the beginning. Also, doing each cleanup
-    separately, I followed the findings by section, when in the end it would
-    have been more natural to follow them by component, as presented.
+    This forced to come back and undo cleanups done days before, and remembering
+    important things I observed for future actions when I could just have done
+    both at once and organize the observations from the beginning. Also, while
+    applying each cleanup phase, I followed the findings by section, when in the
+    end it would have been more natural to follow them by component, as
+    presented in this report.
 
-Note that point 1 is not surprising because this is my 1st study report of the
-analyzer at scale, and I did not know what results to expect for the 2 goals.\
-Point 1 and 2 are connected, and mostly related to the dual objective: study the
-analyzer's results and audit opam.
+The 2 points aboveare connected, and mostly related to the dual objective:
+study the analyzer's results and audit opam.
 
 <span class="thanks"> for reading</span>
