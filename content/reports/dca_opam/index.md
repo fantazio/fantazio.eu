@@ -22,6 +22,9 @@ tags: [dead_code_analyzer, opam, ocaml, static analysis, dead code, ocaml softwa
     - [src/solver](#srcsolver)
     - [src/state](#srcstate)
     - [src/tools](#srctools)
+- [Conclusion](#conclusion)
+    - [Results](#anchor_conclusion-results)
+    - [Lessons learned](#lessons-learned)
 
 ## Foreword
 
@@ -182,7 +185,7 @@ $ wc -l dca.out
 545 dca.out
 ```
 The analyzer reported 500+ unused exported values, unused methods, and unused
-constructors and fields. 508 more precisely. Let's explore the reports !
+constructors and fields. 512 more precisely. Let's explore the reports !
 
 ## Observations
 
@@ -743,7 +746,7 @@ reasonable or if it should be undone, along with a short explanation.
 The analyzer reported 36 findings in this component:
 34 unused values, 1 unused field and 1 unused constructor.\
 The aggressive cleanup did not reveal any false positive or limitation.\
-The informed cleanup indicates that only 2 findings shold not be removed.
+The informed cleanup indicates that only 2 findings should not be removed.
 They are exported values used outside opam.
 
 From these results, we can compute the precision of the analyzer shown in the
@@ -1579,7 +1582,7 @@ reasonable or if it should be undone, along with a short explanation.
     I found a use outside opam in [opam-bundle](https://github.com/AltGr/opam-bundle/blob/master/src/opamBundleMain.ml#L732).
 
 - `src/core/opamProcess.mli:54: is_verbose_command`: <span class="alert-safe">**clean**</span>\
-  `src/core/opamProcess.mli:73: t.p_info`
+  `src/core/opamProcess.mli:73: t.p_info`: <span class="alert-safe">**clean**</span>\
   `src/core/opamProcess.mli:217: Job.seq_map`: <span class="alert-danger">**undo**</span>\
     I could not find any use outside opam of the 1st and 2nd findings but I did
     find one of the 3rd in [opam-bundle](https://github.com/AltGr/opam-bundle/blob/master/src/opamBundleMain.ml#L685).
@@ -1592,7 +1595,7 @@ reasonable or if it should be undone, along with a short explanation.
     and replace its use with ``OpamSHA.hash_string `SHA1``.
 
 - `src/core/opamStd.mli`: <span class="alert-danger">**undo**</span>\
-    Based on the intent of `OpamStd`,its findings should not be removed.
+    Based on the intent of `OpamStd`, its findings should not be removed.
 
 - `src/core/opamStubs.mli`: <span class="alert-danger">**undo**</span>\
     According to the module documentation below, most of its functions are
@@ -1648,7 +1651,7 @@ reasonable or if it should be undone, along with a short explanation.
 The analyzer reported 209 findings in this component:
 153 unused values, 56 unused fields and constructors.\
 The aggressive cleanup revealed 24 false positives (1 value and 23 fields and
-constructors), and 2 new limitations.\
+constructors), and 3 new limitations.\
 The informed cleanup indicates that 65 additional findings (33 values and
 32 fields) should not be removed.
 
@@ -1953,7 +1956,7 @@ File "src/client/opamSolution.ml", line 1478, characters 42-43:
                                                  ^
 Error: Unbound constructor L
 ```
-Thus, wee can conclude the the following finding is a
+Thus, we can conclude the the following finding is a
 <span class="alert-danger">false positive</span>:
 ```
 /tmp/proj/opam/src/format/opamVariable.mli:26: variable_contents.L
@@ -2945,7 +2948,7 @@ reasonable or if it should be undone, along with a short explanation.
 
 The analyzer reported 26 findings in this component:
 25 unused values, 1 unused field.\
-The aggressive cleanup did not reveal any false positive or limitation.
+The aggressive cleanup did not reveal any false positive or limitation.\
 The informed cleanup did not reveal any false positive or limitation.
 
 From these results, we can compute the precision of the analyzer shown in the
@@ -3092,3 +3095,130 @@ extrapolated as the potential fix rate.
 | exported values         | 100%       |   0%     |
 | constructors and fields | NA         | NA       |
 | total                   | 100%       | 100%     |
+
+## Conclusion
+
+### Results<a id="anchor_conclusion-results"></a>
+
+Overall, the analyzer reported 512 findings in opam:
+433 unused values, and 79 fields and constructors.
+
+Out of them, 3 unused values findings were discarded from the study for being
+out of `src`.\
+We discovered <span class="alert-danger">39 actual false positives</span>
+(1 value and 38 fields and contructors), and documented 4 new limitations (
+[issue #79](https://github.com/LexiFi/dead_code_analyzer/issues/79),
+[issue #80](https://github.com/LexiFi/dead_code_analyzer/issues/80),
+[issue #81](https://github.com/LexiFi/dead_code_analyzer/issues/81), and
+[issue #82](https://github.com/LexiFi/dead_code_analyzer/issues/82))\
+during the aggressive cleanup phase.\
+We also labeled an <span class="alert-danger">extra 104 findings as false
+positives</span> (72 values and 32 fields) during the informed cleanup phase.
+The reasons are, in order of importance:
+1. Platform (Windows) specific code and FFI (34 findings, in
+    `src/core/opamStubs.mli`, and `src/core/opamStubsTypes.ml`)
+2. Module's intent (29 findings, 28 in `src/core/opamStd.mli`)
+3. Use outside opam (28 findings)
+4. Methodology mistake (6 findings, used in `admin-scripts`)
+5. Work in progress (2 findings)
+6. Mistake in opam (1 finding)
+
+From these results, we can compute the precision of the analyzer shown in the
+table below. The estimated precision for the informed cleanup can be
+extrapolated as the potential fix rate.
+
+| section                 | aggressive | informed |
+|:-----------------------:|:----------:|:--------:|
+| exported values         | 99.8%      | 83.0%    |
+| constructors and fields | 51.9%      | 11.4%    |
+| total                   | 92.3%      | 71.9%    |
+
+The _total_ precision for both cleanups is reassuring, but there is a clear
+unbalance in the precision of the analyzer on exported values and on
+constructors and fields.\
+In addition, identifying and documenting them may be time consuming (e.g. we are
+hitting 3 limitations in `src/core/opamStd.mli`).\
+However, the actual false positives are often grouped (e.g. in
+`src/core/opamStd.mli`) or related to similar
+limitations (e.g. issue #82 causes 9 false positives in `src/format/opamFile.mli`
+and 3 in `src/core/opamStubsTypes.ml`).\
+Moreover, from an informed cleanup perspective, some actual false positives
+would be labeled as such without requiring investigating their cause (e.g. the
+18 false positives in `src/core/opamStd.mli`).\
+At last, I assume the informed cleanup was more time consuming for me (learning
+and verifying a lot of things) than it would have been for an opam developer
+(already knowing things), so the transfer of false positives from the aggressive
+cleanup phase to the informed cleanup would make them even more tolerable.
+
+Despite the large amount of actual or labeled false positives, the
+`dead_code_analyzer` actually helped discover a lot of actual dead code and _more_.\
+Indeed, during the agressive cleanup phase, we were able to easily discover
+exported types and modules that were only related to the analyzer's findings.\
+Additionally, during the informed cleanup, we discovered that the `OpamHash` and
+`OpamSha` modules were exporting more entry-points for hash and sha computations
+than they should, and simplified their API.\
+Finally, as mentionned at the bottom of the list above, the findings actually
+pointed out a value that should not have been dead, which helped fix a
+mistake in opam.
+
+### Lessons learned
+
+Cleaning up code is time consuming. Although often easy (just follow the
+analyzer's and compiler's reports), the lack of automated way of doing it makes
+the task repetitive and tedious. Ideally, I think that an "auto-cleaner" tool
+should take care of most of the cleanup and developers should only worry about
+filtering what the tool will take care of.\
+Such a tool should be not be tied to the `dead_code_analyzer` specifically but
+offer its service to all refactoring-related tools.
+
+Doing an occasional cleanup can be effective to audit a codebase, and I would
+recommend doing it (but I might biased). The analyzer is fast, but doing
+an overall cleanup can take a lot of human time.\
+Thus, I would also recommend to try and use the analyzer more regularly for
+differential analysis. Although the feature is not available yet, the idea would
+be to detect dead code introduced or cleaned up by a change (e.g. a PR), and a
+poor man's version of it can be implemented with shell scripts.\
+A differential analysis would help maintaining the codebase quality, and,
+consequently, speed up audits during the occasional overall cleanups.
+
+We only did 1 iteration with the analyzer on opam's codebase but could apply
+more. It would probably take a few iterations before we reach a fixpoint.\
+However, I do not think that going as deep as possible at once is a good idea in
+this situation. As I said, I am not an opam developer and this work will require
+going through a review process. The goal is not to put too big of a workload on
+the reviewers. Going deeper would require more work on both sides.\
+Upon success, additional iterations may be applied during future audits.
+
+We only used the default sections of the analyzer: unused exported values,
+unused methods, and unused fields and constructors. There are 3 more sections
+that are left to explore in future audits: optional arguments always used,
+optional arguments never used, and stylistic issues. Again, the goal is not to
+put too big of a workload on the reviewers. This is why those sections will be
+considered in future audits, and probably independently of the default ones
+first to ease their introduction in the cleanup process.
+
+Overall, I spent ~50h on this study: triaging the results and documenting issues
+during the aggressive cleanup phase, triaging the results in the informed
+cleanup phase, writing the report, proof reading and proof checking the results.\
+I believe that for an opam developer, doing a complete informed cleanup should
+not take half of that time. Maybe a couple days.\
+Because writing this report was interlaced with applying the cleanups, it is
+harder to precisely measure a precise duration per action. However, I can
+identify two clear pain points/mistaked I made during :
+1. Not planning the structure of the report ahead. This forced me to adapt the
+    structure as I was going, sometimes taking long and wordly notes that were
+    removed during the final re-write. It also lead to a full re-write to
+    clarify and focus its structure and content.
+2. Applying the aggressive cleanup entirely before doing the informed one.
+    This forced to come back and undo cleaning done days before, and remembering
+    important things I observed when I could just have done both at once and
+    organize the observations from the beginning. Also, doing each cleanup
+    separately, I followed the findings by section, when in the end it would
+    have been more natural to follow them by component, as presented.
+
+Note that point 1 is not surprising because this is my 1st study report of the
+analyzer at scale, and I did not know what results to expect for the 2 goals.\
+Point 1 and 2 are connected, and mostly related to the dual objective: study the
+analyzer's results and audit opam.
+
+<span class="thanks"> for reading</span>
