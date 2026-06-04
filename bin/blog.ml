@@ -5,6 +5,7 @@ let assets = Path.rel [ "assets" ]
 let images = Path.(assets / "images")
 let css = Path.(assets / "css")
 let templates = Path.(assets / "templates")
+let assets_reports = Path.(assets / "reports")
 let content = Path.rel [ "content" ]
 let pages = Path.(content / "pages")
 let articles = Path.(content / "articles")
@@ -24,6 +25,19 @@ let is_index file =
   match Path.remove_extension file |> Path.basename with
   | Some "index" -> true
   | _ -> false
+
+let iter_files_deep ~where paths action =
+  let is_file = ref false in
+  let where = function
+    | `Directory ->
+        is_file := false;
+        fun _ -> true
+    | `File ->
+        is_file := true;
+        where
+  in
+  let action path = if !is_file then action path else Eff.return in
+  Batch.iter_tree ~where paths action
 
 let build_paths dir filenames =
   List.map (fun filename -> Path.(dir / filename)) filenames
@@ -90,19 +104,7 @@ let create_documents document_kind =
     | Article -> articles
     | Report -> reports
   in
-  let is_file = ref false in
-  let where = function
-    | `Directory ->
-        is_file := false;
-        fun _ -> true
-    | `File ->
-        is_file := true;
-        is_markdown
-  in
-  let action path =
-    if !is_file then create_document document_kind path else Eff.return
-  in
-  Batch.iter_tree ~where paths action
+  iter_files_deep ~where:is_markdown paths (create_document document_kind)
 
 let create_pages = create_documents Page
 let create_articles = create_documents Article
@@ -158,11 +160,22 @@ let copy_images =
   let copy_image image_path = Action.copy_file ~into:www_images image_path in
   Batch.iter_files ~where:is_image images copy_image
 
+let copy_assets_reports =
+  let is_output file = with_ext [ "out"; "err" ] file in
+  let copy_report path =
+    let into =
+      Path.dirname path |> Path.trim ~prefix:assets |> Path.relocate ~into:www
+    in
+    Action.copy_file ~into path
+  in
+  iter_files_deep ~where:is_output assets_reports copy_report
+
 let program () =
   let open Eff in
   let cache = Path.(www / ".cache") in
   Action.restore_cache cache
   >>= copy_images
+  >>= copy_assets_reports
   >>= create_css
   >>= create_pages
   >>= create_articles

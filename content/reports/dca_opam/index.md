@@ -156,8 +156,8 @@ things as simple as possible for now.\
 Finally, the `stderr` (output of verbose) is redirected to `dca.err`, and
 `stdout` (the findings) is redirected to `dca.out`.
 
-[dca.out is available here.](../../assets/reports/dca/opam/dca.1.2.0_opam.2.5.1.out)\
-[dca.err is available here.](../../assets/reports/dca/opam/dca.1.2.0_opam.2.5.1.err)
+[dca.out is available here.](./dca_opam/dca.1.2.0_opam.2.5.1.out)\
+[dca.err is available here.](./dca_opam/dca.1.2.0_opam.2.5.1.err)
 
 <div class="alert-tip">
 
