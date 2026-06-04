@@ -46,7 +46,7 @@ by "component" although, in practice, I followed the analyzer's results by
 
 > I am not an opam developer. My observations and judgements are those of a
 > newcomer and may be mistaken. They will be corrected by an external
-> review process.
+> review process ([PR #6954](https://github.com/ocaml/opam/pull/6954)).
 </div>
 
 ## Setup
@@ -156,8 +156,8 @@ things as simple as possible for now.\
 Finally, the `stderr` (output of verbose) is redirected to `dca.err`, and
 `stdout` (the findings) is redirected to `dca.out`.
 
-[dca.out is available here.](./dca_opam/dca.1.2.0_opam.2.5.1.out)\
-[dca.err is available here.](./dca_opam/dca.1.2.0_opam.2.5.1.err)
+[dca.out is available here.](./dca.1.2.0_opam.2.5.1.out)\
+[dca.err is available here.](./dca.1.2.0_opam.2.5.1.err)
 
 <div class="alert-tip">
 
@@ -3171,7 +3171,7 @@ and remove
 [more than 2.3k lines of code](https://github.com/fantazio/opam/compare/2.5.1...dca_naive).\
 The changes of the informed cleanup are available on my fork in branch
 [fantazio/dca_informed](https://github.com/fantazio/opam/tree/dca_informed)
-and remove [almost 2k lines of code](https://github.com/fantazio/opam/compare/2.5.1...dca_informed).
+and remove [more than 1.8k lines of code](https://github.com/fantazio/opam/compare/2.5.1...dca_informed).
 
 ### Results<a id="anchor_conclusion-results"></a>
 
