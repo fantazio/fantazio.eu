@@ -1,0 +1,19 @@
+[class*="dune-keyword"] {
+  color: var(--keyword-color);
+}
+
+.dune-meta-class-stanza,
+.dune-entity-name-function-action
+{
+  color: var(--type-color);
+}
+
+[class*="dune-constant"],
+[class^="dune-"][class*="-string"] {
+  color: var(--constant-color);
+}
+
+[class*="dune-comment"] {
+  color: var(--comment-color);
+  font-style: italic;
+}

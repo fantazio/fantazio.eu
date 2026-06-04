@@ -1,12 +1,32 @@
 /* Style.css */
 :root {
     --width-screen: min(100rem, 100%);
-    --color-contrast-1: #e2e2e2;
-    --color-contrast-2: #111111;
+
+    --main-foreground-color: #fef9ef;
+    --main-background-color: #1b1b3a;
+    --code-background-color: #0d0d1b;
+    --quote-background-color: var(--main-background-color);
+
+    --ocaml-color: #f08106;
+    --link-color: #f0c505;
+    --visited-link-color: var(--ocaml-color);
+
+    --note-color: #43aa8b;
+    --tip-color: var(--link-color);
+    --danger-color: #dc1836;
+    --danger-background-color: #b8142d;
+
+    --keyword-color: #5fbfa2;
+    --constant-color: #549bf2;
+    --type-color: var(--tip-color);
+    --comment-color: #656056;
+
+    --delete-color: var(--danger-color);
+    --insert-color: var(--note-color);
 }
 
 .icon {
-    --internal-icon-color: var(--color-contrast-2);
+    /*--internal-icon-color: var(--main-foreground-color);*/
     --internal-icon-size: 2rem;
     fill: var(--icon-color, var(--internal-icon-color));
     width: var(--icon-size-w, var(--icon-size, var(--internal-icon-size)));
@@ -14,13 +34,172 @@
     display: inline-block;
 }
 
+table {
+  border-collapse: collapse;
+  border-style: solid;
+  border-width: thin;
+}
+
+th, td {
+  padding: 0.6em;
+  border: solid;
+}
+
+.center {
+  text-align: center;
+}
+
+details summary::after {
+  content: " (click to expand/hide)";
+  white-space: preserve;
+  font-style: italic;
+  display: inline-block;
+}
+
+header {
+  text-align: center;
+}
+
+.header_title {
+  display: block;
+  font-size: 2em;
+  margin: 0;
+  font-weight: bold;
+}
+
+.article_title {
+  display: grid;
+  justify-content: center;
+  margin: 0;
+
+  &> time {
+    display: flex;
+    justify-content: end;
+  }
+}
+
+h1 {
+  text-align: center;
+  font-size: 2.5em;
+  margin: 0;
+}
+
+h2 {
+  font-size: 2em;
+  margin: .5em 0;
+}
+
+h3 {
+  font-size: 1.5em;
+  margin: 1em 0;
+}
+
+h4 {
+  font-size: 1.25em;
+  margin: 1.25em 0;
+}
+
+h5 {
+  font-size: 1em;
+  margin: 1.5em 0;
+  font-variant: small-caps;
+}
+
+h6 {
+  font-size: .83em;
+  margin: 1.67em 0;
+  font-variant: small-caps;
+}
+
+details summary {
+  text-decoration: underline;
+}
+
+.alert-note {
+  border-color: var(--note-color);
+}
+
+.alert-tip {
+  border-color: var(--tip-color);
+}
+
+.alert-caution {
+  border-color: var(--danger-color);
+}
+
+.alert-danger {
+  --quote-background-color: var(--danger-background-color);
+  --code-background-color: #931024;
+}
+
+.alert-safe {
+  --quote-background-color: var(--note-color);
+  --code-background-color: #3a9278;
+}
+
+.alert-cite {
+  border-color: var(--main-foreground-color);
+  font-style: italic;
+}
+
+span.alert-danger,
+span.alert-safe {
+  background-color: var(--quote-background-color);
+}
+
+@property --alert-title {
+  syntax: "*";
+  inherits: true;
+}
+
+div[class*="alert-"] > blockquote > p:first-child::before {
+    display: block;
+    font-weight: bold;
+}
+
+div.alert-note > blockquote > p:first-child::before {
+    color: var(--note-color);
+    content: var(--alert-title, "Note") ":";
+}
+
+div.alert-tip > blockquote > p:first-child::before {
+    color: var(--tip-color);
+    content: var(--alert-title, "Tip") ":";
+}
+
+div.alert-caution > blockquote > p:first-child::before {
+    color: var(--danger-color);
+    content: var(--alert-title, "Caution") ":";
+}
+
+div.alert-danger > blockquote > p:first-child::before {
+    content: var(--alert-title, "Warning") ":";
+}
+
+div.alert-cite > blockquote > p:first-child::before {
+    content: var(--alert-title) ":";
+}
+
+.thanks {
+  &::before {
+    content: "Thanks ";
+    white-space: preserve;
+  }
+  white-space: preserve;
+  display: flex;
+  justify-content: end;
+  font-variant: small-caps;
+  font-weight: bold;
+  font-style: italic;
+}
 
 body {
     display: flex;
     flex-direction: column;
     font-family: sans-serif;
-    color: var(--color-contrast-2);
-    background-color: var(--color-contrast-1);
+    line-height: normal;
+    color: var(--main-foreground-color);
+    background-color: var(--main-background-color);
 }
 
 main {
@@ -36,11 +215,8 @@ header,main, footer {
 }
 
 footer {
-    --icon-color: var(--color-contrast-1);
+    --icon-color: var(--ocaml-color);
     --icon-size: 2rem;
-    
-    background-color: var(--color-contrast-2);
-    color: var(--color-contrast-1);
 
     & > div {
         display: flex;
@@ -49,7 +225,6 @@ footer {
         gap: 1rem;
 
         & a {
-            color: var(--color-contrast-1);
             font-weight: 700;
             text-decoration: none;
         }
@@ -60,4 +235,37 @@ article,
 section,
 p {
     margin: 1rem 0;
+}
+
+code {
+  background-color: var(--code-background-color);
+  border-radius: .25em;
+  padding: 0rem .25rem;
+  font-family: monospace;
+  word-wrap: break-word;
+}
+
+pre code {
+  border-radius: .25em;
+  display: block;
+  overflow: auto;
+  padding: .5rem 1rem;
+}
+
+blockquote {
+  background-color: var(--quote-background-color);
+  border-radius: 0 .25em .25em 0;
+  border-left: .25rem solid;
+  border-color: inherit;
+  display: block;
+  padding: 0rem .75rem;
+  word-wrap: break-word;
+}
+
+a {
+  color: var(--link-color);
+}
+
+a:visited {
+  color: var(--visited-link-color);
 }

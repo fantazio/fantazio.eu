@@ -1,0 +1,693 @@
+---
+title: Dead code analyzing Opam
+description: Running the dead_code_analyzer on opam
+date: 2026-05-05
+tags: [dead_code_analyzer, opam, ocaml, static analysis, ocaml software foundation]
+---
+
+This experiment uses the `dead_code_analyzer 1.2.0` on `opam 2.5.1`.
+It is funded by the [OCaml Software Fundation](https://ocaml-sf.org/).
+
+
+### Unused exported values
+
+The [report](../assets/reports/dca/opam/dca.out)'s unused exported values section initial content is 433 lines long after discarding the header, footer, and blank lines.
+<details><summary>446 lines report output (<i>click to expand/hide</i>)</summary>
+
+```
+.> UNUSED EXPORTED VALUES:
+=========================
+/tmp/proj/opam/_build/default/src/client/opamAction.mli:42: prepare_package_build
+/tmp/proj/opam/_build/default/src/client/opamAdminCheck.mli:16: installability_check
+/tmp/proj/opam/_build/default/src/client/opamAdminCheck.mli:20: cycle_check
+/tmp/proj/opam/_build/default/src/client/opamAdminCheck.mli:32: get_obsolete
+/tmp/proj/opam/_build/default/src/client/opamArg.mli:29: cli2_5
+/tmp/proj/opam/_build/default/src/client/opamArg.mli:100: escape_path
+/tmp/proj/opam/_build/default/src/client/opamArg.mli:129: name_list
+/tmp/proj/opam/_build/default/src/client/opamArg.mli:132: param_list
+/tmp/proj/opam/_build/default/src/client/opamArg.mli:135: atom_list
+/tmp/proj/opam/_build/default/src/client/opamArg.mli:138: nonempty_atom_list
+/tmp/proj/opam/_build/default/src/client/opamArg.mli:214: locked
+/tmp/proj/opam/_build/default/src/client/opamArg.mli:280: package_with_version
+/tmp/proj/opam/_build/default/src/client/opamArg.mli:286: atom_or_local
+/tmp/proj/opam/_build/default/src/client/opamArg.mli:289: atom_or_dir
+/tmp/proj/opam/_build/default/src/client/opamArg.mli:301: opamlist_columns
+/tmp/proj/opam/_build/default/src/client/opamArg.mli:385: scrubbed_environment_variables
+/tmp/proj/opam/_build/default/src/client/opamAuxCommands.mli:34: name_and_dir_of_opam_file
+/tmp/proj/opam/_build/default/src/client/opamAuxCommands.mli:57: resolve_locals
+/tmp/proj/opam/_build/default/src/client/opamCliMain.mli:20: check_and_run_external_commands
+/tmp/proj/opam/_build/default/src/client/opamCliMain.mli:26: main_catch_all
+/tmp/proj/opam/_build/default/src/client/opamCliMain.mli:29: json_out
+/tmp/proj/opam/_build/default/src/client/opamCliMain.mli:33: run
+/tmp/proj/opam/_build/default/src/client/opamClient.mli:95: reinstall_t
+/tmp/proj/opam/_build/default/src/client/opamClient.mli:120: upgrade_t
+/tmp/proj/opam/_build/default/src/client/opamClient.mli:172: PIN.post_pin_action
+/tmp/proj/opam/_build/default/src/client/opamClientConfig.mli:93: search_files
+/tmp/proj/opam/_build/default/src/client/opamConfigCommand.mli:76: parse_whole
+/tmp/proj/opam/_build/default/src/client/opamInitDefaults.mli:20: default_compiler
+/tmp/proj/opam/_build/default/src/client/opamInitDefaults.mli:22: eval_variables
+/tmp/proj/opam/_build/default/src/client/opamListCommand.mli:31: default_dependency_toggles
+/tmp/proj/opam/_build/default/src/client/opamListCommand.mli:132: field_of_string
+/tmp/proj/opam/_build/default/src/client/opamRepositoryCommand.mli:40: update_global_selection
+/tmp/proj/opam/_build/default/src/client/opamSolution.mli:102: eq_atom
+/tmp/proj/opam/_build/default/src/client/opamSolution.mli:136: sum
+
+/tmp/proj/opam/_build/default/src/core/cmdliner/cmdliner_msg.mli:33: pp_try_help
+/tmp/proj/opam/_build/default/src/core/cmdliner/cmdliner_trie.mli:14: is_empty
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:79: Manpage.s_name
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:83: Manpage.s_synopsis
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:117: Manpage.s_environment_intro
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:133: Manpage.s_see_also
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:136: Manpage.s_none
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:155: Manpage.print
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:184: Term.app
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:187: Term.map
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:190: Term.product
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:195: Term.Syntax.let+
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:198: Term.Syntax.and+
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:204: Term.term_result
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:214: Term.term_result'
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:218: Term.cli_parse_result
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:227: Term.cli_parse_result'
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:231: Term.main_name
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:239: Term.with_used_args
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:282: Term.exit_info
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:297: Term.default_exits
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:303: Term.default_error_exits
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:312: Term.env_info
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:364: Term.name
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:404: Term.eval_choice
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:418: Term.eval_peek_opts
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:460: Term.exit_status_success
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:464: Term.exit_status_cli_error
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:469: Term.exit_status_internal_error
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:474: Term.exit_status_of_result
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:484: Term.exit_status_of_status_result
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:489: Term.exit
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:494: Term.exit_status
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:500: Term.pure
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:504: Term.man_format
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:538: Cmd.Exit.ok
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:541: Cmd.Exit.some_error
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:545: Cmd.Exit.cli_error
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:549: Cmd.Exit.internal_error
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:558: Cmd.Exit.info
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:572: Cmd.Exit.info_code
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:575: Cmd.Exit.defaults
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:595: Cmd.Env.info
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:691: Cmd.eval
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:698: Cmd.eval'
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:705: Cmd.eval_result
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:716: Cmd.eval_result'
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:766: Cmd.eval_value'
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:775: Cmd.eval_peek_opts
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:840: Arg.conv
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:849: Arg.conv'
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:855: Arg.conv_parser
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:858: Arg.conv_printer
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:861: Arg.conv_docv
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:867: Arg.parser_of_kind_of_string
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:874: Arg.some'
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:1025: Arg.pos_left
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:1057: Arg.last
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:1071: Arg.bool
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:1074: Arg.char
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:1080: Arg.nativeint
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:1083: Arg.int32
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:1086: Arg.int64
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:1089: Arg.float
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:1103: Arg.file
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:1107: Arg.dir
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:1112: Arg.non_dir_file
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:1121: Arg.array
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:1130: Arg.t2
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:1133: Arg.t3
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:1138: Arg.t4
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:1147: Arg.doc_quote
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:1150: Arg.doc_alts
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:1174: Arg.pconv
+/tmp/proj/opam/_build/default/src/core/cmdliner/opamCmdliner.mli:1185: Arg.env_var
+
+/tmp/proj/opam/_build/default/src/core/opamCompat.mli:45: Lazy.map_val
+/tmp/proj/opam/_build/default/src/core/opamConsole.mli:19: color
+/tmp/proj/opam/_build/default/src/core/opamConsole.mli:21: utf8_extended
+/tmp/proj/opam/_build/default/src/core/opamConsole.mli:45: acolor
+/tmp/proj/opam/_build/default/src/core/opamConsole.mli:46: acolor_w
+/tmp/proj/opam/_build/default/src/core/opamConsole.mli:61: Symbols.latin_capital_letter_o_with_stroke
+/tmp/proj/opam/_build/default/src/core/opamConsole.mli:172: Tree.get_default_symbols
+/tmp/proj/opam/_build/default/src/core/opamCoreConfig.mli:34: E.confirmlevel
+/tmp/proj/opam/_build/default/src/core/opamCoreConfig.mli:37: E.yes
+/tmp/proj/opam/_build/default/src/core/opamCoreConfig.mli:113: set
+/tmp/proj/opam/_build/default/src/core/opamCoreConfig.mli:115: setk
+/tmp/proj/opam/_build/default/src/core/opamDirTrack.mli:29: to_string
+/tmp/proj/opam/_build/default/src/core/opamDirTrack.mli:38: string_of_change
+/tmp/proj/opam/_build/default/src/core/opamFilename.mli:64: env_of_list
+/tmp/proj/opam/_build/default/src/core/opamFilename.mli:97: to_list_dir
+/tmp/proj/opam/_build/default/src/core/opamFilename.mli:158: with_open_out_bin
+/tmp/proj/opam/_build/default/src/core/opamFilename.mli:181: with_tmp_file
+/tmp/proj/opam/_build/default/src/core/opamFilename.mli:184: with_tmp_file_job
+/tmp/proj/opam/_build/default/src/core/opamFilename.mli:206: with_contents
+/tmp/proj/opam/_build/default/src/core/opamFilename.mli:211: copy_in
+/tmp/proj/opam/_build/default/src/core/opamFilename.mli:244: extract
+/tmp/proj/opam/_build/default/src/core/opamFilename.mli:257: extract_generic_file
+/tmp/proj/opam/_build/default/src/core/opamFilename.mli:277: remove_suffix
+/tmp/proj/opam/_build/default/src/core/opamFilename.mli:331: with_flock_write_then_read
+/tmp/proj/opam/_build/default/src/core/opamFilename.mli:349: Attribute.to_string_list
+/tmp/proj/opam/_build/default/src/core/opamFilename.mli:351: Attribute.of_string_list
+/tmp/proj/opam/_build/default/src/core/opamHash.mli:26: md5
+/tmp/proj/opam/_build/default/src/core/opamHash.mli:27: sha256
+/tmp/proj/opam/_build/default/src/core/opamParallel.mli:42: iter
+/tmp/proj/opam/_build/default/src/core/opamProcess.mli:54: is_verbose_command
+/tmp/proj/opam/_build/default/src/core/opamProcess.mli:217: Job.seq_map
+/tmp/proj/opam/_build/default/src/core/opamSHA.mli:14: sha1_file
+/tmp/proj/opam/_build/default/src/core/opamSHA.mli:16: sha256_file
+/tmp/proj/opam/_build/default/src/core/opamSHA.mli:18: sha512_file
+/tmp/proj/opam/_build/default/src/core/opamSHA.mli:25: sha256_string
+/tmp/proj/opam/_build/default/src/core/opamSHA.mli:27: sha512_string
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:144: Option.default_map
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:179: List.remove_duplicates
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:197: List.insert
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:229: List.update_assoc
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:298: String.split_quoted
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:319: Format.indent_left
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:321: Format.indent_right
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:379: Env.reset_value
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:386: Env.cut_value
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:472: Sys.system
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:502: Sys.chop_exe_suffix
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:524: Sys.path_sep
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:570: Sys.get_cygwin_variant
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:621: Win32.RegistryHive.to_string
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:622: Win32.RegistryHive.of_string
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:625: Win32.set_parent_pid
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:629: Win32.parent_putenv
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:633: Win32.persistHomeDirectory
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:688: Config.resolve_when
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:736: Config.E.find
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:741: Config.E.update
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:751: Compare.compare
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:753: Compare.=
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:754: Compare.<>
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:755: Compare.<
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:756: Compare.>
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:757: Compare.<=
+/tmp/proj/opam/_build/default/src/core/opamStd.mli:758: Compare.>=
+/tmp/proj/opam/_build/default/src/core/opamStubs.mli:25: getCurrentProcessID
+/tmp/proj/opam/_build/default/src/core/opamStubs.mli:140: getConsoleAlias
+/tmp/proj/opam/_build/default/src/core/opamStubsTypes.ml:128: nproc
+/tmp/proj/opam/_build/default/src/core/opamSystem.mli:55: verbose_for_base_commands
+/tmp/proj/opam/_build/default/src/core/opamSystem.mli:134: get_files
+/tmp/proj/opam/_build/default/src/core/opamSystem.mli:173: files_with_links
+/tmp/proj/opam/_build/default/src/core/opamSystem.mli:200: directories_with_links
+/tmp/proj/opam/_build/default/src/core/opamSystem.mli:337: lock_max
+/tmp/proj/opam/_build/default/src/core/opamSystem.mli:388: register_printer
+/tmp/proj/opam/_build/default/src/core/opamSystem.mli:405: classify_executable
+/tmp/proj/opam/_build/default/src/core/opamVersion.mli:20: major
+/tmp/proj/opam/_build/default/src/core/opamVersion.mli:29: git
+/tmp/proj/opam/_build/default/src/core/opamVersion.mli:44: message
+/tmp/proj/opam/_build/default/src/core/opamVersionCompare.mli:35: equal
+
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:112: Wrappers.with_wrap_remove
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:145: Config.with_best_effort_prefix
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:148: Config.with_solver
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:153: Config.with_dl_tool
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:257: InitConfig.opam_version
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:276: InitConfig.with_opam_version
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:281: InitConfig.with_jobs
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:283: InitConfig.with_dl_jobs
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:284: InitConfig.with_dl_cache
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:285: InitConfig.with_solver_criteria
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:286: InitConfig.with_solver
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:288: InitConfig.with_global_variables
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:307: Descr.of_string
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:316: Descr.full
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:342: URL.with_mirrors
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:343: URL.with_swhid
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:345: URL.with_subpath
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:346: URL.with_subpath_opt
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:504: OPAM.extensions
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:507: OPAM.extended
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:519: OPAM.features
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:522: OPAM.libraries
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:525: OPAM.syntax
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:531: OPAM.homepage
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:534: OPAM.author
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:537: OPAM.license
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:540: OPAM.doc
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:561: OPAM.bug_reports
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:575: OPAM.synopsis
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:576: OPAM.descr_body
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:619: OPAM.with_version_opt
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:690: OPAM.with_extensions
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:692: OPAM.add_extension
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:694: OPAM.remove_extension
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:701: OPAM.with_descr_opt
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:724: OPAM.to_string_with_preserved_format
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:743: OPAM.sections
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:750: OPAM.contents
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:761: OPAM.rewrite_xfield
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:804: Environment.read
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:807: Environment.read_from_channel
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:808: Environment.read_from_string
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:821: Comp.create_preinstalled
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:828: Comp.opam_version
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:831: Comp.name
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:837: Comp.src
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:843: Comp.configure
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:846: Comp.make
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:850: Comp.build
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:857: Comp.env
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:859: Comp.tags
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:861: Comp.with_src
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:862: Comp.with_patches
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:863: Comp.with_configure
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:864: Comp.with_make
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:865: Comp.with_build
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:866: Comp.with_packages
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:929: Dot_install.with_bin
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:932: Dot_install.with_sbin
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:935: Dot_install.with_lib
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:938: Dot_install.with_toplevel
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:941: Dot_install.with_stublibs
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:944: Dot_install.with_share
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:947: Dot_install.with_share_root
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:950: Dot_install.with_etc
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:953: Dot_install.with_doc
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:956: Dot_install.with_man
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:959: Dot_install.with_libexec
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:962: Dot_install.with_lib_root
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:965: Dot_install.with_libexec_root
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:968: Dot_install.with_misc
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:998: Dot_config.variables
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:1087: Repo.browse
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:1090: Repo.upstream
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:1108: Repo.with_browse
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:1110: Repo.with_upstream
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:1118: Repo.with_announce
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:1122: Repo.with_stamp_opt
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:1132: Syntax.pp_channel
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:1137: Syntax.to_channel
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:1139: Syntax.to_string
+/tmp/proj/opam/_build/default/src/format/opamFile.mli:1140: Syntax.to_string_with_preserved_format
+/tmp/proj/opam/_build/default/src/format/opamFilter.mli:55: string_interp_regex
+/tmp/proj/opam/_build/default/src/format/opamFilter.mli:109: eval
+/tmp/proj/opam/_build/default/src/format/opamFilter.mli:121: eval_to_string
+/tmp/proj/opam/_build/default/src/format/opamFilter.mli:134: ident_value
+/tmp/proj/opam/_build/default/src/format/opamFilter.mli:140: ident_bool
+/tmp/proj/opam/_build/default/src/format/opamFilter.mli:142: expand_interpolations_in_file_full
+/tmp/proj/opam/_build/default/src/format/opamFilter.mli:188: gen_filter_formula
+/tmp/proj/opam/_build/default/src/format/opamFormat.mli:19: value_pos
+/tmp/proj/opam/_build/default/src/format/opamFormat.mli:64: V.simple_arg
+/tmp/proj/opam/_build/default/src/format/opamFormat.mli:73: V.group
+/tmp/proj/opam/_build/default/src/format/opamFormat.mli:80: V.map_group
+/tmp/proj/opam/_build/default/src/format/opamFormat.mli:122: V.filter_ident
+/tmp/proj/opam/_build/default/src/format/opamFormat.mli:157: V.package_atom
+/tmp/proj/opam/_build/default/src/format/opamFormat.mli:196: I.file
+/tmp/proj/opam/_build/default/src/format/opamFormat.mli:200: I.item
+/tmp/proj/opam/_build/default/src/format/opamFormat.mli:271: I.extract_field
+/tmp/proj/opam/_build/default/src/format/opamFormat.mli:292: I.signature
+/tmp/proj/opam/_build/default/src/format/opamFormat.mli:299: I.signed
+/tmp/proj/opam/_build/default/src/format/opamFormula.mli:18: compare_relop
+/tmp/proj/opam/_build/default/src/format/opamFormula.mli:31: compare_version_constraint
+/tmp/proj/opam/_build/default/src/format/opamFormula.mli:73: string_of_disjunction
+/tmp/proj/opam/_build/default/src/format/opamFormula.mli:82: string_of_cnf
+/tmp/proj/opam/_build/default/src/format/opamFormula.mli:85: string_of_dnf
+/tmp/proj/opam/_build/default/src/format/opamFormula.mli:144: iter
+/tmp/proj/opam/_build/default/src/format/opamFormula.mli:172: compare
+/tmp/proj/opam/_build/default/src/format/opamFormula.mli:190: compare_nc
+/tmp/proj/opam/_build/default/src/format/opamFormula.mli:199: formula_to_cnf
+/tmp/proj/opam/_build/default/src/format/opamFormula.mli:202: dnf_of_formula
+/tmp/proj/opam/_build/default/src/format/opamFormula.mli:218: simplify_ineq_formula
+/tmp/proj/opam/_build/default/src/format/opamFormula.mli:245: to_conjunction
+/tmp/proj/opam/_build/default/src/format/opamFormula.mli:248: of_conjunction
+/tmp/proj/opam/_build/default/src/format/opamFormula.mli:252: to_disjunction
+/tmp/proj/opam/_build/default/src/format/opamFormula.mli:260: of_disjunction
+/tmp/proj/opam/_build/default/src/format/opamPath.mli:65: backup
+/tmp/proj/opam/_build/default/src/format/opamPath.mli:71: plugins
+/tmp/proj/opam/_build/default/src/format/opamPath.mli:82: plugin
+/tmp/proj/opam/_build/default/src/format/opamPath.mli:103: Switch.meta_dirname
+/tmp/proj/opam/_build/default/src/format/opamPath.mli:174: Switch.extra_file
+/tmp/proj/opam/_build/default/src/format/opamPath.mli:219: Switch.Default.lib_dir
+/tmp/proj/opam/_build/default/src/format/opamPath.mli:222: Switch.Default.stublibs
+/tmp/proj/opam/_build/default/src/format/opamPath.mli:225: Switch.Default.toplevel
+/tmp/proj/opam/_build/default/src/format/opamPath.mli:232: Switch.Default.doc_dir
+/tmp/proj/opam/_build/default/src/format/opamPath.mli:235: Switch.Default.share_dir
+/tmp/proj/opam/_build/default/src/format/opamPath.mli:242: Switch.Default.etc_dir
+/tmp/proj/opam/_build/default/src/format/opamPath.mli:250: Switch.Default.man_dir
+/tmp/proj/opam/_build/default/src/format/opamPath.mli:253: Switch.Default.man_dirs
+/tmp/proj/opam/_build/default/src/format/opamPath.mli:256: Switch.Default.bin
+/tmp/proj/opam/_build/default/src/format/opamPath.mli:259: Switch.Default.sbin
+/tmp/proj/opam/_build/default/src/format/opamPath.mli:275: Switch.DefaultF.doc_dir
+/tmp/proj/opam/_build/default/src/format/opamPath.mli:281: Switch.DefaultF.etc_dir
+/tmp/proj/opam/_build/default/src/format/opamPath.mli:287: Switch.DefaultF.man_dirs
+/tmp/proj/opam/_build/default/src/format/opamPp.mli:96: ignore
+/tmp/proj/opam/_build/default/src/format/opamSysPkg.mli:29: string_of_status
+/tmp/proj/opam/_build/default/src/format/opamSysPkg.mli:45: string_of_to_install
+/tmp/proj/opam/_build/default/src/format/opamTypesBase.mli:29: map_atomic_action
+/tmp/proj/opam/_build/default/src/format/opamTypesBase.mli:30: map_highlevel_action
+/tmp/proj/opam/_build/default/src/format/opamTypesBase.mli:31: map_concrete_action
+/tmp/proj/opam/_build/default/src/format/opamTypesBase.mli:47: nullify_pos_map
+/tmp/proj/opam/_build/default/src/format/opamTypesBase.mli:52: pos_best
+/tmp/proj/opam/_build/default/src/format/opamTypesBase.mli:96: iter_success
+/tmp/proj/opam/_build/default/src/format/opamTypesBase.mli:100: env_update
+/tmp/proj/opam/_build/default/src/format/opamTypesBase.mli:124: switch_selections_compare
+/tmp/proj/opam/_build/default/src/format/opamTypesBase.mli:127: simple_arg_equal
+/tmp/proj/opam/_build/default/src/format/opamTypesBase.mli:128: arg_equal
+/tmp/proj/opam/_build/default/src/format/opamTypesBase.mli:129: filter_equal
+
+/tmp/proj/opam/_build/default/src/repository/opamRepository.mli:87: find_backend
+/tmp/proj/opam/_build/default/src/repository/opamRepositoryBackend.mli:97: to_json
+/tmp/proj/opam/_build/default/src/repository/opamRepositoryBackend.mli:100: compare
+/tmp/proj/opam/_build/default/src/repository/opamRepositoryBackend.mli:104: check_digest
+/tmp/proj/opam/_build/default/src/repository/opamRepositoryConfig.mli:24: E.curl
+/tmp/proj/opam/_build/default/src/repository/opamRepositoryConfig.mli:25: E.fetch
+/tmp/proj/opam/_build/default/src/repository/opamRepositoryPath.mli:58: Remote.repo
+/tmp/proj/opam/_build/default/src/repository/opamRepositoryPath.mli:64: Remote.archive
+
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:19: Package.equal
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:20: Package.compare
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:21: Package.to_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:22: Package.of_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:52: diff
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:71: check_request
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:79: get_final_universe
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:89: actions_of_diff
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:153: remove
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:156: uninstall_all
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:161: install
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:164: remove_all_uninstalled_versions_but
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:191: opam_invariant_package_name
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:197: opam_deprequest_package_name
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:204: unavailable_package
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:205: is_unavailable_package
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:210: string_of_vpkgs
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:244: string_of_explanation
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:256: conflict_cycles
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:262: string_of_atom
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:265: string_of_request
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:268: string_of_universe
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:271: string_of_packages
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:277: packages
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:281: to_cudf
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:291: Json.version_to_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:292: Json.version_of_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:294: Json.relop_to_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:295: Json.relop_of_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:297: Json.enum_keep_to_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:298: Json.enum_keep_of_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:300: Json.constr_to_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:301: Json.constr_of_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:303: Json.vpkg_to_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:304: Json.vpkg_of_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:305: Json.vpkglist_to_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:306: Json.vpkglist_of_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:308: Json.veqpkg_to_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:309: Json.veqpkg_of_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:310: Json.veqpkglist_to_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:311: Json.veqpkglist_of_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:313: Json.vpkgformula_to_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:314: Json.vpkgformula_of_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:316: Json.typedecl1_to_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:317: Json.typedecl1_of_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:318: Json.typedecl_to_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:319: Json.typedecl_of_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:321: Json.typed_value_to_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:322: Json.typed_value_of_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:324: Json.package_to_json
+/tmp/proj/opam/_build/default/src/solver/opamCudf.mli:325: Json.package_of_json
+/tmp/proj/opam/_build/default/src/solver/opamSolver.mli:22: empty_universe
+/tmp/proj/opam/_build/default/src/solver/opamSolver.mli:27: string_of_request
+/tmp/proj/opam/_build/default/src/solver/opamSolver.mli:57: solution_to_json
+/tmp/proj/opam/_build/default/src/solver/opamSolver.mli:58: solution_of_json
+/tmp/proj/opam/_build/default/src/solver/opamSolver.mli:61: cudf_versions_map
+/tmp/proj/opam/_build/default/src/solver/opamSolver.mli:122: check_for_conflicts
+/tmp/proj/opam/_build/default/src/solver/opamSolver.mli:126: coinstallability_check
+
+/tmp/proj/opam/_build/default/src/state/opamEnv.mli:37: get_opam
+/tmp/proj/opam/_build/default/src/state/opamEnv.mli:45: get_opam_raw
+/tmp/proj/opam/_build/default/src/state/opamEnv.mli:68: cygwin_non_shadowed_programs
+/tmp/proj/opam/_build/default/src/state/opamEnv.mli:110: path
+/tmp/proj/opam/_build/default/src/state/opamEnv.mli:133: update_user_setup
+/tmp/proj/opam/_build/default/src/state/opamEnv.mli:140: write_static_init_scripts
+/tmp/proj/opam/_build/default/src/state/opamEnv.mli:157: clear_dynamic_init_scripts
+/tmp/proj/opam/_build/default/src/state/opamFileTools.mli:54: lint_string
+/tmp/proj/opam/_build/default/src/state/opamFormatUpgrade.mli:26: latest_version
+/tmp/proj/opam/_build/default/src/state/opamGlobalState.mli:26: all_installed
+/tmp/proj/opam/_build/default/src/state/opamGlobalState.mli:50: unlock
+/tmp/proj/opam/_build/default/src/state/opamRepositoryState.mli:71: load_repo
+/tmp/proj/opam/_build/default/src/state/opamRepositoryState.mli:118: cleanup
+/tmp/proj/opam/_build/default/src/state/opamScript.mli:16: prompt
+/tmp/proj/opam/_build/default/src/state/opamStateConfig.mli:96: safe_load
+/tmp/proj/opam/_build/default/src/state/opamStateConfig.mli:132: load_config_root
+/tmp/proj/opam/_build/default/src/state/opamSwitchState.mli:62: get_conflicts_t
+/tmp/proj/opam/_build/default/src/state/opamSwitchState.mli:71: unlock
+/tmp/proj/opam/_build/default/src/state/opamSwitchState.mli:114: descr
+/tmp/proj/opam/_build/default/src/state/opamSwitchState.mli:117: descr_opt
+/tmp/proj/opam/_build/default/src/state/opamSwitchState.mli:151: dev_packages
+/tmp/proj/opam/_build/default/src/state/opamSysPoll.mli:21: os_version
+/tmp/proj/opam/_build/default/src/state/opamUpdate.mli:61: dev_package
+/tmp/proj/opam/_build/default/src/state/opamUpdate.mli:70: pinned_packages
+/tmp/proj/opam/_build/default/src/state/opamUpdate.mli:79: pinned_package
+
+/tmp/proj/opam/_build/default/src/tools/opam_admin_top.mli:15: repo
+/tmp/proj/opam/_build/default/src/tools/opam_admin_top.mli:18: packages
+/tmp/proj/opam/_build/default/src/tools/opam_admin_top.mli:26: iter_packages_gen
+/tmp/proj/opam/_build/default/src/tools/opam_admin_top.mli:39: filter_packages
+/tmp/proj/opam/_build/default/src/tools/opam_admin_top.mli:42: iter_packages
+
+/tmp/proj/opam/_build/default/tests/lib/typeGymnastics.mli:16: open_env_updates
+/tmp/proj/opam/_build/default/tests/lib/typeGymnastics.mli:20: op_of_raw
+/tmp/proj/opam/_build/default/tests/lib/typeGymnastics.mli:21: raw_of_op
+
+Nothing else to report in this section
+--------------------------------------------------------------------------------
+```
+</details>
+
+<div class="alert-note">
+
+> **NOTE**:\
+> All the reports use the absolute paths of the files. In my case, the opam
+> project is located at `/tmp/proj/opam`. This prefix may vary depending on the
+> location of the clone on your machine.
+</div>
+
+
+
+This naive cleaning process could theorically be automatised easily but has not been done for the
+`dead_code_analyzer` yet.
+
+
+
+#### Core
+
+This section focuses on reports in `/tmp/proj/opam/src/core`.
+
+Among the 75 reported values in this subdirectory, 18 (i.e. 24%) were marked as deprecated.
+
+
+Among the rest of the unused exported values in `core/`, only 1 out of 68 is marked as deprecated.
+A module (`OpamStd.Win32.RegistryHive`) only contains unused values and a module (`OpamStd.Compare`) almost only contains unused values except for one (`equal`).
+
+
+The warnings 32 are triggered because the values are not exported (anymore) and not used inside their compilation unit.
+The warning 60 on module `RegistryHive` appears because I removed it from `src/core/opamStd.mli` since it was only exporting unused values.
+
+All the reported unused values and modules can be removed, just like the reports from the analyzer.
+
+
+#### Tools
+
+This section focuses on reports in `/tmp/proj/opam/src/tools`.
+
+
+Running our `dune` command gives a few compiler reports:
+
+The warnings 32 are triggered because the values are not exported (anymore) and not used inside their compilation unit. All the reported unused values can be removed, just like reports from the analyzer.
+
+After this first cleanup, running our `dune` command a second time outputs even more reports:
+```
+$ dune build @check
+File "src/tools/opam_admin_top.ml", line 14, characters 4-12:
+14 | let identity _ x = x
+         ^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value identity.
+
+File "src/tools/opam_admin_top.ml", line 15, characters 4-9:
+15 | let true_ _ = true
+         ^^^^^
+Error (warning 32 [unused-value-declaration]): unused value true_.
+
+File "src/tools/opam_admin_top.ml", line 23, characters 4-9:
+23 | let apply f x prefix y =
+         ^^^^^
+Error (warning 32 [unused-value-declaration]): unused value apply.
+
+File "src/tools/opam_admin_top.ml", line 28, characters 4-13:
+28 | let to_action f x y =
+         ^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value to_action.
+
+File "src/tools/opam_admin_top.ml", line 40, characters 4-21:
+40 | let iter_packages_gen ?(quiet=false) f =
+         ^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value iter_packages_gen.
+
+File "src/tools/opam_admin_top.ml", line 105, characters 4-10:
+105 | let filter fn patterns =
+          ^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value filter.
+```
+
+Once again, we can cleanup the compiler reports and run our command:
+```
+$ dune build @check
+File "src/tools/opam_admin_top.ml", line 12, characters 0-20:
+12 | open OpamFilename.Op
+     ^^^^^^^^^^^^^^^^^^^^
+Error (warning 33 [unused-open]): unused open OpamFilename.Op.
+
+File "src/tools/opam_admin_top.ml", line 14, characters 4-8:
+14 | let repo = OpamFilename.cwd ()
+         ^^^^
+Error (warning 32 [unused-value-declaration]): unused value repo.
+
+File "src/tools/opam_admin_top.ml", line 16, characters 4-8:
+16 | let wopt w f = function
+         ^^^^
+Error (warning 32 [unused-value-declaration]): unused value wopt.
+
+File "src/tools/opam_admin_top.ml", line 20, characters 4-13:
+20 | let of_action o = function
+         ^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value of_action.
+
+File "src/tools/opam_admin_top.ml", line 25, characters 4-23:
+25 | let regexps_of_patterns patterns =
+         ^^^^^^^^^^^^^^^^^^^
+Error (warning 32 [unused-value-declaration]): unused value regexps_of_patterns.
+```
+
+Third time's the charm. After cleaning up these reports, the file does not contain anything but comments.
+
+### Unused constructors/record fields
+
+The [report](../assets/reports/dca/opam/dca.out)'s unused constructors/record fields section initial content is 75 lines long after discarding the header, footer, and blank lines.
+<details><summary>88 lines report output (<i>click to expand/hide</i>)</summary>
+
+```
+.> UNUSED CONSTRUCTORS/RECORD FIELDS:
+====================================
+/tmp/proj/opam/src/client/opamListCommand.mli:38: pattern_selector.ext_fields
+/tmp/proj/opam/src/client/opamListCommand.mli:59: selector.Atoms
+
+/tmp/proj/opam/src/core/opamCompat.mli:36: Either.t.Left
+/tmp/proj/opam/src/core/opamCompat.mli:37: Either.t.Right
+/tmp/proj/opam/src/core/opamProcess.mli:73: t.p_info
+/tmp/proj/opam/src/core/opamStd.mli:474: Sys.os.Darwin
+/tmp/proj/opam/src/core/opamStd.mli:475: Sys.os.Linux
+/tmp/proj/opam/src/core/opamStd.mli:476: Sys.os.FreeBSD
+/tmp/proj/opam/src/core/opamStd.mli:477: Sys.os.OpenBSD
+/tmp/proj/opam/src/core/opamStd.mli:478: Sys.os.NetBSD
+/tmp/proj/opam/src/core/opamStd.mli:479: Sys.os.DragonFly
+/tmp/proj/opam/src/core/opamStd.mli:482: Sys.os.Unix
+/tmp/proj/opam/src/core/opamStd.mli:483: Sys.os.Other
+/tmp/proj/opam/src/core/opamStd.mli:505: Sys.powershell_host.Powershell_pwsh
+/tmp/proj/opam/src/core/opamStd.mli:505: Sys.powershell_host.Powershell
+/tmp/proj/opam/src/core/opamStd.mli:506: Sys.shell.SH_sh
+/tmp/proj/opam/src/core/opamStd.mli:506: Sys.shell.SH_bash
+/tmp/proj/opam/src/core/opamStd.mli:506: Sys.shell.SH_zsh
+/tmp/proj/opam/src/core/opamStd.mli:506: Sys.shell.SH_csh
+/tmp/proj/opam/src/core/opamStd.mli:506: Sys.shell.SH_fish
+/tmp/proj/opam/src/core/opamStd.mli:507: Sys.shell.SH_pwsh
+/tmp/proj/opam/src/core/opamStd.mli:507: Sys.shell.SH_cmd
+/tmp/proj/opam/src/core/opamStd.mli:613: Sys.warning_printer.warning
+/tmp/proj/opam/src/core/opamStubsTypes.ml:23: console_screen_buffer_info.window
+/tmp/proj/opam/src/core/opamStubsTypes.ml:26: console_screen_buffer_info.maximumWindowSize
+/tmp/proj/opam/src/core/opamStubsTypes.ml:34: console_font_infoex.font
+/tmp/proj/opam/src/core/opamStubsTypes.ml:36: console_font_infoex.fontSize
+/tmp/proj/opam/src/core/opamStubsTypes.ml:42: console_font_infoex.fontWeight
+/tmp/proj/opam/src/core/opamStubsTypes.ml:77: windows_cpu_architecture.AMD64
+/tmp/proj/opam/src/core/opamStubsTypes.ml:78: windows_cpu_architecture.ARM
+/tmp/proj/opam/src/core/opamStubsTypes.ml:79: windows_cpu_architecture.ARM64
+/tmp/proj/opam/src/core/opamStubsTypes.ml:80: windows_cpu_architecture.IA64
+/tmp/proj/opam/src/core/opamStubsTypes.ml:81: windows_cpu_architecture.Intel
+/tmp/proj/opam/src/core/opamStubsTypes.ml:82: windows_cpu_architecture.Unknown
+/tmp/proj/opam/src/core/opamStubsTypes.ml:87: win32_non_fixed_version_info.comments
+/tmp/proj/opam/src/core/opamStubsTypes.ml:88: win32_non_fixed_version_info.companyName
+/tmp/proj/opam/src/core/opamStubsTypes.ml:89: win32_non_fixed_version_info.fileDescription
+/tmp/proj/opam/src/core/opamStubsTypes.ml:90: win32_non_fixed_version_info.fileVersionString
+/tmp/proj/opam/src/core/opamStubsTypes.ml:91: win32_non_fixed_version_info.internalName
+/tmp/proj/opam/src/core/opamStubsTypes.ml:92: win32_non_fixed_version_info.legalCopyright
+/tmp/proj/opam/src/core/opamStubsTypes.ml:93: win32_non_fixed_version_info.legalTrademarks
+/tmp/proj/opam/src/core/opamStubsTypes.ml:94: win32_non_fixed_version_info.originalFilename
+/tmp/proj/opam/src/core/opamStubsTypes.ml:95: win32_non_fixed_version_info.productName
+/tmp/proj/opam/src/core/opamStubsTypes.ml:97: win32_non_fixed_version_info.privateBuild
+/tmp/proj/opam/src/core/opamStubsTypes.ml:98: win32_non_fixed_version_info.specialBuild
+/tmp/proj/opam/src/core/opamStubsTypes.ml:103: win32_version_info.signature
+/tmp/proj/opam/src/core/opamStubsTypes.ml:104: win32_version_info.version
+/tmp/proj/opam/src/core/opamStubsTypes.ml:105: win32_version_info.fileVersion
+/tmp/proj/opam/src/core/opamStubsTypes.ml:106: win32_version_info.productVersion
+/tmp/proj/opam/src/core/opamStubsTypes.ml:107: win32_version_info.fileFlagsMask
+/tmp/proj/opam/src/core/opamStubsTypes.ml:108: win32_version_info.fileFlags
+/tmp/proj/opam/src/core/opamStubsTypes.ml:109: win32_version_info.fileOS
+/tmp/proj/opam/src/core/opamStubsTypes.ml:110: win32_version_info.fileType
+/tmp/proj/opam/src/core/opamStubsTypes.ml:111: win32_version_info.fileSubtype
+/tmp/proj/opam/src/core/opamStubsTypes.ml:112: win32_version_info.fileDate
+/tmp/proj/opam/src/core/opamStubsTypes.ml:118: uname.sysname
+/tmp/proj/opam/src/core/opamStubsTypes.ml:119: uname.release
+/tmp/proj/opam/src/core/opamStubsTypes.ml:120: uname.machine
+
+/tmp/proj/opam/src/format/opamFile.mli:366: OPAM.t.conflict_class
+/tmp/proj/opam/src/format/opamFile.mli:369: OPAM.t.env
+/tmp/proj/opam/src/format/opamFile.mli:378: OPAM.t.substs
+/tmp/proj/opam/src/format/opamFile.mli:380: OPAM.t.build_env
+/tmp/proj/opam/src/format/opamFile.mli:403: OPAM.t.extensions
+/tmp/proj/opam/src/format/opamFile.mli:413: OPAM.t.metadata_dir
+/tmp/proj/opam/src/format/opamFile.mli:419: OPAM.t.locked
+/tmp/proj/opam/src/format/opamFile.mli:1019: Repo_config_legacy.t.repo_name
+/tmp/proj/opam/src/format/opamFile.mli:1020: Repo_config_legacy.t.repo_root
+/tmp/proj/opam/src/format/opamFile.mli:1038: Switch_config.t.paths
+/tmp/proj/opam/src/format/opamTypes.mli:308: universe.u_action
+/tmp/proj/opam/src/format/opamTypes.mli:364: lock.Read_lock
+/tmp/proj/opam/src/format/opamTypes.mli:368: lock.Global_lock
+/tmp/proj/opam/src/format/opamTypes.mli:372: lock.Switch_lock
+/tmp/proj/opam/src/format/opamTypes.mli:377: lock.Global_with_switch_cont_lock
+/tmp/proj/opam/src/format/opamVariable.mli:26: variable_contents.L
+
+/tmp/proj/opam/src/solver/opamCudfSolverSig.ml:12: criteria_def.crit_default
+/tmp/proj/opam/src/solver/opamCudfSolverSig.ml:13: criteria_def.crit_upgrade
+/tmp/proj/opam/src/solver/opamCudfSolverSig.ml:14: criteria_def.crit_fixup
+/tmp/proj/opam/src/solver/opamCudfSolverSig.ml:15: criteria_def.crit_best_effort_prefix
+
+/tmp/proj/opam/src/state/opamStateTypes.mli:164: switch_state.invalidated
+
+Nothing else to report in this section
+--------------------------------------------------------------------------------
+```
+</details>
+
+Because we already removed some code during the cleanup of unused exported values, the lines of the reports are not exact anymore.
+For the sake of this example, we will pretend that they are. One can run the analyzer on unused fields and constructors specifically by running the `dead_code_analyzer` command with the `--nothing -T all` arguments.
+
+#### Client
+
+This section focuses on reports in `/tmp/proj/opam/src/client`.
+
+Nonetheless, it would be nice to try and automatise this process as much as possible.
+
+#### Core
+
+This section focuses on reports in `/tmp/proj/opam/src/core`.
+
+In the end, only 33 out of 56 (i.e. ~9%) reports were true positives in the `src/core` directory.
+
+#### Format
+
+This section focuses on reports in `/tmp/proj/opam/src/format`.
+
+There are only 16 reports in this directory, mostly concentrated in 2 files:
+- 10 of them (62.5%) are in `src/format/opamFile.mli`,
+- 5 of them (31.25%) are in `src/format/opamTypes.mli`.
+
+In the end, only the reports in `src/format/opamTypes` (31.25%) were true positives in the `src/format` directory.

@@ -1,0 +1,7 @@
+[class^="diff-"][class$="-deleted"] {
+  color: var(--delete-color);
+}
+
+[class^="diff-"][class$="-inserted"] {
+  color: var(--insert-color);
+}
