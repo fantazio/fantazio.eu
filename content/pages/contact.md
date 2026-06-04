@@ -1,3 +1,3 @@
-Name : Firstname Lastname
+email: [corentin@fantazio.eu](mailto:corentin@fantazio.eu)
 
-email : foo@bar.baz
+github: [fantazio](https://github.com/fantazio)
