@@ -1,6 +1,6 @@
 ---
-title: Dead code analyzing Opam
-description: This is a study report of the dead_code_analyzer on opam.
+title: Dead code analyzing opam
+description: This is a study report of using the dead_code_analyzer on opam.
 date: 2026-06-04
 tags: [dead_code_analyzer, opam, ocaml, static analysis, dead code, ocaml software foundation]
 ---
@@ -277,7 +277,7 @@ and we want to reduce the work required for the maintainers to review (and
 approve) the cleanup done using the analyzer.
 
 Although I followed the analyzer's output in order (by section), and applied each
-phase separately, this report will discuss the findings by component (grouping
+phase separately, this report will explore the findings by component (grouping
 sections) and discuss the 2 phases for each component.
 I hope the results will be clearer to follow this way.
 
@@ -2354,6 +2354,9 @@ should be undone, along with a short explanation.
 - `src/format/opamFile.mli:*: Dot_install.*`: <span class="alert-safe">**clean**</span>\
     Same reasoning as with `OpamFile.Config.*`.
 
+- `src/format/opamFile.mli:998: Dot_config.variables`: <span class="alert-safe">**clean**</span>\
+    I did not find any use of `Dot_config` outside opam.
+
 - `src/format/opamFile.mli:1087: Repo.browse`: <span class="alert-safe">**clean**</span>\
   `src/format/opamFile.mli:1090: Repo.upstream`: <span class="alert-danger">**undo**</span>\
     I have not found any use of `OpamFile.Repo.browse` outside opam but found
@@ -3303,7 +3306,7 @@ clear pain points/mistakes I made during this study:
     end it would have been more natural to follow them by component, as
     presented in this report.
 
-The 2 points aboveare connected, and mostly related to the dual objective:
+The 2 points above are connected, and mostly related to the dual objective:
 study the analyzer's results and audit opam.
 
-<span class="thanks"> for reading</span>
+<span class="thanks">for reading</span>
