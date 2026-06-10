@@ -1,4 +1,5 @@
-1. [ ] List projects relying on Typedtree
+1. [x] List projects relying on Typedtree
+    See [projects.md](./projects.md)
 2. [ ] Document Typedtree changes (version-to-version) since 4.14
 3. [ ] Document how selected projects use Typedtree and handle changes
 4. [ ] Learn how Ppxlib handles multiple versions of the Parsetree
