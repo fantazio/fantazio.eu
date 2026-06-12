@@ -1,6 +1,6 @@
 1. [x] List projects relying on Typedtree
     See [projects.md](./projects.md)
-2. [ ] Document Typedtree changes (version-to-version) since 4.14
+2. [x] Document Typedtree changes (version-to-version) since 4.14
 3. [ ] Document how selected projects use Typedtree and handle changes
 4. [ ] Learn how Ppxlib handles multiple versions of the Parsetree
 5. [ ] Design a Typedtree-replacement (Vaast.Typedtree), that would be
