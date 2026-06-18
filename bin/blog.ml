@@ -76,8 +76,12 @@ let document_archetype : document_kind -> (module ARCHETYPE) = function
   | Article -> (module Archetype.Article)
   | Report -> (module Archetype.Article)
 
-let create_document document_kind source =
-  let www_target = www_target document_kind source in
+let create_document ?into document_kind source =
+  let www_target =
+    match into with
+    | Some into -> into
+    | None -> www_target document_kind source
+  in
   let module Archetype = (val document_archetype document_kind) in
   let pipeline =
     let open Task in
@@ -104,7 +108,18 @@ let create_documents document_kind =
     | Article -> articles
     | Report -> reports
   in
-  iter_files_deep ~where:is_markdown paths (create_document document_kind)
+  let action path =
+    let is_main_index path =
+      match Path.basename path with
+      | Some s -> String.equal s "index.md" && Path.dirname path = paths
+      | _ -> false
+    in
+    if is_main_index path then
+      let into = www_target document_kind path in
+      create_document ~into Page path
+    else create_document document_kind path
+  in
+  iter_files_deep ~where:is_markdown paths action
 
 let create_pages = create_documents Page
 let create_articles = create_documents Article
