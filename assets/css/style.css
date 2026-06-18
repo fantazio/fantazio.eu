@@ -68,13 +68,24 @@ header {
 }
 
 .article_title {
+
+  display:grid;
+
+  &> .text {
   display: grid;
   justify-content: center;
   margin: 0;
 
+    &> .description {
+      display: flex;
+      justify-content: end;
+      font-style: italic;
+    }
+  }
+
   &> time {
-    display: flex;
-    justify-content: end;
+      display: flex;
+      justify-content: end;
   }
 }
 

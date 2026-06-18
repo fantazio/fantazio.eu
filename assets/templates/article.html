@@ -1,14 +1,15 @@
 <div class="article_title">
+<div class="text">
 <h1>{{ title }}</h1>
+{% if has_description %}
+<span class="description">
+{{ description }}
+</span>
+{% endif %}
+</div>
 <time>{{ date.repr.date }}</time>
 </div>
 
-
-{% if has_description %}
-<p class="description">
-{{ description }}
-</p>
-{% endif %}
 
 <article>
 {{safe (yocaml_body) }}
