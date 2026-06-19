@@ -70,11 +70,14 @@ header {
 .article_title {
 
   display:grid;
+  grid-auto-flow: column;
+  grid-auto-columns: auto min-content;
+  gap: 1rem;
 
   &> .text {
   display: grid;
   justify-content: center;
-  margin: 0;
+  margin-left: 6rem;
 
     &> .description {
       display: flex;
@@ -84,8 +87,9 @@ header {
   }
 
   &> time {
-      display: flex;
-      justify-content: end;
+    display: flex;
+    justify-content: end;
+    align-self: flex-end;
   }
 }
 
@@ -120,6 +124,11 @@ h6 {
   font-size: .83em;
   margin: 1.67em 0;
   font-variant: small-caps;
+}
+
+p + ul,
+p + ol {
+  margin: 0.25rem 0 0;
 }
 
 details summary {
@@ -217,12 +226,24 @@ main {
     flex: 1;
 }
 
-header,main, footer {
-    & > div {
-        width: var(--width-screen);
-        margin: 0 auto;
-        padding: 2rem;
-    }
+header, main, footer {
+  & > div {
+    width: var(--width-screen);
+    margin: 0 auto;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+header > div {
+  padding-top: 2rem;
+}
+main > div {
+  padding-top: 1rem;
+  padding-bottom: 2rem;
+}
+footer > div {
+  padding-bottom: 2rem;
 }
 
 footer {
@@ -245,7 +266,7 @@ footer {
 article,
 section,
 p {
-    margin: 1rem 0;
+    margin: 1rem 0 0;
 }
 
 code {
