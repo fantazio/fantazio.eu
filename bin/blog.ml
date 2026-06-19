@@ -101,6 +101,8 @@ let create_page source = create_document Page source
 let create_article source = create_document Article source
 let create_report source = create_document Report source
 
+let create_404 = create_page Path.(content / "404.md")
+
 let create_documents document_kind =
   let paths =
     match document_kind with
@@ -192,6 +194,7 @@ let program () =
   >>= copy_images
   >>= copy_assets_reports
   >>= create_css
+  >>= create_404
   >>= create_pages
   >>= create_articles
   >>= create_reports
