@@ -213,6 +213,21 @@ div.alert-cite > blockquote > p:first-child::before {
   font-style: italic;
 }
 
+figure {
+  display: grid;
+  justify-content: center;
+  margin-top: 1rem;
+
+  p {
+    margin-top: 0;
+  }
+
+  &> figcaption {
+    display: flex;
+    justify-content: center;
+  }
+}
+
 body {
     display: flex;
     flex-direction: column;
