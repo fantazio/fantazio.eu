@@ -69,33 +69,21 @@ header {
 
 .article_title {
 
-  display:grid;
-  grid-auto-flow: column;
-  grid-auto-columns: auto min-content;
-  gap: 1rem;
-
-  &> .text {
-  display: grid;
-  justify-content: center;
-  margin-left: 6rem;
-
-    &> .description {
-      display: flex;
-      justify-content: end;
-      font-style: italic;
-    }
+  &> .description {
+    display: flex;
+    justify-content: center;
+    font-style: italic;
   }
 
   &> time {
     display: flex;
     justify-content: end;
-    align-self: flex-end;
   }
 }
 
 h1 {
   text-align: center;
-  font-size: 2.5em;
+  font-size: 2em;
   margin: 0;
 }
 
