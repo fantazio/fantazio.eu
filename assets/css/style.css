@@ -309,6 +309,12 @@ blockquote {
   word-wrap: break-word;
 }
 
+section[role="doc-endnotes"]::before {
+  content:"Footnotes";
+  font-weight: bold;
+  text-decoration: overline;
+}
+
 a {
   color: var(--link-color);
 }
