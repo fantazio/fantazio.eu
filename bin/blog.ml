@@ -6,6 +6,9 @@ let images = Path.(assets / "images")
 let css = Path.(assets / "css")
 let templates = Path.(assets / "templates")
 let assets_reports = Path.(assets / "reports")
+let favicon = Path.(assets / "favicon")
+
+
 let content = Path.rel [ "content" ]
 let pages = Path.(content / "pages")
 let articles = Path.(content / "articles")
@@ -187,10 +190,17 @@ let copy_assets_reports =
   in
   iter_files_deep ~where:is_output assets_reports copy_report
 
+let copy_favicon =
+  let www_favicon = www in
+  let is_favicon_info file = with_ext [ "png"; "ico"; "webmanifest" ] file in
+  let copy_favicon path = Action.copy_file ~into:www_favicon path in
+  Batch.iter_files ~where:is_favicon_info favicon copy_favicon
+
 let program () =
   let open Eff in
   let cache = Path.(www / ".cache") in
   Action.restore_cache cache
+  >>= copy_favicon
   >>= copy_images
   >>= copy_assets_reports
   >>= create_css
