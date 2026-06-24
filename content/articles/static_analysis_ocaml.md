@@ -40,7 +40,7 @@ For example, [Simmo Saan](https://sim642.eu) put in the effort to survey the exi
 linters in the ecosystem [2 years ago](https://sim642.eu/blog/2024/05/01/ocaml-linting/)
 with the specific intent to find all catch-all exception handlers in
 [Goblint](https://github.com/goblint/analyzer/). He listed no less than
-9 linters and stated that:
+9 linters and observed that:
 <div class="alert-cite">
 
 > Ocamllint and ocp-lint are the most universal attempts at OCaml linting, however they’re long dead and no replacement seems to have emerged.
@@ -115,7 +115,7 @@ and other forms of static analysis will provide reviewers a lot of help
 detecting subtle mistakes and smells.
 
 [^on_debit]: Some people and companies bafflingly consider the debit of code a
-metric of producitvity. This naturally results in more quantity and less
+metric of productivity. This naturally results in more quantity and less
 quality. Quality takes time among other things.
 
 Finally, in order to reduce the chances of producing unlawful code, whose
@@ -147,10 +147,10 @@ refactoring tools can automatize attention-numbing repetitive tasks, formal
 methods can help design, produce, and verify that a system
 conforms to expectations.
 
-Witing ad-hoc tools is not a satisfying answer. First, because indeed this
+Writing ad-hoc tools is not a satisfying answer. First, because indeed this
 requires investment which might not be worth it for a small codebase or a
-limited impact. Second, writing one-off throwaway code in a hundred different
-flavors feels wrong.\
+potentially limited impact. Second, writing one-off throwaway code in a hundred
+different flavors feels wrong.\
 Both issues can be fixed by having a collective investment in those tools.
 
 This desire for more/better tooling is not only mine but shows up regularly in
@@ -178,13 +178,13 @@ The desire for this tooling does not only appear in discussions but also in
 actions. If I zoom in on the
 [dead_code_analyzer's activity](https://github.com/LexiFi/dead_code_analyzer/graphs/contributors?all=1),
 it was initiated in Janurary 2015 but primarily developed between September 2015
-and January 2016 (it is part of SecurOcaml). It was followed by sporadic
+and January 2016 (it is part of SecurOCaml). It was followed by sporadic
 interactions and improvements in 2017, 2018 (mostly), and 2019. Then the project
 was left for dead until Edwin Ansari revived it in
 [2025](https://github.com/LexiFi/dead_code_analyzer/pull/16). Since then, the
 tool was [used on Frama-C](https://github.com/LexiFi/dead_code_analyzer/issues/23)
 (it was already in 2015), [on opam](/reports/dca_opam),
-[on goblint](https://github.com/LexiFi/dead_code_analyzer/issues/85#issuecomment-4721950945),
+[on Goblint](https://github.com/LexiFi/dead_code_analyzer/issues/85#issuecomment-4721950945),
 and [at TrustInSoft](https://github.com/LexiFi/dead_code_analyzer/pull/84).
 
 ## I got a plan
@@ -202,7 +202,7 @@ and the in-betweens.
 ### Linters
 
 Among linters are code formatting tools, which I'll consider out of scope for
-this presentation. There are already 2 strong competitors in that space:
+this article. There are already 2 strong competitors in that space:
 [ocamlformat](https://github.com/ocaml-ppx/ocamlformat), and
 [ocp-indent](https://github.com/OCamlPro/ocp-indent).\
 By linters I mean surface-level local static analysis tools. Usually, they would
@@ -213,8 +213,8 @@ yet to replace the former champions.\
 I think there is value in a
 [clippy](https://doc.rust-lang.org/stable/clippy/usage.html)-like linter
 ([Sasha-Élie Ayoun too](https://discuss.ocaml.org/t/how-possible-is-a-clippy-like-linter-for-ocaml/7779)).
-The benefit would be to centralize some OCaml best practices, dangerous patterns,
-and other warnings that are out of the compiler's responsibility to report.\
+The benefit would be to centralize some of OCaml best practices, dangerous
+patterns, and other warnings that are not the compiler's responsibility.\
 There is work in progress in that direction :
 [zanuda](https://github.com/Kakadu/zanuda) for OCaml 4.14 and 5.3
 ([5.5 in progress](https://github.com/Kakadu/zanuda/pull/90)),
@@ -231,16 +231,16 @@ track to fill the "clippy" spot in the OCaml ecosystem.
 There are long standing tools that can produce OCaml from formal specifications,
 like [Rocq](https://rocq-prover.org/) and [F*](https://fstar-lang.org/).
 These are already solid options if you have the skillset to write in these
-languages instead of OCaml. However, the topic at hand is formal methods applied
-to OCaml.\
-There is a work in progress to enable the use of Rocq on existing OCaml code:
-[rocq-of-ocaml](https://github.com/formal-land/rocq-of-ocaml). Again, using an
-interactive prover to add formal specification over code is a great idea, but
+languages instead of OCaml.\
+There is also a work in progress to enable the use of Rocq on existing OCaml code:
+[rocq-of-ocaml](https://github.com/formal-land/rocq-of-ocaml). Again, using a
+proof assistant to add formal specification over code is a great idea, but
 it requires specific non-trivial skills.
 
-Rather than producing OCaml from formal specification, adding such
-specifications to OCaml might be more accessible. There is work in progress in
-that direction: [Gospel](https://ocaml-gospel.github.io/gospel/).
+Rather than producing OCaml from formal specifications, writing such
+specifications directly in the OCaml code might be more accessible. There is
+work in progress in that direction:
+[Gospel](https://ocaml-gospel.github.io/gospel/).\
 From those specifications one can then use tools to verify them statically
 (e.g. [camleer](https://github.com/ocaml-gospel/cameleer),
 [peter](https://github.com/ocaml-gospel/peter)) or dynamically
@@ -248,12 +248,13 @@ From those specifications one can then use tools to verify them statically
 
 Finally, having formal verification without writing formal specifications is
 also a possibility. In this case, rather than custom properties, such a tool
-would look to more general pitfalls of the language, like uncaught exceptions,
-always-failing asserts, or out of bound array accesses. Again, there is work in
-progress: [Salto](https://salto.gitlabpages.inria.fr/)
+would look for more general pitfalls of the language, like uncaught exceptions,
+out of bound array accesses, or always-failing asserts (which can encode the
+custom properties). Again, there is work in progress:
+[Salto](https://salto.gitlabpages.inria.fr/)
 
-Because all of this categories of tools require specialized skills, I don't
-think splitting the efforts is a good idea. The current distribution of projects
+Because this category of tools requires specialized skills, I don't think
+splitting the efforts is a good idea. The current distribution of projects
 is reasonable and support should focus on them.
 
 ### In-betweens
@@ -267,11 +268,16 @@ complex analysis than linters without the cost of formal verification.
 One such tool is the [dead_code_analyzer](https://github.com/LexiFi/dead_code_analyzer).
 As demonstrated, there is a request for it and the project is actively
 maintained. There is a competitor to the tool:
-[reanalyze](https://github.com/rescript-lang/reanalyze). The main difference, despite
+[reanalyze](https://github.com/rescript-lang/reanalyze). The main difference[^on_reanalyze], despite
 the latter being inspired by the former, is the target community. Reanalyze is
 part of the [rescript](https://github.com/rescript-lang/rescript/) (forked from
 OCaml) ecosystem, while the dead_code_analyzer is part of the OCaml ecosystem.\
 I don't think there is any interest in splitting the efforts further.
+
+[^on_reanalyze]: There are more differences between the dead_code_analyzer and
+reanalyze. The latter looks for transitively dead code, works with extra
+attributes to silence/trigger specific warnings, adds checked exceptions and
+a termination analysis.
 
 Another tool of interest is an exception checker, as demonstrated previously.
 Salto is already working towards this, and reanalyze already provides an
@@ -282,7 +288,7 @@ an [attempt to add one to the language exists](https://github.com/lpw25/ocaml-ty
 In my opinion, there is space for an external effect typer, that would provide
 the missing feature à la
 [ocamlexc](https://caml.inria.fr/pub/old_caml_site/ocamlexc/ocamlexc.htm),
-which would report potential uncaught effect/exception traces instead of the
+but would report potential uncaught effect/exception traces instead of the
 typed exceptions, with pluggable models for external libraries (e.g. `Stdlib`).\
 I have not seen efforts put on this topic despite the demand and potential
 benefit to the ecosystem (+ it would lift worries on the usage of exceptions
@@ -308,7 +314,7 @@ will eventually [come from the company itself](https://en.wikipedia.org/wiki/Eat
 Another refactoring task, which is often very repetitive, is simply to fix
 compiler errors after a manual update like adding/removing a field/constructor,
 renaming something, or moving a value into a different module. This is a task
-we all have to face at some point, which is straightforward bu can sometimes
+we all have to face at some point, which is straightforward but can sometimes
 feel needlessly tedious or even discourage refactoring some parts of a codebase
 that could impact many places.\
 I have not found a tool that would automatically fix up compiler errors during
@@ -327,17 +333,21 @@ projects could result in an intuitive clone detector.
 
 ### Program information
 
-The development of static analysis tools require access to program information.
+The development of static analysis tools requires access to program information.
 
-The [compiler-libs](https://ocaml.org/manual/5.5/api/compilerlibref/Compiler_libs.html)
+The [compiler-libs](https://ocaml.github.io/odoc/ocaml-base-compiler/compiler-libs.common/)
 provides access to the OCaml compiler's internal representations of code.
-Among them, the ones of interest are the `Parsetree`, the `Typedtree`, and
-`Lambda`.\
+Among them, the ones of interest are
+the [`Parsetree`](https://ocaml.github.io/odoc/ocaml-base-compiler/compiler-libs.common/Parsetree/index.html),
+the [`Typedtree`](https://ocaml.github.io/odoc/ocaml-base-compiler/compiler-libs.common/Typedtree/index.html),
+and [`Lambda`](https://ocaml.github.io/odoc/ocaml-base-compiler/compiler-libs.common/Lambda/index.html).\
 One observation I made about the `Typedtree` is that it breaks in-between OCaml
 versions. This forces tools relying on it to either also break compatibility
 with previous versions when updating to the latest, or to support them using
 compiler-dependent versions of code (e.g. via
-[cppo](https://github.com/ocaml-community/cppo), or by branching).
+[cppo](https://github.com/ocaml-community/cppo) like
+[ocp-index](https://github.com/OCamlPro/ocp-index), or by branching like
+[merlin](https://github.com/ocaml/merlin)).
 The dead_code_analyzer is a victim of those breaking changes. It could be
 adapted to support multiple versions of OCaml like other projects. However, this
 would be yet another ad-hoc solution to a more general problem.\
@@ -350,13 +360,12 @@ new tools, which would not be left behind by the time they are made available.\
 There is a study in progress on the topic, and I am open to funding. The plan
 would be to develop a prototype with a version of the dead_code_analyzer
 using it as proof of concept, before reaching out to the community and
-maintainers of other concerned projects to get feedback and guide deelopment
+maintainers of other concerned projects to get feedback and guide development
 towards an agreed solution. The intent of this process is to reduce the amount
-of "noise" in the discussion before reaching a consensus.\
-While writing this article I found out that
-[the same problem was observed on the `Parsetree`](https://discuss.ocaml.org/t/the-future-of-ppx/3766)
-(in the context of ppx) which lead to the multi-version-compatible design of
-[ppxlib](https://github.com/ocaml-ppx/ppxlib).
+of efforts and "noise" in the discussion before reaching a consensus.\
+[The same observation on the `Parsetree`](https://discuss.ocaml.org/t/the-future-of-ppx/3766)
+(in the context of ppx) lead to the [multi-version-compatible design of
+ppxlib](https://ocaml-ppx.github.io/ppxlib/ppxlib/compatibility.html).
 
 Another tool that provides access to program information is
 [merlin](https://github.com/ocaml/merlin). It, for example, builds an index of
