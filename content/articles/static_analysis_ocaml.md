@@ -4,6 +4,11 @@ description: I got a plan
 date: 2026-06-19
 ---
 
+<div class="alert-note" style='--alert-title: "Update"'>
+
+> _2026-06-25_: Apply feedback from [the discuss thread](https://discuss.ocaml.org/t/blog-static-analysis-for-ocaml/18287)
+</div>
+
 ## Context
 
 OCaml is described on its [official website](https://ocaml.org/) as:
@@ -21,9 +26,12 @@ a category stands out:
 I mean it in a _broad_ sense. This includes:
 - compilers (e.g.
 [the first Rust compiler](https://en.wikipedia.org/wiki/Rust_\(programming_language\)#2006%E2%80%932009:_Early_years),
-    and [Hack's](https://github.com/facebook/hhvm/tree/master/hphp/hack)),
-- interpreters (e.g. [WebAssembly's reference interpreter](https://github.com/WebAssembly/spec/tree/main/interpreter),
-    and [Liquidsoap's](https://github.com/savonet/liquidsoap)),
+    and [Haxe](https://haxe.org/));
+- type checkers (e.g. [Hack](https://github.com/facebook/hhvm/tree/master/hphp/hack),
+    and [Flow](https://github.com/facebook/flow)
+    ([until very recently](https://x.com/flowtype/status/2069836762403459342))),
+- interpreters (e.g. [WebAssembly reference interpreter](https://github.com/WebAssembly/spec/tree/main/interpreter),
+    and [Liquidsoap](https://github.com/savonet/liquidsoap)),
 - interactive theorem provers (e.g. [Rocq](https://rocq-prover.org/), and
     [anterior versions of F*](https://en.wikipedia.org/wiki/F*_\(programming_language\)#Versions)),
 - static analyzers (e.g. [Frama-C](https://frama-c.com/), and [Astrée](https://www.astree.ens.fr/)).
@@ -297,6 +305,12 @@ looking for funding to develop a first version. This first version, although
 incomplete would help enabling feedback-based iterations to drive efforts and
 possibly attract contributors.
 
+<div class="alert-note" style='--alert-title: "Update"'>
+
+> Adding [Owi](https://github.com/ocamlpro/owi) to the list. OCaml support and
+> abstract interpretation are in progress.
+</div>
+
 #### Refactoring tools
 
 Refactoring tools are also in demand. Often implcitly when looking for linters.
@@ -310,6 +324,11 @@ For some time I was thinking of developing a tool similar to
 has experimental support for OCaml. Because this tool is the main product of
 the eponym company, and it is written in OCaml itself, I assume that support
 will eventually [come from the company itself](https://en.wikipedia.org/wiki/Eating_your_own_dog_food).
+<div class="alert-note" style='--alert-title: "Update"'>
+
+> Semgrep will probably not dogfood any time soon. Yoann Padioleau
+> [forked the tool to add OCaml support](https://github.com/aryx/osemgrep).
+</div>
 
 Another refactoring task, which is often very repetitive, is simply to fix
 compiler errors after a manual update like adding/removing a field/constructor,
