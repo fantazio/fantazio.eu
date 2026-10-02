@@ -1,3 +1,7 @@
+---
+title: PPxlib multi-version compatibility
+date: 2026-06-30
+---
 The multi-version-compatible design of ppxlib is due to the [same observation on
 the `Parsetree`](https://discuss.ocaml.org/t/the-future-of-ppx/3766) as we made
 to the `Typedtree`: it breaks in between OCaml version. Their observation was in

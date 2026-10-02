@@ -1,3 +1,7 @@
+---
+title: Typedtree changes
+date: 2026-06-30
+---
 Command is `git diff <version1> <version2> typing/typedtree`
 
 There is no change in bugfix versions:

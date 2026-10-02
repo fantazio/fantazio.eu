@@ -1,3 +1,7 @@
+---
+title: Projects
+date: 2026-06-30
+---
 Selected projects:
 - [asak](https://github.com/nobrakal/asak)
 - [dead_code_analyzer](https://github.com/LexiFi/dead_code_analyzer)

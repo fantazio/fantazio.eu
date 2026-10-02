@@ -1,3 +1,7 @@
+---
+title: TODO
+date: 2026-06-30
+---
 1. [x] List projects relying on Typedtree
     See [projects.md](./projects.md)
 2. [x] Document Typedtree changes (version-to-version) since 4.14
@@ -7,5 +11,5 @@
     - usable in place of the typedtree (almost 1:1)
     - resilient to the documented changes
     - resilient to future Typedtree changes
-6. [ ] Implement conversion from/to Typedtree and Vaast.Typedtree
-7. [ ] Develop a `vaast`-dependent version of the `dead_code_analyzer`
+6. [x] Implement conversion from/to Typedtree and Vaast.Typedtree
+7. [x] Develop a `vaast`-dependent version of the `dead_code_analyzer`
