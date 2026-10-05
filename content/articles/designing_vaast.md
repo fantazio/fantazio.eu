@@ -813,6 +813,6 @@ https://github.com/LexiFi/dead_code_analyzer/compare/master...fantazio:dead_code
 ).
 
 If you are interested in its development or use, feel free to join the
-discussion on its design.
+[discussion on its design](https://github.com/fantazio/vaast/issues/8).
 
 <span class="thanks">for reading</span>
